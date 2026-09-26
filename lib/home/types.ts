@@ -38,7 +38,7 @@ export interface Company {
   name: string;
   logo: string;
   location: string;
-  industry: string;
+  starts: string;
   openings: number;
 }
 

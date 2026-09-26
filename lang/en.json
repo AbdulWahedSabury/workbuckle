@@ -150,32 +150,70 @@
             "label": "Found their dream jobs"
           }
         ]
+      },
+      "why_cyprus": [
+        {
+          "title": "Seamless EU Mobility",
+          "description": "No work visas required for EU passport holders—enjoy simple registration and full employment rights.",
+          "img": "/images/why_cyprus/seamless_eu_mobility.jpg",
+          "accents": [
+            "/images/why_cyprus/accents/file-check-corner.png",
+            "/images/why_cyprus/accents/shield-check.png"
+          ]
         },
-        "why_cyprus": [
-          {
-            "title": "Seamless EU Mobility",
-            "description": "No work visas required for EU passport holders—enjoy simple registration and full employment rights.",
-            "img": "/images/why_cyprus/seamless_eu_mobility.jpg",
-            "accents": ["/images/why_cyprus/accents/file-check-corner.png", "/images/why_cyprus/accents/shield-check.png"]
-          },
-          {
-            "title": "World-Class Employers",
-            "description": "Gain experience in top-tier luxury hotels, 5-star resorts, and fine-dining establishments in Europe.",
-            "img": "/images/why_cyprus/World-Class.jpg",
-            "accents": ["/images/why_cyprus/accents/hotel.png", "/images/why_cyprus/accents/utensils-crossed.png"]
-          },
-          {
-            "title": "Relocation Support",
-            "description": "Free high-quality accommodation options, staff meals, and airport transfers provided for selected positions.",
-            "img": "/images/why_cyprus/relocation.jpg",
-            "accents": ["/images/why_cyprus/accents/house.png", "/images/why_cyprus/accents/plane-landing.png"]
-          },
-          {
-        "title": "Mediterranean Lifestyle",
-        "description": "Experience 300+ days of sunshine a year, pristine beaches in Limassol, and the rich cultural life of historic Nicosia.",
-        "img": "/images/why_cyprus/Mediterranean.jpeg",
-        "accents": ["/images/why_cyprus/accents/sun.png", "/images/why_cyprus/accents/waves-horizontal.png"]
-      }]
+        {
+          "title": "World-Class Employers",
+          "description": "Gain experience in top-tier luxury hotels, 5-star resorts, and fine-dining establishments in Europe.",
+          "img": "/images/why_cyprus/World-Class.jpg",
+          "accents": [
+            "/images/why_cyprus/accents/hotel.png",
+            "/images/why_cyprus/accents/utensils-crossed.png"
+          ]
+        },
+        {
+          "title": "Relocation Support",
+          "description": "Free high-quality accommodation options, staff meals, and airport transfers provided for selected positions.",
+          "img": "/images/why_cyprus/relocation.jpg",
+          "accents": [
+            "/images/why_cyprus/accents/house.png",
+            "/images/why_cyprus/accents/plane-landing.png"
+          ]
+        },
+        {
+          "title": "Mediterranean Lifestyle",
+          "description": "Experience 300+ days of sunshine a year, pristine beaches in Limassol, and the rich cultural life of historic Nicosia.",
+          "img": "/images/why_cyprus/Mediterranean.jpeg",
+          "accents": [
+            "/images/why_cyprus/accents/sun.png",
+            "/images/why_cyprus/accents/waves-horizontal.png"
+          ]
+        }
+      ],
+      "companies": {
+        "title" : "Featured Employers & Locations",
+      "list":[
+        {
+          "name": "Luxury Beachfront Resort & Spa",
+          "logo": "/images/companies/logo.png",
+          "location": "Limassol, Cyprus",
+          "starts": "5-Star Hotel",
+          "openings": "Beachfront | Award-Winning Fine Dining"
+        },
+        {
+          "name": "Exclusive Marina & Boutique Hotel",
+          "logo": "/images/companies/logo.png",
+          "location": "Limassol, Cyprus",
+          "starts": "5-Star Hotel",
+          "openings": "High-End Guest Services | International Team | Career Progression"
+        },
+        {
+          "name": "Premier City Center & Luxury Hotel",
+          "logo": "/images/companies/logo.png",
+          "location": "Nicosia, Cyprus",
+          "starts": "5-Star Hotel",
+          "openings": "Year-Round Employment | Executive Guest Operations"
+        }
+      ]}
     },
     "blog": {
       "title": "Blog",

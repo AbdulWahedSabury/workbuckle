@@ -22,16 +22,16 @@ export default function CompanyCard({ company, href }: CompanyCardProps) {
       className="group flex flex-col rounded-card border border-line bg-white p-6 lg:p-[30px]"
     >
       <div className="mb-8 flex items-start justify-between">
-        <span className="flex size-[70px] items-center justify-center rounded-sm-card border border-line bg-white">
+        <span className="flex size-17.5 items-center justify-center rounded-sm-card border border-line bg-white">
           <Image
             src={company.logo}
             alt={`${company.name} logo (square, ~80×80)`}
-            width={40}
-            height={40}
-            className="size-10 rounded-lg object-contain"
+            width={60}
+            height={60}
+            className="size-full rounded-lg object-contain"
           />
         </span>
-        <span className="rounded-full bg-gray-3 px-3 py-1 text-xs font-semibold text-ink">{company.industry}</span>
+        <span className="rounded-full bg-gray-3 px-3 py-1 text-xs font-semibold text-ink">{company.starts}</span>
       </div>
       <h3 className="mb-2 text-[22px]">{company.name}</h3>
       <p className="mb-8 flex items-center gap-1.5">
