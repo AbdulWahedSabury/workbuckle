@@ -57,10 +57,10 @@ export default function TestimonialCard({ testimonial, direction, onSwipe }: Tes
           ))}
         </div>
         <Quote className="mb-3 size-9 text-primary/25" fill="currentColor" aria-hidden="true" />
-        <blockquote className="mb-8 font-heading text-lg leading-[1.5em] font-medium text-ink sm:text-xl lg:text-[22px]">
+        <blockquote className="mb-8 font-heading text-lg leading-normal font-medium text-ink sm:text-xl">
           {testimonial.quote}
         </blockquote>
-        <p className="font-heading text-[22px] font-semibold text-ink">{testimonial.name}</p>
+        <p className="font-heading text-xl font-semibold text-ink">{testimonial.name}</p>
         <p>{testimonial.role}</p>
       </div>
     </motion.article>

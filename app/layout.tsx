@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Poppins } from "next/font/google";
+import { DM_Sans, Merriweather, Poppins } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import { NextIntlClientProvider } from "next-intl";
@@ -15,6 +15,11 @@ const inter = DM_Sans({
   subsets: ["latin"],
   weight: ["500", "600", "700"],
 });
+const merriweather = Merriweather({
+  variable: "--font-merriweather",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+});
 
 export const metadata: Metadata = {
   title: {
@@ -29,7 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full">
       <body
-        className={`${poppins.variable} ${inter.variable} flex min-h-dvh flex-col antialiased`}
+        className={`${poppins.variable} ${inter.variable} ${merriweather.variable} flex min-h-dvh flex-col antialiased`}
       >
         <NextIntlClientProvider>
           <Header />

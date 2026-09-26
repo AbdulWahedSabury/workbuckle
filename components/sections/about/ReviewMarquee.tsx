@@ -11,7 +11,7 @@ export default function ReviewMarquee() {
   return (
     <Reveal as="section" className="overflow-hidden pb-[60px] md:pb-[75px] lg:pb-[90px]">
       <div className="container-site mb-8 flex items-end justify-between gap-6 lg:mb-[50px]">
-        <h2 className="max-w-[640px] text-[32px] sm:text-[40px] lg:text-[48px]">
+        <h2 className="max-w-[640px] text-3xl sm:text-4xl lg:text-5xl">
           Loved by candidates and hiring teams
         </h2>
         <button
@@ -37,10 +37,10 @@ export default function ReviewMarquee() {
                 <Star key={i} className="size-5 fill-primary text-primary" />
               ))}
             </div>
-            <p className="mb-5 font-heading text-lg leading-[1.5em] text-ink sm:mb-[50px] sm:text-xl">
+            <p className="mb-5 font-heading text-lg leading-normal text-ink sm:mb-[50px] sm:text-xl">
               &ldquo;{r.quote}&rdquo;
             </p>
-            <h4 className="mb-0 text-xl lg:text-[22px]">{r.name}</h4>
+            <h4 className="mb-0 text-xl">{r.name}</h4>
             <p>{r.role}</p>
           </li>
         ))}

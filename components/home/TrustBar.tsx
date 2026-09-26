@@ -13,7 +13,7 @@ export default function TrustBar() {
                 <Icon className="size-6" />
               </span>
               <div>
-                <p className="font-heading text-[32px] leading-tight font-semibold tracking-tight text-ink lg:text-[40px]">
+                <p className="font-heading text-3xl leading-tight font-semibold tracking-tight text-ink lg:text-4xl">
                   {value}
                 </p>
                 <p className="text-sm sm:text-base">{label}</p>

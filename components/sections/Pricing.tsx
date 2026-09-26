@@ -57,12 +57,12 @@ export default function Pricing() {
               >
                 <div className="mb-1 flex items-center gap-1">
                   <Icon className="size-6 text-ink" />
-                  <span className="font-heading text-[22px] leading-[1.5em] font-semibold text-ink">
+                  <span className="font-heading text-xl leading-normal font-semibold text-ink">
                     {plan.name}
                   </span>
                 </div>
                 <p className={`mb-5 ${plan.highlighted ? "text-ink/70" : ""}`}>{plan.blurb}</p>
-                <h3 className="mb-5 text-[36px] leading-[1.3em]">
+                <h3 className="mb-5 text-4xl">
                   ${price}
                   <span className="text-base font-medium text-gray-2">
                     {" "}

@@ -87,7 +87,7 @@ export default function AboutHero() {
           {/* Center title */}
           <div className="order-1 flex flex-col items-center text-center lg:order-2">
             <p className="mb-4 rounded-full bg-gray-3 px-4 py-1.5 text-sm font-semibold text-ink">About Work Buckle</p>
-            <h1 className="mb-2.5 text-[42px] leading-[1.2em] md:text-[52px] xl:text-[50px] 2xl:text-[60px] 2xl:leading-[1.3em]">
+            <h1 className="mb-2.5 text-4xl md:text-5xl 2xl:text-6xl">
               We help people find work they are proud of.
             </h1>
             <p className="mb-[30px] max-w-[480px]">

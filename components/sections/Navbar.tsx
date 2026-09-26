@@ -99,7 +99,7 @@ export default function Navbar() {
             aria-label="Open cart (0 items)"
           >
             <ShoppingBag className="size-5" />
-            <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-ink text-[11px] font-semibold text-white">
+            <span className="absolute -top-1 -right-1 flex size-5 items-center justify-center rounded-full bg-ink text-xs font-semibold text-white">
               0
             </span>
           </button>

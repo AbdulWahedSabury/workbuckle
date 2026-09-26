@@ -58,7 +58,7 @@ export default function HeroSection() {
           initial="hidden"
           animate="show"
           variants={container}
-          className="mb-2.5 w-full text-[42px] leading-[1.3em] tracking-tight sm:text-[50px] md:w-[80%] md:text-[70px] lg:w-[70%] lg:text-[60px] xl:text-[70px] min-[1920px]:text-[90px]"
+          className="mb-2.5 w-full text-4xl tracking-tight sm:text-5xl md:w-[80%] md:text-7xl lg:w-[70%] lg:text-6xl xl:text-7xl min-[1920px]:text-8xl"
         >
           {headlineArray.map((_, index) => (
             <Fragment key={index}>
@@ -94,7 +94,7 @@ export default function HeroSection() {
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:gap-[50px]">
                 {stats.map((stat) => (
                   <div key={stat.label}>
-                    <p className="mb-2.5 font-heading text-[36px] leading-[1.3em] font-semibold text-ink sm:text-[40px] md:text-[44px] lg:text-[48px]">
+                    <p className="mb-2.5 font-heading text-4xl font-semibold text-ink md:text-5xl">
                       <CountUp to={stat.value} />
                       {stat.suffix}
                       <Accent>+</Accent>

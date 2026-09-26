@@ -11,7 +11,7 @@ export default function AboutCta() {
             aria-hidden="true"
           />
           <div>
-            <h2 className="mb-3 text-[30px] text-white sm:text-[40px] lg:text-[48px]">
+            <h2 className="mb-3 text-3xl text-white sm:text-4xl lg:text-5xl">
               Ready to take the next step?
             </h2>
             <p className="max-w-[560px] text-white/70">

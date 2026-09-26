@@ -11,7 +11,7 @@ export default function JobCategories() {
           <div className="grid grid-cols-1 gap-10 p-6 sm:p-10 lg:grid-cols-[minmax(200px,1fr)_0.4fr] lg:gap-[50px] lg:p-[50px]">
             {/* Heading column comes first on mobile, sits right on desktop */}
             <div className="flex flex-col items-start justify-between gap-8 lg:order-2">
-              <h2 className="text-[32px] text-white sm:text-[40px] lg:text-[48px]">
+              <h2 className="text-3xl text-white sm:text-4xl lg:text-5xl">
                 Explore roles by category
               </h2>
               <div>

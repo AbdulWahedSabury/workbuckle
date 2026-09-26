@@ -21,7 +21,7 @@ function CompanyCard({ company }: { company: Company }) {
         />
       </div>
       <div className="mb-8 lg:mb-10">
-        <h3 className="mb-2 text-[22px]">{company.name}</h3>
+        <h3 className="mb-2 text-xl">{company.name}</h3>
         <p className="flex items-center gap-1 text-ink">
           <MapPin className="size-[18px]" /> {company.location}
         </p>
@@ -61,7 +61,7 @@ export default function TopCompanies() {
               ))}
             </div>
             <div className="flex flex-col justify-between gap-10 rounded-card bg-primary p-6 sm:p-[30px]">
-              <h4 className="text-[24px] sm:text-[28px]">
+              <h4 className="text-2xl">
                 Hiring? Put your openings in front of motivated candidates.
               </h4>
               <div className="flex flex-col items-end">

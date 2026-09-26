@@ -15,7 +15,7 @@ export default function SectionHeading({
 }: SectionHeadingProps) {
   return (
     <h2
-      className={`mb-8 text-[32px] sm:text-[40px] lg:mb-[50px] lg:text-[48px] ${
+      className={`mb-8 text-3xl sm:text-4xl lg:mb-[50px] lg:text-5xl ${
         align === "center" ? "mx-auto max-w-[720px] text-center" : "max-w-[760px]"
       } ${tone === "light" ? "text-white" : "text-ink"} ${className}`}
     >

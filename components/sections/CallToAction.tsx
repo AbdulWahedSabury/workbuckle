@@ -11,7 +11,7 @@ export default function CallToAction() {
             aria-hidden="true"
           />
           <div className="relative">
-            <h2 className="mb-3 text-[30px] sm:text-[40px] lg:text-[48px]">Your next role is one search away.</h2>
+            <h2 className="mb-3 text-3xl sm:text-4xl lg:text-5xl">Your next role is one search away.</h2>
             <p className="max-w-[560px] text-ink/70">
               Create a free profile, set your alerts, and let the right openings come to you.
             </p>

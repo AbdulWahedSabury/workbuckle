@@ -103,7 +103,7 @@ function HexBadge({ badge, delay, floatIndex }: { badge: Badge; delay: number; f
             className={`absolute inset-0 flex flex-col items-center justify-center gap-0.5 px-[18%] text-center sm:gap-1.5 ${tone.text}`}
           >
             <Icon className={`size-4 sm:size-6 md:size-7 ${tone.icon}`} strokeWidth={2.25} aria-hidden="true" />
-            <p className="font-heading text-[10px] leading-[1.35] font-semibold sm:text-sm md:text-lg lg:text-sm xl:text-lg">
+            <p className="font-heading text-xs leading-snug font-semibold sm:text-sm md:text-lg lg:text-sm xl:text-lg">
               {badge.label[0]}
               <br />
               {badge.label[1]}

@@ -42,7 +42,7 @@ export default function JobSearch() {
         <div className="container-site">
           <div className="relative z-20 mb-16 grid grid-cols-1 gap-8 lg:mb-[120px] lg:grid-cols-[0.75fr_1fr] lg:gap-[30px]">
             <div>
-              <h2 className="mb-6 text-2xl text-white sm:text-[28px] lg:mb-10">
+              <h2 className="mb-6 text-2xl text-white lg:mb-10">
                 Search by category
               </h2>
               <div ref={dropdownRef} className="relative w-full">
@@ -122,7 +122,7 @@ export default function JobSearch() {
             </div>
           </div>
 
-          <h3 className="mb-8 text-2xl text-white sm:text-[28px]">Browse by job type</h3>
+          <h3 className="mb-8 text-2xl text-white">Browse by job type</h3>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-[30px]">
             {jobTypes.map((t) => (
               <Link
@@ -131,7 +131,7 @@ export default function JobSearch() {
                 className="group flex flex-col gap-6 rounded-card border border-gray-1 bg-gray-1 p-[30px] transition-colors duration-300 hover:border-primary"
               >
                 <div>
-                  <h4 className="mb-1 text-[22px] text-white">{t.title}</h4>
+                  <h4 className="mb-1 text-xl text-white">{t.title}</h4>
                   <p className="text-white/60">{t.count.toLocaleString()} open roles</p>
                 </div>
                 <span className="relative flex w-fit items-center gap-1.5 pb-1 font-semibold text-primary">

@@ -33,7 +33,7 @@ export default function CompanyCard({ company, href }: CompanyCardProps) {
         </span>
         <span className="rounded-full bg-gray-3 px-3 py-1 text-xs font-semibold text-ink">{company.starts}</span>
       </div>
-      <h3 className="mb-2 text-[22px]">{company.name}</h3>
+      <h3 className="mb-2 text-xl">{company.name}</h3>
       <p className="mb-8 flex items-center gap-1.5">
         <MapPin className="size-4" /> {company.location}
       </p>

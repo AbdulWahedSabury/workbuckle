@@ -16,7 +16,7 @@ export default function Testimonials() {
       <div className="container-site">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.5fr_minmax(200px,1fr)] lg:gap-[30px]">
           <div className="flex flex-col justify-between gap-8">
-            <h2 className="text-[32px] sm:text-[40px] lg:text-[48px]">What our community says</h2>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl">What our community says</h2>
             <div className="flex items-center gap-4">
               <button
                 type="button"
@@ -68,10 +68,10 @@ export default function Testimonials() {
                       ))}
                     </div>
                     <Quote className="mb-4 size-8 text-gray-3" fill="currentColor" aria-hidden="true" />
-                    <p className="mb-8 font-heading text-lg leading-[1.5em] text-ink sm:text-xl lg:mb-[50px]">
+                    <p className="mb-8 font-heading text-lg leading-normal text-ink sm:text-xl lg:mb-[50px]">
                       {t.quote}
                     </p>
-                    <p className="font-heading text-[22px] leading-[1.3em] font-semibold text-ink">{t.name}</p>
+                    <p className="font-heading text-xl font-semibold text-ink">{t.name}</p>
                     <p>{t.role}</p>
                   </div>
                 </article>

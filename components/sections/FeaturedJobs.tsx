@@ -69,7 +69,7 @@ export default function FeaturedJobs() {
                     {job.category}
                   </span>
                 </div>
-                <h3 className="mb-1 text-xl sm:text-[22px]">{job.title}</h3>
+                <h3 className="mb-1 text-xl">{job.title}</h3>
                 <p className="mb-5 text-gray-2">{job.company}</p>
                 <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-ink">
                   <span className="flex items-center gap-1">

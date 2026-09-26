@@ -31,7 +31,7 @@ export default function Hero() {
   return (
     <section className="pt-8 lg:pt-[50px]">
       <div className="container-site">
-        <h1 className="mb-2.5 w-full text-[40px] leading-[1.2em] sm:text-[52px] lg:w-[70%] lg:text-[60px] lg:leading-[1.3em]">
+        <h1 className="mb-2.5 w-full text-4xl sm:text-5xl lg:w-[70%] lg:text-6xl">
           Find work that fits your life, and a team that fits you.
         </h1>
 
@@ -51,7 +51,7 @@ export default function Hero() {
               <div className="grid grid-cols-3 gap-5">
                 {heroStats.map((stat) => (
                   <div key={stat.label}>
-                    <p className="font-heading text-[32px] leading-[1.3em] font-semibold text-ink sm:text-[40px] lg:text-[48px]">
+                    <p className="font-heading text-3xl font-semibold text-ink sm:text-4xl lg:text-5xl">
                       {stat.value}
                     </p>
                     <p className="text-sm sm:text-base">{stat.label}</p>

@@ -42,7 +42,7 @@ export default function ArrowButton({
       href={href}
       className={`group inline-flex items-center gap-3 rounded-full border py-2 pr-2 pl-4 text-base font-semibold transition-all duration-500 ${s.button} ${className}`}
     >
-      <span className="leading-[1.5em]">{label}</span>
+      <span className="leading-normal">{label}</span>
       <span
         className={`relative flex size-[30px] flex-none items-center justify-center overflow-hidden rounded-full transition-colors duration-500 ${s.circle}`}
       >

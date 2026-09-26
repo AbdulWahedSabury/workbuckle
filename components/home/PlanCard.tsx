@@ -26,9 +26,9 @@ export default function PlanCard({ plan, selected, onSelect }: PlanCardProps) {
           Most popular
         </span>
       )}
-      <h3 className="mb-1 text-[22px]">{plan.name}</h3>
+      <h3 className="mb-1 text-xl">{plan.name}</h3>
       <p className="mb-6">{plan.blurb}</p>
-      <p className="mb-6 font-heading text-[40px] leading-none font-semibold tracking-tight text-ink">
+      <p className="mb-6 font-heading text-4xl leading-none font-semibold tracking-tight text-ink">
         {plan.price}
         <span className="ml-1.5 font-sans text-base font-medium tracking-normal text-gray-2">{plan.cadence}</span>
       </p>

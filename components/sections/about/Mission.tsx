@@ -9,7 +9,7 @@ export default function Mission() {
       <div className="container-site">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:gap-20">
           <Reveal>
-            <h2 className="mb-8 text-[32px] sm:text-[40px] lg:mb-[50px] lg:text-[48px]">
+            <h2 className="mb-8 text-3xl sm:text-4xl lg:mb-[50px] lg:text-5xl">
               Our mission is to make hiring honest and simple.
             </h2>
             <ul className="flex flex-col gap-5 lg:gap-8">
@@ -17,7 +17,7 @@ export default function Mission() {
                 <li key={point.title} className="flex gap-4">
                   <CircleCheck className="mt-1 size-6 flex-none text-primary" />
                   <div>
-                    <h3 className="mb-1 text-xl sm:text-[22px]">{point.title}</h3>
+                    <h3 className="mb-1 text-xl">{point.title}</h3>
                     <p>{point.text}</p>
                   </div>
                 </li>
@@ -47,7 +47,7 @@ export default function Mission() {
           </div>
         </div>
 
-        <Reveal as="h2" className="mx-auto mt-14 max-w-[980px] text-center text-[26px] leading-[1.4em] sm:text-[32px] lg:mt-20 lg:text-[40px]">
+        <Reveal as="h2" className="mx-auto mt-14 max-w-[980px] text-center text-2xl leading-snug sm:text-3xl lg:mt-20 lg:text-4xl">
           Every role on Work Buckle is <span className="text-primary">real, current, and clearly paid</span>, so
           your time goes into applying, not guessing.
         </Reveal>

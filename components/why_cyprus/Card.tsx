@@ -31,8 +31,8 @@ export default function Card({ step, index, total, progress, stack }: ProcessCar
           <span className="mb-3 inline-block font-heading text-sm font-semibold tracking-wide text-gray-900 uppercase">
             Step {String(index + 1).padStart(2, "0")}
           </span>
-          <h3 className=" text-gray-900 mb-3 text-[26px] tracking-tight sm:text-[32px]">{step.title}</h3>
-          <p className="mb-7 text-lg leading-[1.6em]  text-gray-900">{step.description}</p>
+          <h3 className=" text-gray-900 mb-3 text-2xl tracking-tight sm:text-3xl">{step.title}</h3>
+          <p className="mb-7 text-lg leading-relaxed  text-gray-900">{step.description}</p>
         </div>
         <div className="order-first md:order-none">
           <ProcessIllustration step={step} />

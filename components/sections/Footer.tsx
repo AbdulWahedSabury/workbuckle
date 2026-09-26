@@ -50,7 +50,7 @@ export default function Footer() {
               <div className="grid grid-cols-2 gap-8 lg:grid-cols-[1fr_1.25fr] lg:gap-[50px]">
                 {footerLinks.map((group) => (
                   <div key={group.title}>
-                    <h3 className="mb-6 text-lg sm:text-[22px]">{group.title}</h3>
+                    <h3 className="mb-6 text-lg sm:text-xl">{group.title}</h3>
                     <ul className="flex flex-col items-start gap-[15px]">
                       {group.links.map((l) => (
                         <li key={l.label}>
@@ -71,7 +71,7 @@ export default function Footer() {
 
           <div>
             <div className="mb-10 rounded-card bg-gray-3 p-5">
-              <h3 className="mb-2 text-[22px]">Get new roles in your inbox</h3>
+              <h3 className="mb-2 text-xl">Get new roles in your inbox</h3>
               <p className="mb-5">One email a week. Unsubscribe any time.</p>
               {subscribed ? (
                 <p className="rounded-full bg-white px-6 py-4 font-semibold text-ink" role="status">
