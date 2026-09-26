@@ -1,0 +1,303 @@
+{
+  "layout": {
+    "footer": {
+      "legal": "Legal",
+      "quick_links": "Quick Links",
+      "support": "Customer Support",
+      "follow_us": "Follow us",
+      "about": "Workbuckle – Connecting hospitality professionals with exciting career opportunities across Europe. Your trusted partner in recruitment and career development."
+    }
+  },
+  "Metadata": {
+    "home": {
+      "title": "My Travel Games",
+      "description": "Portable classic games for every adventure. Handcrafted wooden travel board games - Backgammon, Chess, Ludo, Domino and more.",
+      "keywords": {
+        "game": "travel games, board games, handcrafted games, portable games, wooden games, my travel games"
+      }
+    },
+    "about": {
+      "title": "About Us",
+      "description": "Discover the story behind My Travel Games. Handcrafted wooden travel board games made with love and designed for adventures."
+    },
+    "blog": {
+      "title": "Blog",
+      "description": "Read our latest articles about travel games, handcrafted wooden board games, and tips for playing anywhere, anytime."
+    },
+    "gallery": {
+      "title": "Gallery",
+      "description": "Browse our gallery of handcrafted wooden travel board games. See the beauty and craftsmanship of My Travel Games collection."
+    },
+    "product": {
+      "title": "Shop",
+      "description": "Explore our collection of classic and timeless travel board games. Handcrafted wooden games for every adventure."
+    },
+    "cart": {
+      "title": "Cart",
+      "description": "Review your cart and proceed to checkout at My Travel Games."
+    },
+    "contact": {
+      "title": "Contact Us",
+      "description": "Get in touch with My Travel Games. Questions about orders, shipping, or our handcrafted wooden travel board games - we are happy to help."
+    },
+    "corporate_partners": {
+      "title": "Corporate Partners",
+      "description": "Become a corporate partner. Bulk orders for hotels, airlines, events, and retailers of handcrafted travel board games."
+    },
+    "customization": {
+      "title": "Personalized Games",
+      "description": "Create your own personalized handcrafted board game. Customize with your face, name, and favorite photos."
+    },
+    "checkout": {
+      "success": {
+        "title": "Order Successful",
+        "description": "Your order has been successfully placed. Thank you for shopping at My Travel Games."
+      },
+      "cancel": {
+        "title": "Order Cancelled",
+        "description": "Your order has been cancelled. Please try again or contact support."
+      }
+    },
+    "not_found": {
+      "title": "Page Not Found",
+      "description": "The page you are looking for does not exist. Return to home page."
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "jobs": "Jobs",
+    "contact": "Contact",
+    "terms": "Terms and Conditions",
+    "privacy": "Privacy Policy",
+    "menu": "Menu",
+    "categories": "categories",
+    "companies": "Companies"
+  },
+  "pages": {
+    "about": {
+      "title": "  Your reliable partner for travel-ready classic games",
+      "description_short": "Crafted by Hand. Made with Love.<br/> Behind every wooden curve and every delicate hand-painted detail lies a story of love, patience, and imagination.<br/> My Travel Games was born from a desir qe to bring the warmth of artisanal craftsmanship into everyday life—reminding us that the most beautiful things are those created with both hand and heart.<br/> Our collection celebrates the joy of classic play....",
+      "headline": "More Than Games. More Than Gifts. Stories That Bring People Together.",
+      "description": "At <bold>My Travel Games</bold>, we believe that the most meaningful memories are created when people connect, explore, and share experiences together. What began as a passion for travel and discovering new cultures grew into a mission: to create products that inspire curiosity, spark conversations, and bring people closer to one another. Every game and every gift in our collection is carefully selected to celebrate the joy of discovery and the stories that make each journey unique. We see travel as more than visiting new places. It is about understanding cultures, creating connections, and collecting moments that stay with us long after the journey ends. Our products are designed with that same spirit—to turn simple moments into lasting memories. Whether you are searching for a meaningful gift, a unique travel-inspired game, or a way to share unforgettable experiences with family and friends, you are part of a community that values adventure, learning, and human connection. <emphasis>Because the best souvenirs are not the things we bring home—they are the memories, stories, and friendships we create along the way.</emphasis>",
+      "cta": "<cta>Create memories. Discover the world. Share the journey.</cta>",
+      "valuesTitle": "Our Values",
+      "values": [
+        "Curiosity & Discovery",
+        "Meaningful Connections",
+        "Cultural Appreciation",
+        "Quality & Creativity",
+        "Memories That Last"
+      ],
+      "highlights": {
+        "design": {
+          "title": "Travel-Ready Design",
+          "description": "Our games are compact, Lighter than your smartphone, and easy to pack — perfect for road trips, flights, and weekend escapes."
+        },
+        "craftsmanship": {
+          "title": "Timeless Craftsmanship",
+          "description": "We focus on durable materials and classic aesthetics that feel just as good at home as they do abroad."
+        },
+        "connection": {
+          "title": "Made for Connection",
+          "description": "From quiet chess matches to lively domino nights, our games bring people together wherever you are."
+        }
+      },
+      "stats": {
+        "delivered": "Games Delivered",
+        "satisfaction": "Customer Satisfaction",
+        "shipped": "Countries Shipped To",
+        "secure": "Secure Online Ordering"
+      }
+    },
+    "home": {
+      "hero": {
+        "images": {
+          "barman": {
+            "alt": "Smiling job seeker in a light shirt",
+            "badge": ["No work visa required", "for EU citizens"]
+          },
+          "frontdesk": {
+            "alt": "Confident professional woman in an office",
+            "badge": ["We are", "hiring!"]
+          },
+          "waitress": {
+            "alt": "Thoughtful candidate portrait",
+            "badge": ["Are you looking", "for a job?"]
+          }
+        },
+        "headline": [
+          "Build Your Career in",
+          "<accent>Paradise:</accent>",
+          "Luxury Hospitality",
+          "Jobs in",
+          "Cyprus"
+        ],
+        "body": "Join prestigious 5-star hotels and luxury resorts in Limassol and Nicosia. Full EU working rights, competitive compensation, and structured accommodation support included",
+        "cta": {
+          "label": "Explore Available Roles & Apply "
+        },
+        "statsTitle": "# 25 Years of Excellence in Connecting Global Talent with Cyprus’s Finest Employers",
+        "stats": [
+          {
+            "value": 100,
+            "suffix": "",
+            "label": "A wide range of industries"
+          },
+          {
+            "value": 25,
+            "suffix": "K",
+            "label": "Found their dream jobs"
+          }
+        ]
+        },
+        "why_cyprus": [
+          {
+            "title": "Seamless EU Mobility",
+            "description": "No work visas required for EU passport holders—enjoy simple registration and full employment rights.",
+            "img": "/images/why_cyprus/seamless_eu_mobility.jpg",
+            "accents": ["/images/why_cyprus/accents/file-check-corner.png", "/images/why_cyprus/accents/shield-check.png"]
+          },
+          {
+            "title": "World-Class Employers",
+            "description": "Gain experience in top-tier luxury hotels, 5-star resorts, and fine-dining establishments in Europe.",
+            "img": "/images/why_cyprus/World-Class.jpg",
+            "accents": ["/images/why_cyprus/accents/hotel.png", "/images/why_cyprus/accents/utensils-crossed.png"]
+          },
+          {
+            "title": "Relocation Support",
+            "description": "Free high-quality accommodation options, staff meals, and airport transfers provided for selected positions.",
+            "img": "/images/why_cyprus/relocation.jpg",
+            "accents": ["/images/why_cyprus/accents/house.png", "/images/why_cyprus/accents/plane-landing.png"]
+          },
+          {
+        "title": "Mediterranean Lifestyle",
+        "description": "Experience 300+ days of sunshine a year, pristine beaches in Limassol, and the rich cultural life of historic Nicosia.",
+        "img": "/images/why_cyprus/Mediterranean.jpeg",
+        "accents": ["/images/why_cyprus/accents/sun.png", "/images/why_cyprus/accents/waves-horizontal.png"]
+      }]
+    },
+    "blog": {
+      "title": "Blog",
+      "description": "Where Travel Meets Storytelling Every destination has a story, and every journey offers something new to discover.<br/> Explore articles, insights, and inspiration designed to bring the spirit of travel, curiosity, and adventure closer to you.",
+      "post": {
+        "read_time": "{min} mins read"
+      }
+    },
+    "eu_countries": {
+      "Austria": "Austria",
+      "Belgium": "Belgium",
+      "Bulgaria": "Bulgaria",
+      "Croatia": "Croatia",
+      "Cyprus": "Cyprus",
+      "Czechia": "Czechia",
+      "Denmark": "Denmark",
+      "Estonia": "Estonia",
+      "Finland": "Finland",
+      "France": "France",
+      "Germany": "Germany",
+      "Greece": "Greece",
+      "Hungary": "Hungary",
+      "Ireland": "Ireland",
+      "Italy": "Italy",
+      "Latvia": "Latvia",
+      "Lithuania": "Lithuania",
+      "Luxembourg": "Luxembourg",
+      "Malta": "Malta",
+      "Netherlands": "Netherlands",
+      "Poland": "Poland",
+      "Portugal": "Portugal",
+      "Romania": "Romania",
+      "Slovakia": "Slovakia",
+      "Slovenia": "Slovenia",
+      "Spain": "Spain",
+      "Sweden": "Sweden"
+    }
+  },
+  "whoWeAre": {
+    "title": "Who We Are?",
+    "description": "MyTravelGames creates compact, practical and distinctive games and travel products designed to make journeys more enjoyable.Our story began with a simple idea: travel time should be part of the experience, not just the time between two destinations.<br/>We develop travel-friendly games, wooden game pieces, family products, souvenirs and personalized items for children and adults.<br/> Our products are designed for use on flights, train journeys, road trips, holidays, hotels, beaches and other moments away from home.We focus on a combination of practical design, accessible pricing, quality materials and original ideas.<br/> Many of our wooden components are made from beech wood, while fabric-based products are created to be lightweight, compact and easy to carry.<br/>MyTravelGames also works with hotels, airlines, travel companies, retailers, distributors and corporate partners, offering products for retail, promotional campaigns, guest gifts and customized projects.From a small family game to a personalized travel gift, our goal is the same: to create products that bring people together and turn ordinary travel moments into lasting memories.<br/>Designed for travel.<br/> Made for shared moments.",
+    "button": "Read More",
+    "services": {
+      "title1": "Passion for Play",
+      "desc1": "We believe classic games transcend generations, turning every journey into a shared experience of joy and connection.",
+      "title2": "Travel Inspired",
+      "desc2": "Born from a love of adventure, our games are designed to move with you, fitting perfectly into your next destination.",
+      "title3": "Thoughtful Design",
+      "desc3": "Simplicity meets elegance. Every piece is crafted with meticulous detail to ensure your travel experience is as seamless as it is stylish.",
+      "title4": "Meaningful Moments",
+      "desc4": "We provide the tools for memories. Our mission is to transform ordinary trips into unforgettable stories through the art of play."
+    }
+  },
+  "sections": {
+    "faq": {
+      "title": "FAQs",
+      "description": "Frequently asked questions"
+    },
+    "contact": {
+      "title": "Get in touch",
+      "for_businesses": "Let’s Start a Project Together",
+      "working_hours": {
+        "label": "Opening Hours",
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      },
+      "write_to_us": "Write To Us"
+    }
+  },
+  "form": {
+    "company_name": {
+      "label": "Company Name",
+      "placeholder": "Enter your company name",
+      "required": "Company Name name is required"
+    },
+    "contact_person": {
+      "label": "Contact Person",
+      "placeholder": "Enter your  name",
+      "required": "Contact Person name is required"
+    },
+    "first_name": {
+      "label": "First Name",
+      "placeholder": "Enter your first name",
+      "required": "First name is required"
+    },
+    "last_name": {
+      "label": "Last Name",
+      "placeholder": "Enter your last name",
+      "required": "Last name is required"
+    },
+    "email": {
+      "label": "Email",
+      "placeholder": "Enter your email",
+      "required": "Email is required",
+      "invalid": "Invalid email address"
+    },
+    "phone": {
+      "label": "Phone",
+      "placeholder": "Enter your phone",
+      "required": "Phone is required",
+      "invalid": "Invalid phone number"
+    },
+    "message": {
+      "label": "Message",
+      "placeholder": "Enter your message",
+      "required": "Message is required"
+    },
+    "too_many_requests": "Too many requests, please try again later",
+    "submit_faild": "Submit failed, please try again later",
+    "submit_success": "Submit success",
+    "error_occured": "Error occured, please try again later",
+    "btn": "Submit",
+    "processing": "Submitting..."
+  },
+  "404": {
+    "title": "404 Not Found",
+    "description": "Your visited page not found. You may go home page.",
+    "cta": "Back to Home"
+  }
+}
