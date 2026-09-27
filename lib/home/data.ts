@@ -133,29 +133,29 @@ export const JOBS: Job[] = [
 
 export const JOB_FILTERS: JobFilter[] = ["All", "Full-Time", "Part-Time", "Internship", "Remote"];
 
-export const COMPANIES: Company[] = [
-  {
-    name: "Creative Media Agency",
-    logo: "/images/companies/company-2.png",
-    location: "London, UK",
-    industry: "Media & Production",
-    openings: 12,
-  },
-  {
-    name: "Vertex Consulting Group",
-    logo: "/images/companies/company-3.png",
-    location: "Toronto, CA",
-    industry: "Consulting",
-    openings: 8,
-  },
-  {
-    name: "Talon Tech LLC",
-    logo: "/images/companies/company-1.png",
-    location: "San Francisco, US",
-    industry: "Software",
-    openings: 21,
-  },
-];
+// export const COMPANIES: Company[] = [
+//   {
+//     name: "Creative Media Agency",
+//     logo: "/images/companies/company-2.png",
+//     location: "London, UK",
+//     industry: "Media & Production",
+//     openings: 12,
+//   },
+//   {
+//     name: "Vertex Consulting Group",
+//     logo: "/images/companies/company-3.png",
+//     location: "Toronto, CA",
+//     industry: "Consulting",
+//     openings: 8,
+//   },
+//   {
+//     name: "Talon Tech LLC",
+//     logo: "/images/companies/company-1.png",
+//     location: "San Francisco, US",
+//     industry: "Software",
+//     openings: 21,
+//   },
+// ];
 
 export const PLANS: Plan[] = [
   {
@@ -221,32 +221,32 @@ export const TESTIMONIALS: Testimonial[] = [
   },
 ];
 
-export const FOOTER_COLUMNS: FooterColumn[] = [
-  {
-    title: "For candidates",
-    links: [
-      { label: "Browse jobs", href: "#jobs" },
-      { label: "Categories", href: "#categories" },
-      { label: "Companies", href: "#companies" },
-      { label: "Career advice", href: "#" },
-    ],
-  },
-  {
-    title: "For employers",
-    links: [
-      { label: "Post a job", href: "#pricing" },
-      { label: "Pricing", href: "#pricing" },
-      { label: "Hiring guide", href: "#" },
-      { label: "Contact sales", href: "#" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "About us", href: "/about" },
-      { label: "Blog", href: "#" },
-      { label: "Privacy policy", href: "#" },
-      { label: "Terms of use", href: "#" },
-    ],
-  },
-];
+// export const FOOTER_COLUMNS: FooterColumn[] = [
+//   {
+//     title: "For candidates",
+//     links: [
+//       { label: "Browse jobs", href: "#jobs" },
+//       { label: "Categories", href: "#categories" },
+//       { label: "Companies", href: "#companies" },
+//       { label: "Career advice", href: "#" },
+//     ],
+//   },
+//   {
+//     title: "For employers",
+//     links: [
+//       { label: "Post a job", href: "#pricing" },
+//       { label: "Pricing", href: "#pricing" },
+//       { label: "Hiring guide", href: "#" },
+//       { label: "Contact sales", href: "#" },
+//     ],
+//   },
+//   {
+//     title: "Company",
+//     links: [
+//       { label: "About us", href: "/about" },
+//       { label: "Blog", href: "#" },
+//       { label: "Privacy policy", href: "#" },
+//       { label: "Terms of use", href: "#" },
+//     ],
+//   },
+// ];
