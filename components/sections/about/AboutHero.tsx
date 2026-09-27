@@ -2,8 +2,10 @@ import Image from "next/image";
 import ArrowButton from "@/components/ui/ArrowButton";
 import Reveal from "@/components/motion/Reveal";
 import Parallax from "@/components/motion/Parallax";
+import { useTranslations } from "next-intl";
+import CtaButton from "@/components/ui/CtaButton";
 
-interface Photo {
+interface PhotoItem {
   src: string;
   alt: string;
   /** Fixed desktop size; below lg the photos fill their grid cell instead. */
@@ -12,52 +14,56 @@ interface Photo {
   parallax: [from: number, to: number];
 }
 
-const leftPhotos: Photo[] = [
+const leftPhotos: PhotoItem[] = [
   {
     src: "/images/about/hero-1.png",
-    alt: "About collage 1 — candidate smiling during a video interview (~320×400)",
-    size: "lg:h-[170px] lg:w-[160px] 2xl:h-[200px]",
+    alt: "Candidate smiling during a video interview",
+    size: "lg:h-[250px] lg:w-[240px] xl:h-[280px] xl:w-[290px] 2xl:h-[320px] 2xl:w-[340px]",
     parallax: [-5, 5],
   },
   {
-    src: "/images/about/hero-2.png",
-    alt: "About collage 2 — two colleagues reviewing a resume together (~400×320)",
-    size: "lg:h-[150px] lg:w-[170px] 2xl:h-[160px] 2xl:w-[200px] lg:self-end",
+    src: "/images/about/hero-2.jpg",
+    alt: "Two colleagues reviewing a resume together",
+    size: "lg:h-[170px] lg:w-[190px] lg:self-end xl:h-[190px] xl:w-[230px] 2xl:h-[210px] 2xl:w-[270px]",
     parallax: [5, -5],
   },
   {
     src: "/images/about/hero-3.png",
-    alt: "About collage 3 — Work Buckle team working in a bright office (~600×400)",
-    size: "lg:h-[160px] lg:w-[250px] 2xl:h-[200px] 2xl:w-[300px]",
+    alt: "Work Buckle team working in a bright office",
+    size: "lg:h-[180px] lg:w-[250px] xl:h-[210px] xl:w-[300px] 2xl:h-[250px] 2xl:w-[360px]",
     parallax: [5, -5],
   },
 ];
 
-const rightPhotos: Photo[] = [
+const rightPhotos: PhotoItem[] = [
   {
-    src: "/images/about/hero-4.png",
-    alt: "About collage 4 — recruiter shaking hands with a new hire (~600×440)",
-    size: "lg:h-[220px] lg:w-[250px] 2xl:w-[300px] lg:self-end",
+    src: "/images/about/hero-4.jpg",
+    alt: "Recruiter shaking hands with a new hire",
+    size: "lg:h-[250px] lg:w-[250px] lg:self-end xl:h-[280px] xl:w-[300px] 2xl:h-[320px] 2xl:w-[360px]",
     parallax: [5, -6],
   },
   {
-    src: "/images/about/hero-5.png",
-    alt: "About collage 5 — team celebrating around a laptop (~600×440)",
-    size: "lg:h-[220px] lg:w-[260px] 2xl:w-[300px]",
+    src: "/images/about/hero.png",
+    alt: "Team celebrating around a laptop",
+    size: "lg:h-[250px] lg:w-[240px] xl:h-[280px] xl:w-[290px] 2xl:h-[320px] 2xl:w-[340px]",
     parallax: [-6, 5],
   },
 ];
 
-function Photo({ photo }: { photo: Photo }) {
+function PhotoCard({ photo, sizes }: { photo: PhotoItem; sizes: string }) {
   const [from, to] = photo.parallax;
   return (
-    <Parallax from={from} to={to} className={`w-full ${photo.size}`}>
-      <div className="relative aspect-[4/3] h-full w-full overflow-hidden rounded-sm-card bg-gray-3 sm:rounded-card lg:aspect-auto">
+    <Parallax
+      from={from}
+      to={to}
+      className={`w-full lg:max-w-full ${photo.size}`}
+    >
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-sm-card bg-gray-3 sm:rounded-card lg:aspect-auto lg:h-full">
         <Image
           src={photo.src}
           alt={photo.alt}
           fill
-          sizes="(min-width: 1024px) 300px, 33vw"
+          sizes={sizes}
           className="object-cover"
           preload
         />
@@ -67,34 +73,45 @@ function Photo({ photo }: { photo: Photo }) {
 }
 
 export default function AboutHero() {
+  const t = useTranslations("pages.about");
   return (
-    <section className="pt-5 sm:pt-10 xl:pt-[50px] 2xl:pt-[70px]">
+    <section className="relative overflow-x-clip pt-10 pb-15 sm:pt-12 lg:pt-14 lg:pb-22.5 xl:pt-16 2xl:pt-20">
       <div className="container-site">
         <Reveal
           effect="growIn"
           delay={0}
           offset={0}
-          className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[1fr_1.4fr_1fr] lg:gap-10 xl:gap-[60px]"
+          className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[1fr_1.3fr_1fr] lg:gap-10 xl:gap-15"
         >
-          <div className="order-2 grid grid-cols-3 gap-5 md:gap-10 lg:order-1 lg:grid-cols-1 lg:gap-[60px]">
+          {/* Left photos */}
+          <div className="order-2 grid grid-cols-3 gap-4 md:gap-8 lg:order-1 lg:grid-cols-1 lg:gap-10 2xl:gap-12">
             {leftPhotos.map((p) => (
-              <Photo key={p.src} photo={p} />
+              <PhotoCard
+                key={p.src}
+                photo={p}
+                sizes="(min-width: 1024px) 360px, 33vw"
+              />
             ))}
           </div>
+
           <div className="order-1 flex flex-col items-center text-center lg:order-2">
-            <p className="mb-4 rounded-full bg-gray-3 px-4 py-1.5 text-sm font-semibold text-ink">About Work Buckle</p>
-            <h1 className="mb-2.5 text-4xl md:text-5xl 2xl:text-6xl">
-              We help people find work they are proud of.
+            <h1 className="mb-4 text-3xl leading-tight tracking-tight text-balance sm:text-4xl md:text-5xl lg:text-3xl xl:text-4xl 2xl:text-5xl">
+              {t("title")}
             </h1>
-            <p className="mb-[30px] max-w-[480px]">
-              Work Buckle started as a small side project to fix one frustration: job boards full of roles that
-              were already gone. Today we connect thousands of candidates with teams that are actually hiring.
+            <p className="mb-8 max-w-lg text-base leading-relaxed text-pretty 2xl:text-lg">
+              {t("headline")}
             </p>
-            <ArrowButton href="/#jobs" label="Explore open roles" variant="primary" />
+            <CtaButton href="/jobs">{t("cta")}</CtaButton>
           </div>
-          <div className="order-3 grid grid-cols-2 gap-5 md:gap-10 lg:grid-cols-1 lg:gap-[110px] 2xl:gap-[140px]">
+
+          {/* Right photos */}
+          <div className="order-3 grid grid-cols-2 gap-4 md:gap-8 lg:grid-cols-1 lg:gap-16 xl:gap-20 2xl:gap-24">
             {rightPhotos.map((p) => (
-              <Photo key={p.src} photo={p} />
+              <PhotoCard
+                key={p.src}
+                photo={p}
+                sizes="(min-width: 1024px) 360px, 50vw"
+              />
             ))}
           </div>
         </Reveal>

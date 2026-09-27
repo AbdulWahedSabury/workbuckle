@@ -15,52 +15,6 @@
       "keywords": {
         "game": "travel games, board games, handcrafted games, portable games, wooden games, my travel games"
       }
-    },
-    "about": {
-      "title": "About Us",
-      "description": "Discover the story behind My Travel Games. Handcrafted wooden travel board games made with love and designed for adventures."
-    },
-    "blog": {
-      "title": "Blog",
-      "description": "Read our latest articles about travel games, handcrafted wooden board games, and tips for playing anywhere, anytime."
-    },
-    "gallery": {
-      "title": "Gallery",
-      "description": "Browse our gallery of handcrafted wooden travel board games. See the beauty and craftsmanship of My Travel Games collection."
-    },
-    "product": {
-      "title": "Shop",
-      "description": "Explore our collection of classic and timeless travel board games. Handcrafted wooden games for every adventure."
-    },
-    "cart": {
-      "title": "Cart",
-      "description": "Review your cart and proceed to checkout at My Travel Games."
-    },
-    "contact": {
-      "title": "Contact Us",
-      "description": "Get in touch with My Travel Games. Questions about orders, shipping, or our handcrafted wooden travel board games - we are happy to help."
-    },
-    "corporate_partners": {
-      "title": "Corporate Partners",
-      "description": "Become a corporate partner. Bulk orders for hotels, airlines, events, and retailers of handcrafted travel board games."
-    },
-    "customization": {
-      "title": "Personalized Games",
-      "description": "Create your own personalized handcrafted board game. Customize with your face, name, and favorite photos."
-    },
-    "checkout": {
-      "success": {
-        "title": "Order Successful",
-        "description": "Your order has been successfully placed. Thank you for shopping at My Travel Games."
-      },
-      "cancel": {
-        "title": "Order Cancelled",
-        "description": "Your order has been cancelled. Please try again or contact support."
-      }
-    },
-    "not_found": {
-      "title": "Page Not Found",
-      "description": "The page you are looking for does not exist. Return to home page."
     }
   },
   "navigation": {
@@ -76,12 +30,11 @@
   },
   "pages": {
     "about": {
-      "title": "  Your reliable partner for travel-ready classic games",
-      "description_short": "Crafted by Hand. Made with Love.<br/> Behind every wooden curve and every delicate hand-painted detail lies a story of love, patience, and imagination.<br/> My Travel Games was born from a desir qe to bring the warmth of artisanal craftsmanship into everyday life—reminding us that the most beautiful things are those created with both hand and heart.<br/> Our collection celebrates the joy of classic play....",
-      "headline": "More Than Games. More Than Gifts. Stories That Bring People Together.",
-      "description": "At <bold>My Travel Games</bold>, we believe that the most meaningful memories are created when people connect, explore, and share experiences together. What began as a passion for travel and discovering new cultures grew into a mission: to create products that inspire curiosity, spark conversations, and bring people closer to one another. Every game and every gift in our collection is carefully selected to celebrate the joy of discovery and the stories that make each journey unique. We see travel as more than visiting new places. It is about understanding cultures, creating connections, and collecting moments that stay with us long after the journey ends. Our products are designed with that same spirit—to turn simple moments into lasting memories. Whether you are searching for a meaningful gift, a unique travel-inspired game, or a way to share unforgettable experiences with family and friends, you are part of a community that values adventure, learning, and human connection. <emphasis>Because the best souvenirs are not the things we bring home—they are the memories, stories, and friendships we create along the way.</emphasis>",
-      "cta": "<cta>Create memories. Discover the world. Share the journey.</cta>",
-      "valuesTitle": "Our Values",
+      "title": "25 Years of Excellence in Connecting Global Talent with Cyprus’s Finest Employers",
+      "headline": "Quarter-century of deep recruitment expertise—delivering tailored workforce solutions for top-tier businesses while advocating for candidates at every step of their career journey.",
+      "story_title": "Our Story & Expertise",
+      "story_desc": "For 25 years, we have been a trusted cornerstone of the recruitment landscape in Cyprus. Through shifting market trends and evolving industry demands, our mission has remained clear: to build lasting, value-driven partnerships between world-class employers and exceptional talent.Having thoroughly explored and navigated the local and European job markets for over two decades, we understand what drives success on both sides of the employment equation. We don’t just fill vacancies—we engineer long-term career matches that help businesses thrive and candidates succeed.",
+      "cta": "Explore the positions & Apply",
       "values": [
         "Curiosity & Discovery",
         "Meaningful Connections",

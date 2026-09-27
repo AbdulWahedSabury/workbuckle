@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import AboutHero from "@/components/sections/about/AboutHero";
 import AboutStats from "@/components/sections/about/AboutStats";
-import Mission from "@/components/sections/about/Mission";
+import MissionVision from "@/components/sections/about/MissionVision";
 import ReviewMarquee from "@/components/sections/about/ReviewMarquee";
 import AboutCta from "@/components/sections/about/AboutCta";
+import OurStory from "@/components/sections/about/OurStory";
 
 export const metadata: Metadata = {
   title: "About",
@@ -15,7 +16,8 @@ export default function AboutPage() {
     <>
       <AboutHero />
       <AboutStats />
-      <Mission />
+      <OurStory />
+      <MissionVision />
       <ReviewMarquee />
       <AboutCta />
     </>
