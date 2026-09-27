@@ -5,6 +5,8 @@ import JobBoard from "@/components/home/JobBoard";
 import AvailablePositions from "@/components/available_positions/AvailablePositions";
 import Testimonials from "@/components/home/Testimonials";
 import WhyCyprus from "@/components/why_cyprus/WhyCyprus";
+import HowToApply from "@/components/how_it_works/HowToApply";
+import RelocationBenefits from "@/components/relocation/RelocationBenefits";
 
 export default function HomePage() {
   return (
@@ -13,7 +15,9 @@ export default function HomePage() {
         <WhyCyprus />
         <Companies />
         <AvailablePositions />
-        <JobBoard />
+        <HowToApply />
+        <RelocationBenefits />
+        {/* <JobBoard /> */}
         <Testimonials />
         <CtaBanner />
         </>

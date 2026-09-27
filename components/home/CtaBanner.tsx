@@ -19,15 +19,13 @@ export default function CtaBanner() {
                 Begin your new journey with us
               </h2>
               <p className="max-w-[560px] text-lg text-white/70">
-                Create a free profile in two minutes and start applying to roles that match your skills.
+                Build Your Career in Paradise: Luxury Hospitality Jobs in
+                Cyprus.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <CtaButton href="#jobs" tone="primary">
-                Browse listings
-              </CtaButton>
-              <CtaButton href="#pricing" tone="light">
-                Hire talent
+                Browse Jobs
               </CtaButton>
             </div>
           </div>

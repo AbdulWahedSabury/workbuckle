@@ -70,21 +70,17 @@ export default function AboutHero() {
   return (
     <section className="pt-5 sm:pt-10 xl:pt-[50px] 2xl:pt-[70px]">
       <div className="container-site">
-        {/* growIn: fades in from 75% scale on load, like the reference hero grid */}
         <Reveal
           effect="growIn"
           delay={0}
           offset={0}
           className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[1fr_1.4fr_1fr] lg:gap-10 xl:gap-[60px]"
         >
-          {/* Left column: 3 photos stacked on desktop, one row of 3 on tablet/mobile */}
           <div className="order-2 grid grid-cols-3 gap-5 md:gap-10 lg:order-1 lg:grid-cols-1 lg:gap-[60px]">
             {leftPhotos.map((p) => (
               <Photo key={p.src} photo={p} />
             ))}
           </div>
-
-          {/* Center title */}
           <div className="order-1 flex flex-col items-center text-center lg:order-2">
             <p className="mb-4 rounded-full bg-gray-3 px-4 py-1.5 text-sm font-semibold text-ink">About Work Buckle</p>
             <h1 className="mb-2.5 text-4xl md:text-5xl 2xl:text-6xl">
@@ -96,8 +92,6 @@ export default function AboutHero() {
             </p>
             <ArrowButton href="/#jobs" label="Explore open roles" variant="primary" />
           </div>
-
-          {/* Right column: 2 photos */}
           <div className="order-3 grid grid-cols-2 gap-5 md:gap-10 lg:grid-cols-1 lg:gap-[110px] 2xl:gap-[140px]">
             {rightPhotos.map((p) => (
               <Photo key={p.src} photo={p} />

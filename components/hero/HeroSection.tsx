@@ -52,7 +52,7 @@ export default function HeroSection() {
 
   return (
 <section className="relative overflow-x-clip pt-24 sm:pt-28 lg:pt-36 lg:pb-22.5 min-[1440px]:pt-40 min-[1920px]:pt-48 pb-[60px]">
-      <HeroVideo src="/images/vecteezy_abstract-neon-grid-background_82024281.mp4" />
+      {/* <HeroVideo src="/images/vecteezy_abstract-neon-grid-background_82024281.mp4" /> */}
       <div className="container-site relative z-30">
         <motion.h1
           initial="hidden"

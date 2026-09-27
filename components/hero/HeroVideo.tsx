@@ -6,7 +6,7 @@ export default function HeroVideo({src}:{src : string}){
           loop
           muted
           playsInline
-          className="absolute top-0 left-0 inset-0 w-full h-full object-cover filter grayscale opacity-10"
+          className="absolute top-0 left-0 inset-0 w-full h-full object-cover grayscale opacity-10"
         >
           <source src={src} type="video/mp4" />
         </video>
