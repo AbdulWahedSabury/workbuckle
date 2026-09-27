@@ -111,6 +111,62 @@
       }
     },
     "home": {
+      "available_jobs": {
+        "title": "Available Positions",
+        "categories": {
+          "front_office": {
+            "title": "Front Office & Guest Experience",
+            "img": "/images/available/front-desk.jpg",
+            "intro": "Front Office & Guest Experience includes roles focused on welcoming guests, managing check-ins/check-outs, resolving inquiries, and providing exceptional customer service to ensure a smooth, positive stay.",
+            "cta": "Explore the positions & Apply",
+            "image_alt": "Hospitality team working together",
+            "list": [
+              {
+                "title": "Front Desk Receptionists (Multi-lingual)"
+              },
+              {
+                "title": "Guest Relations Officers"
+              },
+              {
+                "title": "Concierge Specialists "
+              }
+            ]
+          },
+          "food_&_beverage_culinary": {
+            "title": "Food & Beverage / Culinary",
+            "img": "/images/available/beverage.jpg",
+            "intro": "Food & Beverage / Culinary encompasses roles focused on food preparation, menu creation, kitchen operations, and table service, ensuring high standards of quality, safety, and dining customer service.",
+            "cta": "Explore the positions & Apply",
+            "image_alt": "Hospitality team working together",
+            "list": [
+              {
+                "title": "Fine Dining Waiters & Waitresses "
+              },
+              {
+                "title": "Bartenders & Mixologists"
+              },
+              {
+                "title": "Chefs (Chef de Parte, Commies, Pastry)"
+              }
+            ]
+          },
+          "housekeeping_&_operations": {
+            "title": "Housekeeping & Operations",
+            "img": "/images/available/housekeeping.jpg",
+            "intro": "Housekeeping & Operations includes roles dedicated to maintaining clean, safe, and organized facilities, overseeing daily property maintenance, and managing behind-the-scenes logistics to ensure smooth property functioning.",
+            "cta": "Explore the positions & Apply",
+            "image_alt": "Hospitality team working together",
+            "list": [
+              {
+                "title": "Floor Supervisors & Housekeeping Staff "
+              },
+              {
+                "title": "Spa Therapists & Wellness Staff"
+              }
+            ]
+          }
+        }
+      },
       "hero": {
         "images": {
           "barman": {
@@ -190,30 +246,34 @@
         }
       ],
       "companies": {
-        "title" : "Featured Employers & Locations",
-      "list":[
-        {
-          "name": "Luxury Beachfront Resort & Spa",
-          "logo": "/images/companies/logo.png",
-          "location": "Limassol, Cyprus",
-          "starts": "5-Star Hotel",
-          "openings": "Beachfront | Award-Winning Fine Dining"
-        },
-        {
-          "name": "Exclusive Marina & Boutique Hotel",
-          "logo": "/images/companies/logo.png",
-          "location": "Limassol, Cyprus",
-          "starts": "5-Star Hotel",
-          "openings": "High-End Guest Services | International Team | Career Progression"
-        },
-        {
-          "name": "Premier City Center & Luxury Hotel",
-          "logo": "/images/companies/logo.png",
-          "location": "Nicosia, Cyprus",
-          "starts": "5-Star Hotel",
-          "openings": "Year-Round Employment | Executive Guest Operations"
-        }
-      ]}
+        "title": "Featured Employers & Locations",
+        "list": [
+          {
+            "name": "Luxury Beachfront Resort & Spa",
+            "logo": "/images/companies/logo.png",
+            "location": "Limassol, Cyprus",
+            "starts": "5-Star Hotel",
+            "openings": "Beachfront | Award-Winning Fine Dining"
+          },
+          {
+            "name": "Exclusive Marina & Boutique Hotel",
+            "logo": "/images/companies/logo.png",
+            "location": "Limassol, Cyprus",
+            "starts": "5-Star Hotel",
+            "openings": "High-End Guest Services | International Team | Career Progression"
+          },
+          {
+            "name": "Premier City Center & Luxury Hotel",
+            "logo": "/images/companies/logo.png",
+            "location": "Nicosia, Cyprus",
+            "starts": "5-Star Hotel",
+            "openings": "Year-Round Employment | Executive Guest Operations"
+          }
+        ]
+      },
+      "categories": {
+        "title": "Available Positions"
+      }
     },
     "blog": {
       "title": "Blog",
