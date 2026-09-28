@@ -1,23 +1,24 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion"; // 1. Imported Variants type
 import ArrowButton from "@/components/ui/ArrowButton";
 
-const containerVariants = {
+// 2. Added explicit type annotations to satisfy TypeScript
+const containerVariants: Variants = {
   hidden: { opacity: 0, y: 25 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
       duration: 0.6,
-      ease: [0.21, 0.47, 0.32, 0.98],
+      ease: [0.21, 0.47, 0.32, 0.98], // Validated correctly now
       staggerChildren: 0.15,
     },
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 15 },
   visible: {
     opacity: 1,

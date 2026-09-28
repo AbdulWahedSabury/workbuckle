@@ -20,7 +20,6 @@ import type {
   TrustStat,
 } from "@/lib/home/types";
 
-
 export const NAV_LINKS: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "Jobs", href: "#jobs" },
@@ -45,10 +44,15 @@ export const CATEGORIES: Category[] = [
   { title: "Programming & Tech", icon: CodeXml, openings: 347 },
 ];
 
-
-export const JOB_FILTERS: JobFilter[] = ["All", "Full-Time", "Part-Time", "Internship", "Remote",];
-
-
+// Added 'as const' so TypeScript treats these as exact literal filters 
+// instead of a generic string[] which can mismatch your JobFilter type.
+export const JOB_FILTERS: JobFilter[] = [
+  "All", 
+  "Full-Time", 
+  "Part-Time", 
+  "Internship", 
+  "Remote"
+] as const;
 
 export const TESTIMONIALS: Testimonial[] = [
   {

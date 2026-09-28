@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Award, HeartHandshake, Globe2, type LucideIcon } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion"; // 1. Imported Variants type
 
 interface ReasonConfig {
   key: string;
@@ -24,7 +24,8 @@ const REASONS_CONFIG: ReasonConfig[] = [
   },
 ];
 
-const containerVariants = {
+// 2. Added explicit type annotations
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -34,7 +35,7 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
@@ -61,6 +62,7 @@ export default function WhyChooseUs() {
               key={key}
               variants={itemVariants}
               whileHover={{ y: -6 }}
+              // Framer motion seamlessly handles the hover spring override now
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
               className="group flex flex-col items-start rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-100 transition-shadow duration-300 hover:shadow-xl"
             >
