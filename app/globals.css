@@ -1,10 +1,5 @@
 @import "tailwindcss";
 
-/*
- * Design tokens mirrored from the reference layout.
- * Swap --color-primary to #edcd59 to match the original yellow accent;
- * it is set to the Work Buckle brand orange by default.
- */
 @theme {
   --color-primary: #fc701c;
   --color-primary-dark: #e35f10;
@@ -14,10 +9,11 @@
   --color-gray-3: #f6f6f6;
   --color-line: #0e0e0e12;
 
-  --font-sans: var(--font-work-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: "General Sans", var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-poppins: var(--font-work-sans);
-  --font-dm-sans: var(--font-work-sans);
+  /* 🛠️ FIX 1: Set Roboto as your absolute global sans-serif and body font */
+  --font-sans: var(--next-font-roboto), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--next-font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--next-font-roboto), ui-sans-serif, system-ui, sans-serif;
+
   --radius-card: 30px;
   --radius-sm-card: 20px;
 
@@ -80,17 +76,21 @@
     scroll-behavior: smooth;
   }
 
+  /* 🛠️ FIX 2: Explicitly hardcode Roboto to the body tag to bypass fallback delays */
   body {
-    @apply bg-white font-sans text-base leading-[1.5em] font-medium text-gray-2 antialiased;
+    font-family: var(--next-font-roboto), sans-serif;
+    @apply bg-white text-base leading-[1.5em] font-medium text-gray-2 antialiased;
   }
 
+  /* Headings will use your stylish Poppins font */
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    @apply font-heading font-semibold leading-[1.3em] text-ink;
+    font-family: var(--next-font-poppins), sans-serif;
+    @apply font-semibold leading-[1.3em] text-ink;
   }
 }
 

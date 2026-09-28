@@ -47,7 +47,7 @@ export default function ProcessIllustration({ step }: ProcessIllustrationProps) 
       </motion.div>
       <motion.div
         {...float(1.5)}
-        className="absolute bottom-[10%] left-[2%] flex size-12 items-center justify-center rounded-2xl bg-primary text-ink shadow-[0_16px_30px_-12px_rgba(252,112,28,0.55)] sm:size-14"
+        className="absolute bottom-[10%] left-[2%] flex size-12 items-center justify-center rounded-2xl bg-white text-gray-100 shadow-[0_16px_30px_-12px_rgba(252,112,28,0.55)] sm:size-14"
       >
         <Image
          src={AccentB}

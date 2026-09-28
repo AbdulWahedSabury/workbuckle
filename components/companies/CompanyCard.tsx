@@ -38,7 +38,7 @@ export default function CompanyCard({ company, href }: CompanyCardProps) {
         <MapPin className="size-4" /> {company.location}
       </p>
       <div className="mt-auto flex items-center justify-between border-t border-line pt-5">
-        <span className="font-semibold text-ink">View {company.openings} open jobs</span>
+        <span className="font-semibold text-ink">{company.openings}</span>
         <span className="flex size-10 items-center justify-center rounded-full bg-gray-3 text-ink transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:bg-primary">
           <ArrowUpRight className="size-5" />
         </span>

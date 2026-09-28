@@ -1,19 +1,13 @@
-import Image from "next/image";
-import ArrowButton from "@/components/ui/ArrowButton";
 import Reveal from "@/components/motion/Reveal";
-import Parallax from "@/components/motion/Parallax";
 import { useTranslations } from "next-intl";
 import CtaButton from "@/components/ui/CtaButton";
-
+import PhotoCard from "./PhotoCard";
 interface PhotoItem {
   src: string;
   alt: string;
-  /** Fixed desktop size; below lg the photos fill their grid cell instead. */
   size: string;
-  /** Scroll parallax range in vh (reference "Image Scroll" interaction) */
   parallax: [from: number, to: number];
 }
-
 const leftPhotos: PhotoItem[] = [
   {
     src: "/images/about/hero-1.png",
@@ -49,29 +43,6 @@ const rightPhotos: PhotoItem[] = [
     parallax: [-6, 5],
   },
 ];
-
-function PhotoCard({ photo, sizes }: { photo: PhotoItem; sizes: string }) {
-  const [from, to] = photo.parallax;
-  return (
-    <Parallax
-      from={from}
-      to={to}
-      className={`w-full lg:max-w-full ${photo.size}`}
-    >
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-sm-card bg-gray-3 sm:rounded-card lg:aspect-auto lg:h-full">
-        <Image
-          src={photo.src}
-          alt={photo.alt}
-          fill
-          sizes={sizes}
-          className="object-cover"
-          preload
-        />
-      </div>
-    </Parallax>
-  );
-}
-
 export default function AboutHero() {
   const t = useTranslations("pages.about");
   return (

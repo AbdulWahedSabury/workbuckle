@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Menu } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 import { MotionLink } from "@/components/motion/MotionLink";
 import MobileMenu from "@/components/layout/MobileMenu";
 import Logo from "@/components/ui/Logo";
@@ -18,8 +19,8 @@ export default function Header() {
   const t = useTranslations("navigation");
   const reduceMotion = useReducedMotion();
   const isHome = useRoot();
+  const pathname = usePathname();
 
-  // Only inner pages have a sticky header that reacts to scroll.
   useEffect(() => {
     if (isHome) return;
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -28,7 +29,6 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [isHome]);
 
-  // Close the mobile menu when the viewport grows to desktop.
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
     const onChange = (e: MediaQueryListEvent) => {
@@ -59,20 +59,29 @@ export default function Header() {
         </div>
 
         <nav className="hidden items-center lg:flex" aria-label="Primary">
-          {NAV_LINKS.map((link) => (
-            <MotionLink
-              key={link.href}
-              href={link.href}
-              whileTap={{ scale: 0.98 }}
-              className="group relative whitespace-nowrap px-3 py-2 font-heading text-sm font-medium text-ink xl:px-4 xl:text-base"
-            >
-              {t(link.label)}
-              <span
-                aria-hidden="true"
-                className="absolute inset-x-3 bottom-1 h-0.5 origin-left scale-x-0 rounded-full bg-primary transition-transform duration-300 group-hover:scale-x-100 group-focus-visible:scale-x-100 xl:inset-x-4"
-              />
-            </MotionLink>
-          ))}
+          {NAV_LINKS.map((link) => {
+            const isActive = pathname === link.href;
+            return (
+              <MotionLink
+                key={link.href}
+                href={link.href}
+                whileTap={{ scale: 0.98 }}
+                // 🚀 4. ADD DYNAMIC PADDING AND TEXT COLOR FOR THE ACTIVE STATE
+                className={`group relative whitespace-nowrap py-2 pl-6 pr-3 font-heading text-sm font-medium xl:pl-7 xl:pr-4 xl:text-base transition-colors duration-200
+                  ${isActive ? "text-primary" : "text-ink hover:text-primary"}
+                `}
+                aria-current={isActive ? "page" : undefined}
+              >
+                {t(link.label)}
+                <span
+                  aria-hidden="true"
+                  className={`absolute left-1 top-1/2 h-4 w-0.5 -translate-y-1/2 rotate-12 origin-center rounded-full bg-primary transition-all duration-300 
+                    ${isActive ? "scale-100" : "scale-0"}
+                  `}
+                />
+              </MotionLink>
+            );
+          })}
         </nav>
 
         <div className="flex shrink-0 items-center justify-end gap-3 sm:gap-4">

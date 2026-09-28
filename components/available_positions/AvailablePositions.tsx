@@ -7,12 +7,12 @@ import { useTranslations } from "next-intl";
 export default function AvailablePositions() {
   const t = useTranslations("pages.home.available_jobs");
   return (
-    <RevealSection className="py-[60px] md:py-[75px] lg:py-[90px] bg-gray-3">
+    <RevealSection className="py-15 md:py-18.75 lg:py-22.5 bg-gray-3">
       <div className="container-site">
         <SectionHeader
-          eyebrow="Our Partners"
+          eyebrow={t("eyebrow")}
           title={t("title")}
-          description="Hotels with open seats right now."
+          description=""
         />
         <AvailableCard category="front_office" />
         <AvailableCard category="food_&_beverage_culinary" />

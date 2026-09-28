@@ -35,37 +35,34 @@
       "story_title": "Our Story & Expertise",
       "story_desc": "For 25 years, we have been a trusted cornerstone of the recruitment landscape in Cyprus. Through shifting market trends and evolving industry demands, our mission has remained clear: to build lasting, value-driven partnerships between world-class employers and exceptional talent.Having thoroughly explored and navigated the local and European job markets for over two decades, we understand what drives success on both sides of the employment equation. We don’t just fill vacancies—we engineer long-term career matches that help businesses thrive and candidates succeed.",
       "cta": "Explore the positions & Apply",
-      "values": [
-        "Curiosity & Discovery",
-        "Meaningful Connections",
-        "Cultural Appreciation",
-        "Quality & Creativity",
-        "Memories That Last"
-      ],
-      "highlights": {
-        "design": {
-          "title": "Travel-Ready Design",
-          "description": "Our games are compact, Lighter than your smartphone, and easy to pack — perfect for road trips, flights, and weekend escapes."
-        },
-        "craftsmanship": {
-          "title": "Timeless Craftsmanship",
-          "description": "We focus on durable materials and classic aesthetics that feel just as good at home as they do abroad."
-        },
-        "connection": {
-          "title": "Made for Connection",
-          "description": "From quiet chess matches to lively domino nights, our games bring people together wherever you are."
+      "why_choose_us": {
+        "heading": "Why Partner With Us",
+        "reasons": {
+          "leadership": {
+            "title": "25 Years of Proven Market Leadership",
+            "description": "Proven track record in luxury hospitality and key industry sectors across Cyprus."
+          },
+          "support": {
+            "title": "360° Support for Candidates & Employers",
+            "description": "Dual-focused approach that balances employer requirements with candidate well-being."
+          },
+          "networks": {
+            "title": "Deep Local & EU Recruitment Networks",
+            "description": "Seamless cross-border talent acquisition tailored specifically for EU citizens."
+          }
         }
       },
-      "stats": {
-        "delivered": "Games Delivered",
-        "satisfaction": "Customer Satisfaction",
-        "shipped": "Countries Shipped To",
-        "secure": "Secure Online Ordering"
+      "AboutCta": {
+        "title": "Ready to take the next step?",
+        "description": "Join the candidates and companies who use Work Buckle to find each other every day.",
+        "cta_label": "Jobs",
+        "cta_href": "/#jobs"
       }
     },
     "home": {
       "available_jobs": {
         "title": "Available Positions",
+        "eyebrow": "Job Categories",
         "categories": {
           "front_office": {
             "title": "Front Office & Guest Experience",
@@ -73,6 +70,7 @@
             "intro": "Front Office & Guest Experience includes roles focused on welcoming guests, managing check-ins/check-outs, resolving inquiries, and providing exceptional customer service to ensure a smooth, positive stay.",
             "cta": "Explore the positions & Apply",
             "image_alt": "Hospitality team working together",
+            "slug": "https://mavromatisservices.com/vacancies/",
             "list": [
               {
                 "title": "Front Desk Receptionists (Multi-lingual)"
@@ -91,6 +89,7 @@
             "intro": "Food & Beverage / Culinary encompasses roles focused on food preparation, menu creation, kitchen operations, and table service, ensuring high standards of quality, safety, and dining customer service.",
             "cta": "Explore the positions & Apply",
             "image_alt": "Hospitality team working together",
+            "slug": "https://mavromatisservices.com/vacancies/",
             "list": [
               {
                 "title": "Fine Dining Waiters & Waitresses "
@@ -109,6 +108,7 @@
             "intro": "Housekeeping & Operations includes roles dedicated to maintaining clean, safe, and organized facilities, overseeing daily property maintenance, and managing behind-the-scenes logistics to ensure smooth property functioning.",
             "cta": "Explore the positions & Apply",
             "image_alt": "Hospitality team working together",
+            "slug": "https://mavromatisservices.com/vacancies/",
             "list": [
               {
                 "title": "Floor Supervisors & Housekeeping Staff "
@@ -124,7 +124,7 @@
         "images": {
           "barman": {
             "alt": "Smiling job seeker in a light shirt",
-            "badge": ["No work visa required", "for EU citizens"]
+            "badge": ["No visa required", "for EU citizens"]
           },
           "frontdesk": {
             "alt": "Confident professional woman in an office",
@@ -160,45 +160,51 @@
           }
         ]
       },
-      "why_cyprus": [
-        {
-          "title": "Seamless EU Mobility",
-          "description": "No work visas required for EU passport holders—enjoy simple registration and full employment rights.",
-          "img": "/images/why_cyprus/seamless_eu_mobility.jpg",
-          "accents": [
-            "/images/why_cyprus/accents/file-check-corner.png",
-            "/images/why_cyprus/accents/shield-check.png"
-          ]
-        },
-        {
-          "title": "World-Class Employers",
-          "description": "Gain experience in top-tier luxury hotels, 5-star resorts, and fine-dining establishments in Europe.",
-          "img": "/images/why_cyprus/World-Class.jpg",
-          "accents": [
-            "/images/why_cyprus/accents/hotel.png",
-            "/images/why_cyprus/accents/utensils-crossed.png"
-          ]
-        },
-        {
-          "title": "Relocation Support",
-          "description": "Free high-quality accommodation options, staff meals, and airport transfers provided for selected positions.",
-          "img": "/images/why_cyprus/relocation.jpg",
-          "accents": [
-            "/images/why_cyprus/accents/house.png",
-            "/images/why_cyprus/accents/plane-landing.png"
-          ]
-        },
-        {
-          "title": "Mediterranean Lifestyle",
-          "description": "Experience 300+ days of sunshine a year, pristine beaches in Limassol, and the rich cultural life of historic Nicosia.",
-          "img": "/images/why_cyprus/Mediterranean.jpeg",
-          "accents": [
-            "/images/why_cyprus/accents/sun.png",
-            "/images/why_cyprus/accents/waves-horizontal.png"
-          ]
-        }
-      ],
+      "why_cyprus": {
+        "eyebrow": "Why Cyprus?",
+        "title": "Why Choose Cyprus for Your Hospitality Career?",
+        "description": "Moving to a new country is a major step. As an EU citizen, working in Cyprus provides seamless integration combined with an exceptional quality of life.",
+        "steps": [
+          {
+            "title": "Seamless EU Mobility",
+            "description": "No work visas required for EU passport holders—enjoy simple registration and full employment rights.",
+            "img": "/images/why_cyprus/seamless_eu_mobility.jpg",
+            "accents": [
+              "/images/why_cyprus/accents/file-check-corner.png",
+              "/images/why_cyprus/accents/shield-check.png"
+            ]
+          },
+          {
+            "title": "World-Class Employers",
+            "description": "Gain experience in top-tier luxury hotels, 5-star resorts, and fine-dining establishments in Europe.",
+            "img": "/images/why_cyprus/World-Class.jpg",
+            "accents": [
+              "/images/why_cyprus/accents/hotel.png",
+              "/images/why_cyprus/accents/utensils-crossed.png"
+            ]
+          },
+          {
+            "title": "Relocation Support",
+            "description": "Free high-quality accommodation options, staff meals, and airport transfers provided for selected positions.",
+            "img": "/images/why_cyprus/relocation.jpg",
+            "accents": [
+              "/images/why_cyprus/accents/house.png",
+              "/images/why_cyprus/accents/plane-landing.png"
+            ]
+          },
+          {
+            "title": "Mediterranean Lifestyle",
+            "description": "Experience 300+ days of sunshine a year, pristine beaches in Limassol, and the rich cultural life of historic Nicosia.",
+            "img": "/images/why_cyprus/Mediterranean.jpeg",
+            "accents": [
+              "/images/why_cyprus/accents/sun.png",
+              "/images/why_cyprus/accents/waves-horizontal.png"
+            ]
+          }
+        ]
+      },
       "companies": {
+        "eyebrow": "Our Partners",
         "title": "Featured Employers & Locations",
         "list": [
           {
@@ -206,23 +212,65 @@
             "logo": "/images/companies/logo.png",
             "location": "Limassol, Cyprus",
             "starts": "5-Star Hotel",
-            "openings": "Beachfront | Award-Winning Fine Dining"
+            "openings": "Beachfront | Award-Winning Fine Dining",
+            "url": "https://www.fourseasons.com.cy/"
           },
           {
             "name": "Exclusive Marina & Boutique Hotel",
             "logo": "/images/companies/logo.png",
             "location": "Limassol, Cyprus",
             "starts": "5-Star Hotel",
-            "openings": "High-End Guest Services | International Team | Career Progression"
+            "openings": "High-End Guest Services | International Team | Career Progression",
+            "url": "https://www.fourseasons.com.cy/"
           },
           {
             "name": "Premier City Center & Luxury Hotel",
             "logo": "/images/companies/logo.png",
             "location": "Nicosia, Cyprus",
             "starts": "5-Star Hotel",
-            "openings": "Year-Round Employment | Executive Guest Operations"
+            "openings": "Year-Round Employment | Executive Guest Operations",
+            "url": "https://www.fourseasons.com.cy/"
           }
         ]
+      },
+      "how_to_apply": {
+        "submit_cv": {
+          "title": "Submit Your CV",
+          "description": "Complete the quick form below with your updated resume."
+        },
+        "initial_pre-screening": {
+          "title": "Initial Pre-Screening",
+          "description": "Our team conducts an introductory video interview to match your skills with the right employer."
+        },
+        "employer_interview": {
+          "title": "Employer Interview",
+          "description": "Meet directly with the hiring managers at the luxury resorts in Limassol or Nicosia."
+        },
+        "offer_arrival": {
+          "title": "Offer & Arrival",
+          "description": "Receive your formal contract, book your travel, and let us assist you with housing and onboarding."
+        }
+      },
+      "relocationBenefits": {
+        "heading": "RELOCATION & BENEFITS PACKAGE",
+        "items": {
+          "relocation": {
+            "title": "RELOCATION\nASSISTANCE",
+            "description": "Free transfer from Larnaca or Paphos airport upon arrival."
+          },
+          "accommodation": {
+            "title": "ACCOMMODATION\n& MEALS",
+            "description": "Shared or private accommodation near the workplace plus duty meals included."
+          },
+          "salaries": {
+            "title": "COMPETITIVE\nSALARIES",
+            "description": "Monthly base pay + tips/bonuses, social security coverage, and paid leave."
+          },
+          "growth": {
+            "title": "PROFESSIONAL\nGROWTH",
+            "description": "On-the-job training programs and fast-track paths to supervisory roles."
+          }
+        }
       }
     },
     "blog": {

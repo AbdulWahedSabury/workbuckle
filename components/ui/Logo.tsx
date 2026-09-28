@@ -12,7 +12,7 @@ export default function Logo({ tone = "dark" }: LogoProps) {
         src="/images/logo.png"
         alt="Work Buckle logo mark — orange magnifier speech bubble with black WB monogram"
         width={44}
-        height={66}
+        height={44}
         className="size-10 object-contain lg:size-11"
         preload
       />

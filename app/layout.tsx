@@ -1,24 +1,27 @@
 import type { Metadata } from "next";
-import { DM_Sans, Merriweather, Poppins } from "next/font/google";
+import { Inter, Poppins, Roboto } from 'next/font/google';
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import { NextIntlClientProvider } from "next-intl";
 import Footer from "@/components/layout/Footer";
 import MotionProvider from "@/components/motion/MotionProvider";
 
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'], 
+  variable: '--next-font-inter', 
+});
+
 const poppins = Poppins({
-  variable: "--font-poppins",
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  weight: ['600', '700'],
+  subsets: ['latin'],
+  variable: '--next-font-poppins',
 });
-const inter = DM_Sans({
-  variable: "--font-dm-sans",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-});
-const merriweather = Merriweather({
-  variable: "--font-merriweather",
-  subsets: ["latin"],
-  style: ["normal", "italic"],
+
+const roboto = Roboto({
+  weight: ['400', '500'],
+  subsets: ['latin'],
+  variable: '--next-font-roboto',
 });
 
 export const metadata: Metadata = {
@@ -30,12 +33,13 @@ export const metadata: Metadata = {
     "Work Buckle connects job seekers with hiring teams. Browse featured roles, top companies, and career categories.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="h-full">
-      <body
-        className={`${poppins.variable} ${inter.variable} ${merriweather.variable} flex min-h-dvh flex-col antialiased`}
-      >
+    <html 
+      lang="en" 
+      className={`h-full ${inter.variable} ${poppins.variable} ${roboto.variable}`}
+    >
+      <body className="antialiased">
         <NextIntlClientProvider>
           <Header />
           <MotionProvider>

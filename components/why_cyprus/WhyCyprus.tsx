@@ -6,29 +6,36 @@ import RevealSection from "@/components/motion/RevealSection";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useTranslations } from "next-intl";
-import { ProcessStep } from "@/lib/home/types";
 import Card from "./Card";
 
 const STICKY_TOP = 112;
 const STACK_OFFSET = 28;
-
+export interface ProcessStep {
+  title: string;
+  description: string;
+  img: string;
+  accents: [string, string];
+}
 export default function WhyCyprus() {
   const listRef = useRef<HTMLOListElement>(null);
-  const { scrollYProgress } = useScroll({ target: listRef, offset: ["start start", "end end"] });
+  const { scrollYProgress } = useScroll({
+    target: listRef,
+    offset: ["start start", "end end"],
+  });
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const reduceMotion = useReducedMotion();
   const stack = isDesktop && !reduceMotion;
   const t = useTranslations("pages.home");
-  const steps = t.raw("why_cyprus");
-  
+  const steps = t.raw("why_cyprus.steps");
+
   return (
     <RevealSection id="how-it-works" className="section-spacing">
       <div className="container-site grid grid-cols-1 gap-2 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
         <div className="lg:sticky lg:top-28 lg:self-start lg:pt-10">
           <SectionHeader
-            eyebrow="Why Cyprus? "
-            title="Why Choose Cyprus for Your Hospitality Career? "
-            description="Moving to a new country is a major step. As an EU citizen, working in Cyprus provides seamless integration combined with an exceptional quality of life."
+            eyebrow={t("why_cyprus.eyebrow")}
+            title={t("why_cyprus.title")}
+            description={t("why_cyprus.description")}
           />
         </div>
 
@@ -37,7 +44,9 @@ export default function WhyCyprus() {
             <li
               key={step.title}
               className="lg:sticky"
-              style={isDesktop ? { top: STICKY_TOP + i * STACK_OFFSET } : undefined}
+              style={
+                isDesktop ? { top: STICKY_TOP + i * STACK_OFFSET } : undefined
+              }
             >
               <Card
                 step={step}

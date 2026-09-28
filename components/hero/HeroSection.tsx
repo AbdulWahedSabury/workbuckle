@@ -14,7 +14,7 @@ const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
 };
-const EASE = [0.25, 1, 0.5, 1] as const; // outQuart
+const EASE = [0.25, 1, 0.5, 1] as const;
 
 const wordUp: Variants = {
   hidden: { y: "110%" },
@@ -85,7 +85,7 @@ export default function HeroSection() {
                 {t('body')}
               </motion.p>
               <motion.div variants={fadeUp}>
-                <CtaButton href="/about">{t('cta.label')}</CtaButton>
+                <CtaButton href="/jobs">{t('cta.label')}</CtaButton>
               </motion.div>
             </div>
 

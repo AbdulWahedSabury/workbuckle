@@ -17,7 +17,7 @@ export interface Category {
   openings: number;
 }
 
-export type Schedule = "Full-Time" | "Part-Time" | "Internship";
+export type contract_details = "full_time" | "Part-Time" | "Internship";
 
 export interface Job {
   id: number;
@@ -27,12 +27,12 @@ export interface Job {
   location: string;
   remote: boolean;
   salary: string;
-  schedule: Schedule;
+  contract_details: contract_details;
   experience: string;
   posted: string;
 }
 
-export type JobFilter = "All" | Schedule | "Remote";
+export type JobFilter = "All" | contract_details | "Remote";
 
 export interface Company {
   name: string;
@@ -40,6 +40,7 @@ export interface Company {
   location: string;
   starts: string;
   openings: number;
+  url : string;
 }
 
 export type PlanId = "basic" | "standard" | "enterprise";

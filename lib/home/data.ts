@@ -4,28 +4,18 @@ import {
   Building2,
   Clapperboard,
   CodeXml,
-  FileCheck,
-  Home,
-  Hotel,
   Megaphone,
   Palette,
   PieChart,
-  PlaneLanding,
-  ShieldCheck,
-  Sun,
   UserSearch,
   Users,
-  UtensilsCrossed,
-  Waves,
 } from "lucide-react";
 import type {
   Category,
-  Company,
   Job,
   JobFilter,
   NavLink,
   Plan,
-  ProcessStep,
   Testimonial,
   TrustStat,
 } from "@/lib/home/types";
@@ -55,122 +45,10 @@ export const CATEGORIES: Category[] = [
   { title: "Programming & Tech", icon: CodeXml, openings: 347 },
 ];
 
-export const JOBS: Job[] = [
-  {
-    id: 1,
-    title: "Senior Full Stack Engineer",
-    company: "Talon Tech LLC",
-    logo: "/images/companies/company-1.png",
-    location: "San Francisco, US",
-    remote: true,
-    salary: "$120k – $150k",
-    schedule: "Full-Time",
-    experience: "5+ years",
-    posted: "2 days ago",
-  },
-  {
-    id: 2,
-    title: "Audio Production Specialist",
-    company: "Creative Media Agency",
-    logo: "/images/companies/company-2.png",
-    location: "London, UK",
-    remote: false,
-    salary: "$55k – $70k",
-    schedule: "Full-Time",
-    experience: "3+ years",
-    posted: "Today",
-  },
-  {
-    id: 3,
-    title: "Business Intelligence Analyst",
-    company: "Vertex Consulting Group",
-    logo: "/images/companies/company-3.png",
-    location: "Toronto, CA",
-    remote: true,
-    salary: "$80k – $95k",
-    schedule: "Full-Time",
-    experience: "2+ years",
-    posted: "3 days ago",
-  },
-  {
-    id: 4,
-    title: "Junior UI Designer",
-    company: "Creative Media Agency",
-    logo: "/images/companies/company-2.png",
-    location: "Berlin, DE",
-    remote: false,
-    salary: "$2.4k / month",
-    schedule: "Internship",
-    experience: "No experience",
-    posted: "1 day ago",
-  },
-  {
-    id: 5,
-    title: "Growth Marketing Associate",
-    company: "Vertex Consulting Group",
-    logo: "/images/companies/company-3.png",
-    location: "Austin, US",
-    remote: true,
-    salary: "$32 / hour",
-    schedule: "Part-Time",
-    experience: "1+ year",
-    posted: "5 days ago",
-  },
-  {
-    id: 6,
-    title: "Machine Learning Intern",
-    company: "Talon Tech LLC",
-    logo: "/images/companies/company-1.png",
-    location: "Remote",
-    remote: true,
-    salary: "$3k / month",
-    schedule: "Internship",
-    experience: "Student",
-    posted: "4 days ago",
-  },
-];
 
-export const JOB_FILTERS: JobFilter[] = ["All", "Full-Time", "Part-Time", "Internship", "Remote"];
+export const JOB_FILTERS: JobFilter[] = ["All", "Full-Time", "Part-Time", "Internship", "Remote",];
 
-export const PLANS: Plan[] = [
-  {
-    id: "basic",
-    name: "Basic",
-    price: "$35.00",
-    cadence: "per job post",
-    blurb: "For teams making an occasional hire.",
-    features: ["1 active job listing", "Listed for 30 days", "Standard search visibility", "Email applicant alerts"],
-  },
-  {
-    id: "standard",
-    name: "Standard",
-    price: "$99.00",
-    cadence: "per month",
-    blurb: "For growing teams hiring every month.",
-    features: [
-      "5 active job listings",
-      "Highlighted in search results",
-      "Featured on the home page for 7 days",
-      "Applicant tracking board",
-      "Company profile page",
-    ],
-    popular: true,
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    price: "$120.00",
-    cadence: "per month",
-    blurb: "For organisations hiring at scale.",
-    features: [
-      "Unlimited job listings",
-      "Top placement in every category",
-      "Permanent home page feature",
-      "Team seats and shared pipeline",
-      "Dedicated account manager",
-    ],
-  },
-];
+
 
 export const TESTIMONIALS: Testimonial[] = [
   {

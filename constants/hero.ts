@@ -4,17 +4,17 @@ import { Check, Hand, Search } from "lucide-react";
 export const HERO_IMAGES = [
   {
     id: "barman",
-    src: "/images/barman.jpg",
+    src: "/images/hero/barman.jpg",
     size: "side",
     icon: Check,
     tone: "dark",
     pillBg: "bg-primary",
-    badgePosition: "below",
+    badgePosition: "above",
     offset: "",
   },
   {
     id: "frontdesk",
-    src: "/images/frontdesk.jpg",
+    src: "/images/hero/front-desk.png",
     size: "center",
     icon: Search,
     tone: "dark",
@@ -24,12 +24,12 @@ export const HERO_IMAGES = [
   },
   {
     id: "waitress",
-    src: "/images/waiteres.jpg",
+    src: "/images/hero/waiteres.jpg",
     size: "side",
     icon: Hand,
     tone: "dark",
     pillBg: "bg-primary",
-    badgePosition: "above",
+    badgePosition: "below",
     offset: "-mt-[clamp(50px,13vw,260px)]",
   },
 ] as const satisfies ReadonlyArray<{

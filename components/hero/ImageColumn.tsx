@@ -14,14 +14,14 @@ const PILL_HEIGHTS = {
 
 export default function ImageColumn({ image, index }: { image: HeroImageColumn; index: number }) {
   const delay = columnDelay(index);
-  const badgeFirst = image.badgePosition === "above";
+  const badgeFirst = image.badgePosition === "below";
 
   const pill = (
     <motion.div
       initial={{ opacity: 0, y: 40, scale: 0.94 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 1, ease: EASE, delay }}
-      className={`group relative w-full overflow-hidden rounded-full ${image.pillBg} ${PILL_HEIGHTS[image.size]}`}
+      className={`group relative w-full overflow-hidden bg-white rounded-full ${image.pillBg} ${PILL_HEIGHTS[image.size]}`}
     >
       <Image
         src={image.image.src}

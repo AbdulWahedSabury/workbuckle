@@ -1,51 +1,86 @@
-import { Award, HeartHandshake, Globe2 } from "lucide-react";
-import Reveal from "@/components/motion/Reveal";
-import SectionHeader from "@/components/ui/SectionHeader";
+"use client";
 
-interface Reason {
-  icon: typeof Award;
-  title: string;
-  text: string;
+import { useTranslations } from "next-intl";
+import { Award, HeartHandshake, Globe2, type LucideIcon } from "lucide-react";
+import { motion } from "framer-motion";
+
+interface ReasonConfig {
+  key: string;
+  icon: LucideIcon;
 }
 
-const reasons: Reason[] = [
+const REASONS_CONFIG: ReasonConfig[] = [
   {
+    key: "leadership",
     icon: Award,
-    title: "25 Years of Proven Market Leadership",
-    text: "Proven track record in luxury hospitality and key industry sectors across Cyprus.",
   },
   {
+    key: "support",
     icon: HeartHandshake,
-    title: "360° Support for Candidates & Employers",
-    text: "Dual-focused approach that balances employer requirements with candidate well-being.",
   },
   {
+    key: "networks",
     icon: Globe2,
-    title: "Deep Local & EU Recruitment Networks",
-    text: "Seamless cross-border talent acquisition tailored specifically for EU citizens.",
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: "easeOut" },
+  },
+};
+
 export default function WhyChooseUs() {
+  const t = useTranslations("pages.about.why_choose_us");
+
   return (
-    <section className="section-spacing">
-      <div className="container-site">
-        <SectionHeader eyebrow="Why Choose Us" title="Why Choose Us?" />
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-[30px]">
-          {reasons.map(({ icon: Icon, title, text }, index) => (
-            <Reveal
-              key={title}
-              delay={index * 100}
-              className="flex h-full flex-col rounded-card border border-gray-3 bg-white p-6 sm:p-[30px]"
+    <section className="bg-slate-50 py-16 md:py-24">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          className="grid grid-cols-1 gap-8 md:grid-cols-3"
+        >
+          {REASONS_CONFIG.map(({ key, icon: Icon }) => (
+            <motion.div
+              key={key}
+              variants={itemVariants}
+              whileHover={{ y: -6 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="group flex flex-col items-start rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-100 transition-shadow duration-300 hover:shadow-xl"
             >
-              <span className="mb-6 flex size-14 items-center justify-center rounded-sm-card bg-primary/10 text-primary lg:mb-8">
-                <Icon className="size-7" strokeWidth={1.5} />
-              </span>
-              <h3 className="mb-2 text-xl font-semibold text-ink">{title}</h3>
-              <p>{text}</p>
-            </Reveal>
+              {/* Icon Container with Hover Animation */}
+              <div className="mb-6 flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-slate-900">
+                <Icon className="size-7" strokeWidth={2} />
+              </div>
+
+              {/* Title */}
+              <h3 className="mb-3 text-xl font-semibold leading-snug tracking-tight text-slate-900">
+                {t(`reasons.${key}.title`)}
+              </h3>
+
+              {/* Description */}
+              <p className="text-base font-normal leading-relaxed text-slate-600">
+                {t(`reasons.${key}.description`)}
+              </p>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

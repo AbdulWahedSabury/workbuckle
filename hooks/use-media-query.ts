@@ -1,6 +1,5 @@
 import { useSyncExternalStore } from "react";
 
-/** Live `matchMedia` result. Always false during SSR, so render the mobile layout first. */
 export function useMediaQuery(query: string) {
   return useSyncExternalStore(
     (onChange) => {
