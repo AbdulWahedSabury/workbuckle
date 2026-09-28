@@ -10,6 +10,10 @@ export const NAV_LINKS: Menu = [
     href: '/about',
   },
   {
+    label: 'contact',
+    href: '/contact',
+  },
+  {
     label: 'jobs',
     href: '/jobs',
   },

@@ -1,6 +1,5 @@
 import ArrowButton from "@/components/ui/ArrowButton";
 
-/** Black panel that bleeds off the right edge of the viewport, as on the reference About page. */
 export default function AboutCta() {
   return (
     <section className="relative overflow-hidden pb-[60px] md:pb-[75px] lg:pb-[90px]">

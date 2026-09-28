@@ -1,7 +1,5 @@
 import Image from "next/image";
-import { CircleCheck } from "lucide-react";
 import Reveal from "@/components/motion/Reveal";
-import { missionPoints } from "@/lib/data";
 import RevealSection from "@/components/motion/RevealSection";
 import { useTranslations } from "next-intl";
 
@@ -11,7 +9,7 @@ export default function OurStory() {
     <RevealSection className="pb-[60px] md:pb-[75px] lg:pb-[90px]">
       <div className="container-site">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:gap-20">
-                   <Reveal>
+          <Reveal>
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
               {t("story_title")}
             </h2>
