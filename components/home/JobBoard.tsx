@@ -18,10 +18,8 @@ interface JobBoardProps {
 }
 
 export default function JobBoard({ initialJobs }: JobBoardProps) {
-  // 1. FIXED: Set the initial state back to a value found in your JOB_FILTERS array (e.g., "All" or "Full-Time")
   const [filter, setFilter] = useState<JobFilter>("All");
 
-  // 2. FIXED: Filter the list first, then slice it to grab only the 10 latest roles
   const filteredJobs = initialJobs.filter((job) => matchesFilter(job, filter));
   const latestTenJobs = filteredJobs.slice(0, 10);
 
@@ -34,25 +32,43 @@ export default function JobBoard({ initialJobs }: JobBoardProps) {
             title="Hand-picked roles, updated daily"
             description="Every listing shows pay, schedule and experience up front."
           />
-          {/* Active filter prop will now correctly highlight the tab styling */}
-          <JobFilterTabs filters={JOB_FILTERS} active={filter} onChange={setFilter} />
+          <JobFilterTabs 
+  filters={JOB_FILTERS as JobFilter[]} 
+  active={filter} 
+  onChange={setFilter} 
+/>
         </div>
 
-        <motion.ul variants={fadeUp} layout className="flex flex-col gap-4">
+        <motion.ul variants={fadeUp} layout className="flex flex-col gap-4 mt-8">
           <AnimatePresence mode="popLayout" initial={false}>
-            {latestTenJobs.map((job) => (
-              <JobRow key={job.id} job={job} />
-            ))}
+            {latestTenJobs.length > 0 ? (
+              latestTenJobs.map((job) => (
+                <motion.li
+                  key={job.id}
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <JobRow job={job} />
+                </motion.li>
+              ))
+            ) : (
+              <motion.li
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="rounded-sm-card border border-line p-10 text-center list-none"
+              >
+                No roles match this filter yet.
+              </motion.li>
+            )}
           </AnimatePresence>
-          {latestTenJobs.length === 0 && (
-            <li className="rounded-sm-card border border-line p-10 text-center">
-              No roles match this filter yet.
-            </li>
-          )}
         </motion.ul>
 
         <FadeUp className="mt-10 flex justify-center">
-          {/* Displays the total count of filtered opportunities available */}
           <CtaButton href="/jobs">View all {filteredJobs.length} jobs</CtaButton>
         </FadeUp>
       </div>

@@ -5,7 +5,7 @@ import type { JobFilter } from "@/lib/home/types";
 import { fadeUp, snappySpring } from "@/lib/motion";
 
 interface JobFilterTabsProps {
-  filters: JobFilter[];
+  filters: readonly JobFilter[]; 
   active: JobFilter;
   onChange: (filter: JobFilter) => void;
 }
