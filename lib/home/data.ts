@@ -44,9 +44,7 @@ export const CATEGORIES: Category[] = [
   { title: "Programming & Tech", icon: CodeXml, openings: 347 },
 ];
 
-// Added 'as const' so TypeScript treats these as exact literal filters 
-// instead of a generic string[] which can mismatch your JobFilter type.
-export const JOB_FILTERS: JobFilter[] = [
+export const JOB_FILTERS = [
   "All", 
   "Full-Time", 
   "Part-Time", 
