@@ -2,46 +2,87 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useLocale, useTranslations } from "next-intl";
+import { useQuery } from "@tanstack/react-query";
 import FadeUp from "@/components/motion/FadeUp";
 import RevealSection from "@/components/motion/RevealSection";
 import JobFilterTabs from "@/components/home/JobFilterTabs";
 import JobRow from "@/components/home/JobRow";
 import CtaButton from "@/components/ui/CtaButton";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { JOB_FILTERS } from "@/lib/home/data";
-import { matchesFilter } from "@/lib/home/jobs";
-import type { JobFilter } from "@/lib/home/types";
 import { fadeUp } from "@/lib/motion";
 
-interface JobBoardProps {
-  initialJobs: any[];
-}
+import { useSearchQueryParam } from "@/hooks/use-search-query-params";
+import { JOBS_QUERY_KEY } from "@/constants/query-keys";
+import { fetchJobs } from "@/queries/job";
+import { JobFilter, matchesFilter } from "@/types/job";
 
-export default function JobBoard({ initialJobs }: JobBoardProps) {
+const STALE_TIME = 1000 * 60 * 60; // 1 hour
+const GC_TIME = 1000 * 60 * 60 * 2; // 2 hours
+
+export const JOB_FILTERS: JobFilter[] = [
+  "All",
+  "Limassol",
+  "Larnaca",
+  "Nicosia",
+  "Paphos",
+];
+export default function JobBoard() {
+  const t = useTranslations("pages.home.featured_jobs");
+  const locale = useLocale();
+
+  const { query } = useSearchQueryParam({
+    search: "",
+    sort: "",
+    locale,
+  });
+  const { data, isPending } = useQuery({
+    queryKey: [JOBS_QUERY_KEY, query],
+    queryFn: () => fetchJobs(query),
+    staleTime: STALE_TIME,
+    gcTime: GC_TIME,
+  });
+
+  const apiJobs = data?.results ?? [];
   const [filter, setFilter] = useState<JobFilter>("All");
-
-  const filteredJobs = initialJobs.filter((job) => matchesFilter(job, filter));
+  const filteredJobs = apiJobs.filter((job) => matchesFilter(job, filter));
   const latestTenJobs = filteredJobs.slice(0, 10);
+
 
   return (
     <RevealSection id="jobs" className="section-spacing">
       <div className="container-site">
         <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
           <SectionHeader
-            eyebrow="Featured jobs"
-            title="Hand-picked roles, updated daily"
-            description="Every listing shows pay, schedule and experience up front."
+            eyebrow={t("eyebrow")}
+            title={t("title")}
+            description=""
           />
-          <JobFilterTabs 
-  filters={JOB_FILTERS as JobFilter[]} 
-  active={filter} 
-  onChange={setFilter} 
-/>
+
+          <JobFilterTabs
+            filters={JOB_FILTERS}
+            active={filter}
+            onChange={setFilter}
+          />
         </div>
 
-        <motion.ul variants={fadeUp} layout className="flex flex-col gap-4 mt-8">
+        <motion.ul
+          variants={fadeUp}
+          layout
+          className="mt-8 flex flex-col gap-4"
+        >
           <AnimatePresence mode="popLayout" initial={false}>
-            {latestTenJobs.length > 0 ? (
+            {isPending ? (
+              <motion.li
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="list-none p-10 text-center"
+              >
+                Loading jobs...
+              </motion.li>
+            ) : latestTenJobs.length > 0 ? (
               latestTenJobs.map((job) => (
                 <motion.li
                   key={job.id}
@@ -69,7 +110,9 @@ export default function JobBoard({ initialJobs }: JobBoardProps) {
         </motion.ul>
 
         <FadeUp className="mt-10 flex justify-center">
-          <CtaButton href="/jobs">View all {filteredJobs.length} jobs</CtaButton>
+          <CtaButton href="/jobs">
+            View all {filteredJobs.length} jobs
+          </CtaButton>
         </FadeUp>
       </div>
     </RevealSection>

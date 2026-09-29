@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { JobFilter } from "@/lib/home/types";
 import { fadeUp, snappySpring } from "@/lib/motion";
+import { JobFilter } from "@/types/job";
 
 interface JobFilterTabsProps {
   filters: readonly JobFilter[]; 

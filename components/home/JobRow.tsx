@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowUpRight, Banknote, Clock, GraduationCap, MapPin, Building2 } from "lucide-react";
 import { MotionLink } from "@/components/motion/MotionLink";
 import { snappySpring, spring } from "@/lib/motion";
+import { JobDetailsResponse } from "@/types/job";
 
 // 1. Updated mapping keys to match Manatal's "contract_details" options
 const SCHEDULE_STYLES: Record<string, string> = {
@@ -23,35 +23,18 @@ const formatSchedule = (slug: string) => {
 };
 
 interface JobRowProps {
-  job: {
-    id: number;
-    hash: string;
-    position_name: string;
-    description: string;
-    contract_details: string;
-    city?: string;
-    is_remote?: boolean | null;
-  };
+  job:JobDetailsResponse;
 }
-
 export default function JobRow({ job }: JobRowProps) {
-  // 2. Fallbacks for fields missing from Manatal's response payload
   const displayLocation = job.city || "Larnaca"; 
   const displayScheduleTag = job.contract_details || "full_time";
   const displayScheduleLabel = formatSchedule(displayScheduleTag);
   
-  // Since salary, experience, and logos are missing, we extract/fallback safely
-  const displaySalary = "€1,500 Gross (Neg.)"; // Or dynamic parsing
+  const displaySalary = "€1,500 Gross (Neg.)";
   const displayExperience = "1-3 years exp.";
 
   return (
-    <motion.li
-      layout
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.2 } }}
-      transition={spring}
-    >
+    <div className="w-full">
       <MotionLink
         href={`/jobs/${job.id}`}
         initial="rest"
@@ -67,7 +50,6 @@ export default function JobRow({ job }: JobRowProps) {
         className="flex flex-col gap-5 rounded-sm-card border border-line p-5 sm:p-6 lg:flex-row lg:items-center lg:gap-8"
       >
         <div className="flex items-center gap-4 lg:w-[38%]">
-          {/* Fallback to building icon container if company logos aren't returned by endpoint */}
           <span className="flex size-14 flex-none items-center justify-center rounded-2xl border border-line bg-white text-gray-400">
             <Building2 className="size-6" />
           </span>
@@ -111,6 +93,6 @@ export default function JobRow({ job }: JobRowProps) {
           </span>
         </div>
       </MotionLink>
-    </motion.li>
+    </div>
   );
 }

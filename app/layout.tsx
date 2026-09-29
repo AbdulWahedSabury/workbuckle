@@ -5,6 +5,7 @@ import Header from "@/components/layout/Header";
 import { NextIntlClientProvider } from "next-intl";
 import Footer from "@/components/layout/Footer";
 import MotionProvider from "@/components/motion/MotionProvider";
+import QueryProvider from "@/providers/QueryProvider";
 
 const inter = Inter({
   subsets: ['latin'],
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`h-full ${inter.variable} ${poppins.variable} ${roboto.variable}`}
     >
       <body className="antialiased">
+        <QueryProvider>
         <NextIntlClientProvider>
           <Header />
           <MotionProvider>
@@ -47,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </MotionProvider>
           <Footer />
         </NextIntlClientProvider>
+        </QueryProvider>
       </body>
     </html>
   );

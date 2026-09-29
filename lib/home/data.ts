@@ -44,13 +44,7 @@ export const CATEGORIES: Category[] = [
   { title: "Programming & Tech", icon: CodeXml, openings: 347 },
 ];
 
-export const JOB_FILTERS: JobFilter[] = [
-  "All",
-  "full_time",
-  "Part-Time",
-  "Internship",
-  "Remote",
-];
+
 
 export const TESTIMONIALS: Testimonial[] = [
   {

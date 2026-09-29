@@ -1,3 +1,5 @@
+"use client";
+
 import Companies from "@/components/companies/Companies";
 import CtaBanner from "@/components/home/CtaBanner";
 import HeroSection from "@/components/hero/HeroSection";
@@ -8,10 +10,8 @@ import WhyCyprus from "@/components/why_cyprus/WhyCyprus";
 import HowToApply from "@/components/how_it_works/HowToApply";
 import RelocationBenefits from "@/components/relocation/RelocationBenefits";
 import ContactFaq from "@/components/sections/contact/ContactFaq";
-import { getAllJobs } from "@/lib/mantal";
 
-export default async function HomePage() {
-  const apiJobs = await getAllJobs();
+export default function HomePage() {
   return (
     <>
       <HeroSection />
@@ -20,7 +20,7 @@ export default async function HomePage() {
       <AvailablePositions />
       <HowToApply />
       <RelocationBenefits />
-      <JobBoard initialJobs={apiJobs} />
+      <JobBoard />
       <Testimonials />
       <ContactFaq />
       <CtaBanner />

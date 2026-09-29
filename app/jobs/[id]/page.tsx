@@ -1,4 +1,3 @@
-// app/jobs/[id]/page.tsx
 import { notFound } from "next/navigation";
 import { ArrowLeft, Banknote, Building2, Clock, GraduationCap, MapPin } from "lucide-react";
 import Link from "next/link";
@@ -7,6 +6,9 @@ import { getJobById } from "@/lib/mantal";
 import RevealSection from "@/components/motion/RevealSection";
 import FadeUp from "@/components/motion/FadeUp";
 import CtaButton from "@/components/ui/CtaButton";
+import { getLocale } from "next-intl/server";
+import { Locale } from "next-intl";
+import { fetchJob } from "@/queries/job";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -28,7 +30,8 @@ const formatSchedule = (slug: string) => {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const job = await getJobById(id);
+  const locale = (await getLocale()) as Locale;
+  const job = await fetchJob(id, locale);
   if (!job) return { title: "Job not found" };
   return {
     title: job.position_name,
@@ -38,7 +41,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function JobDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const job = await getJobById(id);
+  const locale = (await getLocale()) as Locale;
+  const job = await fetchJob(id, locale);
 
   if (!job) {
     notFound();

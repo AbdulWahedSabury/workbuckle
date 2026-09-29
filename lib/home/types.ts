@@ -27,7 +27,7 @@ export interface Job {
   location: string;
   remote: boolean;
   salary: string;
-  contract_details: contract_details;
+  contract_details: string;
   experience: string;
   posted: string;
 }
