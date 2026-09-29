@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Banknote, Building2, Clock, GraduationCap, MapPin } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getJobById } from "@/lib/mantal";
 import RevealSection from "@/components/motion/RevealSection";
 import FadeUp from "@/components/motion/FadeUp";
 import CtaButton from "@/components/ui/CtaButton";
@@ -114,7 +113,7 @@ export default async function JobDetailPage({ params }: PageProps) {
             </h2>
             <article
               className="prose prose-slate max-w-none prose-headings:font-heading prose-headings:font-bold prose-p:leading-relaxed prose-li:my-1"
-              dangerouslySetInnerHTML={{ __html: job.description }}
+              dangerouslySetInnerHTML={{ __html: job.description ?? "" }}
             />
 
             <div className="mt-8 flex flex-col gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
