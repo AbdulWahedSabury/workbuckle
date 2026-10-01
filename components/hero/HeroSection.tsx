@@ -229,7 +229,7 @@ function ImageRing({ cards, reduceMotion }: { cards: RingCard[]; reduceMotion: b
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 1.6, delay: 0.7, ease: EASE }}
       className="relative mx-auto mt-10 h-[300px] w-full [--cw:120px] [--r:210px] sm:h-[380px] sm:[--cw:150px] sm:[--r:300px] md:mt-14 md:h-[440px] md:[--cw:180px] md:[--r:390px] lg:h-[500px] lg:[--cw:210px] lg:[--r:470px]"
-      style={{ perspective: 1800 }}
+      style={{ perspective: 1800, WebkitPerspective: 1800 }}
     >
       {/* Floor glow under the ring */}
       <div
@@ -243,12 +243,16 @@ function ImageRing({ cards, reduceMotion }: { cards: RingCard[]; reduceMotion: b
           rotateX: reduceMotion ? -6 : rotateX,
           rotateY: reduceMotion ? 0 : rotateY,
           transformStyle: "preserve-3d",
+          WebkitTransformStyle: "preserve-3d",
         }}
       >
         {/* Ring pivot, centred in the stage */}
-        <div className="absolute left-1/2 top-1/2" style={{ transformStyle: "preserve-3d" }}>
+        <div
+          className="absolute left-1/2 top-1/2"
+          style={{ transformStyle: "preserve-3d", WebkitTransformStyle: "preserve-3d" }}
+        >
           <motion.div
-            style={{ transformStyle: "preserve-3d" }}
+            style={{ transformStyle: "preserve-3d", WebkitTransformStyle: "preserve-3d" }}
             animate={reduceMotion ? undefined : { rotateY: [0, -360] }}
             transition={{ duration: SPIN_SECONDS, repeat: Infinity, ease: "linear" }}
           >
@@ -348,6 +352,8 @@ function Backdrop({ reduceMotion }: { reduceMotion: boolean }) {
         muted
         loop
         playsInline
+        // eslint-disable-next-line react/no-unknown-property -- iOS < 10 needs the non-standard attribute form too
+        webkit-playsinline="true"
         preload="auto"
         initial={{ opacity: 0, scale: 1.08 }}
         animate={{ opacity: 1, scale: 1 }}
