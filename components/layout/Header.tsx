@@ -39,14 +39,14 @@ export default function Header() {
   }, []);
 
   const positionClasses = isHome
-    ? "absolute inset-x-0 top-0 bg-transparent lg:top-10"
-    : `sticky top-0 border-b bg-white/90 backdrop-blur-md ${
+    ? "absolute inset-x-0 top-0 bg-transparent lg:top-10 text-white"
+    : `sticky top-0 border-b bg-white/90 backdrop-blur-md text-ink ${
         scrolled ? "border-ink/10 shadow-sm" : "border-transparent"
       }`;
 
   return (
     <header
-      className={`z-50 w-full text-ink transition-[background-color,border-color,box-shadow] duration-300 ${positionClasses}`}
+      className={`z-50 w-full  transition-[background-color,border-color,box-shadow] duration-300 ${positionClasses}`}
     >
       <motion.div
         initial={reduceMotion ? false : { opacity: 0, y: -16 }}
@@ -68,7 +68,7 @@ export default function Header() {
                 whileTap={{ scale: 0.98 }}
                 // 🚀 4. ADD DYNAMIC PADDING AND TEXT COLOR FOR THE ACTIVE STATE
                 className={`group relative whitespace-nowrap py-2 pl-6 pr-3 font-heading text-sm font-medium xl:pl-7 xl:pr-4 xl:text-base transition-colors duration-200
-                  ${isActive ? "text-primary" : "text-ink hover:text-primary"}
+                  ${isActive ? "text-primary" : " hover:text-primary"}
                 `}
                 aria-current={isActive ? "page" : undefined}
               >

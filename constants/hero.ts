@@ -32,6 +32,38 @@ export const HERO_IMAGES = [
     badgePosition: "below",
     offset: "-mt-[clamp(50px,13vw,260px)]",
   },
+  {
+    id: "waitress",
+    src: "/images/hero/waiteres2.jpg",
+    size: "side",
+    icon: Hand,
+    tone: "dark",
+    pillBg: "bg-primary",
+    badgePosition: "below",
+    offset: "-mt-[clamp(50px,13vw,260px)]",
+  },
+  
+  {
+    id: "porter",
+    src: "/images/hero/porter.jpg",
+    size: "side",
+    icon: Hand,
+    tone: "dark",
+    pillBg: "bg-primary",
+    badgePosition: "below",
+    offset: "-mt-[clamp(50px,13vw,260px)]",
+  },
+  
+  {
+    id: "chef",
+    src: "/images/hero/chef.jpg",
+    size: "side",
+    icon: Hand,
+    tone: "dark",
+    pillBg: "bg-primary",
+    badgePosition: "below",
+    offset: "-mt-[clamp(50px,13vw,260px)]",
+  }
 ] as const satisfies ReadonlyArray<{
   id: string;
   src: string;

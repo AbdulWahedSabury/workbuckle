@@ -124,15 +124,29 @@
         "images": {
           "barman": {
             "alt": "Smiling job seeker in a light shirt",
-            "badge": ["No visa required", "for EU citizens"]
+            "badge": ["Barman position"]
           },
           "frontdesk": {
             "alt": "Confident professional woman in an office",
-            "badge": ["We are", "hiring!"]
+            "badge": ["Front-desk"]
           },
           "waitress": {
             "alt": "Thoughtful candidate portrait",
-            "badge": ["Are you looking", "for a job?"]
+            "badge": ["Waitress"]
+          },
+          
+          "chef": {
+            "alt": "Thoughtful candidate portrait",
+            "badge": ["Chef"]
+          },
+          "porter": {
+            "alt": "Thoughtful candidate portrait",
+            "badge": ["Porter"]
+          },
+          
+          "waitress2": {
+            "alt": "Thoughtful candidate portrait",
+            "badge": ["Waitress"]
           }
         },
         "headline": [
