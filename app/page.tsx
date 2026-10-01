@@ -1,9 +1,9 @@
 "use client";
 
 import Companies from "@/components/companies/Companies";
-import CtaBanner from "@/components/home/CtaBanner";
+import CtaBanner from "@/components/ui/CtaBanner";
 import HeroSection from "@/components/hero/HeroSection";
-import JobBoard from "@/components/home/JobBoard";
+import JobBoard from "@/components/jobs/JobBoard";
 import AvailablePositions from "@/components/available_positions/AvailablePositions";
 import Testimonials from "@/components/testimonials/Testimonials";
 import WhyCyprus from "@/components/why_cyprus/WhyCyprus";

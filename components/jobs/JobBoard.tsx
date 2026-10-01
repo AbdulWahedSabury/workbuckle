@@ -6,8 +6,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import FadeUp from "@/components/motion/FadeUp";
 import RevealSection from "@/components/motion/RevealSection";
-import JobFilterTabs from "@/components/home/JobFilterTabs";
-import JobRow from "@/components/home/JobRow";
+import JobFilterTabs from "@/components/jobs/JobFilterTabs";
+import JobRow from "@/components/jobs/JobRow";
 import CtaButton from "@/components/ui/CtaButton";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { fadeUp } from "@/lib/motion";
@@ -16,17 +16,13 @@ import { useSearchQueryParam } from "@/hooks/use-search-query-params";
 import { JOBS_QUERY_KEY } from "@/constants/query-keys";
 import { fetchJobs } from "@/queries/job";
 import { JobFilter, matchesFilter } from "@/types/job";
+import { JobsLoadingState } from "./JobsLoadingState";
+import { JobsEmptyState } from "./JobsEmptyState";
+import { JOB_FILTERS } from "@/constants/job_filters";
 
 const STALE_TIME = 1000 * 60 * 60; // 1 hour
 const GC_TIME = 1000 * 60 * 60 * 2; // 2 hours
 
-export const JOB_FILTERS: JobFilter[] = [
-  "All",
-  "Limassol",
-  "Larnaca",
-  "Nicosia",
-  "Paphos",
-];
 export default function JobBoard() {
   const t = useTranslations("pages.home.featured_jobs");
   const locale = useLocale();
@@ -78,9 +74,9 @@ export default function JobBoard() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="list-none p-10 text-center"
+                className="list-none w-full"
               >
-                Loading jobs...
+                <JobsLoadingState />
               </motion.li>
             ) : latestTenJobs.length > 0 ? (
               latestTenJobs.map((job) => (
@@ -103,14 +99,16 @@ export default function JobBoard() {
                 exit={{ opacity: 0 }}
                 className="rounded-sm-card border border-line p-10 text-center list-none"
               >
-                No roles match this filter yet.
+                <JobsEmptyState 
+                  filterName={filter} 
+                />
               </motion.li>
             )}
           </AnimatePresence>
         </motion.ul>
 
         <FadeUp className="mt-10 flex justify-center">
-          <CtaButton href="/jobs">
+          <CtaButton href={`/jobs`}>
             View all {filteredJobs.length} jobs
           </CtaButton>
         </FadeUp>
