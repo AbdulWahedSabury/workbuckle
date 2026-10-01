@@ -10,10 +10,10 @@
   },
   "Metadata": {
     "home": {
-      "title": "My Travel Games",
-      "description": "Portable classic games for every adventure. Handcrafted wooden travel board games - Backgammon, Chess, Ludo, Domino and more.",
+      "title": "Work buckle",
+      "description": "Join prestigious 5-star hotels and luxury resorts in Limassol and Nicosia. Full EU working rights, competitive compensation, and structured accommodation support included",
       "keywords": {
-        "game": "travel games, board games, handcrafted games, portable games, wooden games, my travel games"
+        "jobs": "Waiters, Barista, accountant"
       }
     }
   },
@@ -340,50 +340,6 @@
       "post": {
         "read_time": "{min} mins read"
       }
-    },
-    "eu_countries": {
-      "Austria": "Austria",
-      "Belgium": "Belgium",
-      "Bulgaria": "Bulgaria",
-      "Croatia": "Croatia",
-      "Cyprus": "Cyprus",
-      "Czechia": "Czechia",
-      "Denmark": "Denmark",
-      "Estonia": "Estonia",
-      "Finland": "Finland",
-      "France": "France",
-      "Germany": "Germany",
-      "Greece": "Greece",
-      "Hungary": "Hungary",
-      "Ireland": "Ireland",
-      "Italy": "Italy",
-      "Latvia": "Latvia",
-      "Lithuania": "Lithuania",
-      "Luxembourg": "Luxembourg",
-      "Malta": "Malta",
-      "Netherlands": "Netherlands",
-      "Poland": "Poland",
-      "Portugal": "Portugal",
-      "Romania": "Romania",
-      "Slovakia": "Slovakia",
-      "Slovenia": "Slovenia",
-      "Spain": "Spain",
-      "Sweden": "Sweden"
-    }
-  },
-  "whoWeAre": {
-    "title": "Who We Are?",
-    "description": "MyTravelGames creates compact, practical and distinctive games and travel products designed to make journeys more enjoyable.Our story began with a simple idea: travel time should be part of the experience, not just the time between two destinations.<br/>We develop travel-friendly games, wooden game pieces, family products, souvenirs and personalized items for children and adults.<br/> Our products are designed for use on flights, train journeys, road trips, holidays, hotels, beaches and other moments away from home.We focus on a combination of practical design, accessible pricing, quality materials and original ideas.<br/> Many of our wooden components are made from beech wood, while fabric-based products are created to be lightweight, compact and easy to carry.<br/>MyTravelGames also works with hotels, airlines, travel companies, retailers, distributors and corporate partners, offering products for retail, promotional campaigns, guest gifts and customized projects.From a small family game to a personalized travel gift, our goal is the same: to create products that bring people together and turn ordinary travel moments into lasting memories.<br/>Designed for travel.<br/> Made for shared moments.",
-    "button": "Read More",
-    "services": {
-      "title1": "Passion for Play",
-      "desc1": "We believe classic games transcend generations, turning every journey into a shared experience of joy and connection.",
-      "title2": "Travel Inspired",
-      "desc2": "Born from a love of adventure, our games are designed to move with you, fitting perfectly into your next destination.",
-      "title3": "Thoughtful Design",
-      "desc3": "Simplicity meets elegance. Every piece is crafted with meticulous detail to ensure your travel experience is as seamless as it is stylish.",
-      "title4": "Meaningful Moments",
-      "desc4": "We provide the tools for memories. Our mission is to transform ordinary trips into unforgettable stories through the art of play."
     }
   },
   "sections": {

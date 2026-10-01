@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import SectionHeader from "@/components/ui/SectionHeader";
+import { useTranslations } from "next-intl";
 
 const faqs = [
   {
@@ -30,7 +31,6 @@ const faqs = [
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false);
-
   return (
     <div className="border-b border-line">
       <button
@@ -60,11 +60,12 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
   );
 }
 
-export default function ContactFaq() {
+export default function Faq() {
+  const t = useTranslations("sections.faq")
   return (
     <section className="section-spacing">
       <div className="container-site">
-        <SectionHeader eyebrow="FAQs" title="Frequently asked questions" align="center" />
+        <SectionHeader eyebrow={t('title')} title={t("description")} align="center" />
         <div className="mx-auto max-w-3xl">
           {faqs.map((faq) => (
             <FaqItem key={faq.question} {...faq} />

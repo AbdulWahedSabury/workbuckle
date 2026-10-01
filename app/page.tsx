@@ -9,7 +9,8 @@ import Testimonials from "@/components/testimonials/Testimonials";
 import WhyCyprus from "@/components/why_cyprus/WhyCyprus";
 import HowToApply from "@/components/how_it_works/HowToApply";
 import RelocationBenefits from "@/components/relocation/RelocationBenefits";
-import ContactFaq from "@/components/sections/contact/ContactFaq";
+import ContactFaq from "@/components/sections/contact/Faq";
+import Faq from "@/components/sections/contact/Faq";
 
 export default function HomePage() {
   return (
@@ -22,7 +23,7 @@ export default function HomePage() {
       <RelocationBenefits />
       <JobBoard />
       <Testimonials />
-      <ContactFaq />
+      <Faq />
       <CtaBanner />
     </>
   );

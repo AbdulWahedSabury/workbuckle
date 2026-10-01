@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import ContactHero from "@/components/sections/contact/ContactHero";
 import ContactMain from "@/components/sections/contact/ContactMain";
-import ContactFaq from "@/components/sections/contact/ContactFaq";
+import Faq from "@/components/sections/contact/Faq";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -14,7 +14,7 @@ export default async function ContactPage() {
     <>
       <ContactHero />
       <ContactMain />
-      <ContactFaq />
+      <Faq />
     </>
   );
 }
