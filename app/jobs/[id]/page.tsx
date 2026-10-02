@@ -2,8 +2,8 @@ import { cache } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getLocale } from "next-intl/server";
-import type { Locale } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
+import { type Locale } from "next-intl";
 import {
   ArrowLeft,
   Banknote,
@@ -20,35 +20,20 @@ import FadeUp from "@/components/motion/FadeUp";
 import CtaButton from "@/components/ui/CtaButton";
 import { fetchJob } from "@/queries/job";
 
-/* ------------------------------------------------------------------ */
-/* Config                                                              */
-/* ------------------------------------------------------------------ */
 
 const COMPANY_NAME = "Mavromatis Employment Bureau";
-
-// Fallbacks for fields the API does not send yet. Replace them with real
-// job fields as soon as they exist, so every role doesn't show the same values.
 const DEFAULT_LOCATION = "Larnaca";
 const DEFAULT_SCHEDULE = "full_time";
 const PLACEHOLDER_SALARY = "€1,500 Gross (Neg.)";
 const PLACEHOLDER_EXPERIENCE = "1-3 years exp.";
-
-// Tag colours for the dark hero banner.
 const SCHEDULE_STYLES: Record<string, string> = {
   full_time: "bg-primary text-ink",
   part_time: "bg-white/15 text-white",
   internship: "bg-emerald-400/20 text-emerald-200",
 };
-
-/* ------------------------------------------------------------------ */
-/* Data                                                                */
-/* ------------------------------------------------------------------ */
-
 interface PageProps {
   params: Promise<{ id: string }>;
 }
-
-// Shared by generateMetadata and the page, so the job is fetched once per request.
 const getJob = cache(async (id: string) => {
   const locale = (await getLocale()) as Locale;
   return fetchJob(id, locale);
@@ -71,11 +56,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-/* ------------------------------------------------------------------ */
-/* Page                                                                */
-/* ------------------------------------------------------------------ */
 
 export default async function JobDetailPage({ params }: PageProps) {
+  const t = await getTranslations('pages.job');
   const { id } = await params;
   const job = await getJob(id);
   if (!job) notFound();
@@ -107,7 +90,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                 className="size-4 transition-transform group-hover:-translate-x-0.5"
                 aria-hidden="true"
               />
-              Back to all jobs
+              {t('back')}
             </Link>
           </FadeUp>
 
@@ -128,7 +111,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                 <h1 className="mt-3 text-balance text-2xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
                   {job.position_name}
                 </h1>
-                <p className="mt-2 text-sm text-white/60 sm:text-base">{COMPANY_NAME}</p>
+                {/* <p className="mt-2 text-sm text-white/60 sm:text-base">{COMPANY_NAME}</p> */}
 
                 <ul className="mt-5 flex flex-wrap gap-2 text-xs font-semibold sm:text-sm" aria-label="Key details">
                   <li className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-white">
@@ -143,7 +126,7 @@ export default async function JobDetailPage({ params }: PageProps) {
             </div>
 
             <CtaButton href={applyHref} className="w-full justify-center sm:w-auto">
-              Apply for role
+              {t('apply')}
             </CtaButton>
           </FadeUp>
         </div>
@@ -185,7 +168,7 @@ export default async function JobDetailPage({ params }: PageProps) {
 
                 <div className="mt-6 border-t border-line pt-6">
                   <CtaButton href={applyHref} className="w-full justify-center">
-                    Apply for role
+                    {t('apply')}
                   </CtaButton>
                 </div>
               </aside>

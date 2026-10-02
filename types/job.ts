@@ -1,7 +1,7 @@
 export type ContractType = "full_time" | "part_time" | "internship" | "temporary" | "freelance";
 
 export interface JobDetailsResponse {
-  id: number;
+  id?: number;
   hash: string;
   position_name: string;
   description?: string;

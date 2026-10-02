@@ -354,6 +354,10 @@
       "post": {
         "read_time": "{min} mins read"
       }
+    },
+    "job":{
+      "apply":"Apply for role",
+      "back":"Back to all jobs"
     }
   },
   "sections": {

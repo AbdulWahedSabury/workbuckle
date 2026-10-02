@@ -48,7 +48,7 @@ export default function JobsSearchHero({
                 value={searchValue}
                 onChange={handleInputChange}
                 placeholder="Search job title, company or keyword"
-                className="w-full min-w-0 bg-transparent text-sm placeholder:text-white/60 focus:outline-none sm:text-base"
+                className="w-full min-w-0 bg-transparent text-sm placeholder:text-white/90 focus:outline-none sm:text-base"
               />
             </label>
             <button
