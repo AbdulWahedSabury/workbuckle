@@ -11,8 +11,8 @@ import { snappySpring } from "@/lib/motion";
 /* ------------------------------------------------------------------ */
 
 export const CONTACT = {
-  facebook: "https://www.facebook.com/your-page",
-  instagram: "https://www.instagram.com/your-handle",
+  facebook: "https://www.facebook.com/M.MAVROMATIEMPLOYMENT",
+  instagram: "https://www.instagram.com/mavromatisemploymentbureau?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==",
   phone: "+357 00 000 000",
   email: "info@example.com",
 };

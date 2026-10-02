@@ -93,7 +93,7 @@ export default function Header() {
             type="button"
             whileTap={{ scale: 0.95 }}
             onClick={() => setMenuOpen(true)}
-            className="flex size-11 shrink-0 items-center justify-center rounded-full bg-ink text-white lg:hidden"
+            className={`flex size-11 shrink-0 items-center justify-center rounded-full${isHome? "bg-none" : "bg-ink"}  text-white lg:hidden`}
             aria-label="Open menu"
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"

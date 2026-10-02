@@ -2,7 +2,6 @@ import type { LucideIcon } from "lucide-react";
 import { Mail, Phone, User, Link as LinkIcon } from "lucide-react";
 
 import type { ApplicationTextFieldName } from "./types";
-import { getTranslations } from "next-intl/server";
 
 export const ApplyUrl = (jobId: string) =>
   `https://api.manatal.com/open/v3/career-page/mavromatis-employment-bureau/jobs/${jobId}/apply/`;
@@ -16,7 +15,6 @@ export interface TextFieldConfig {
   required?: boolean;
   autoComplete?: string;
 }
-const f = getTranslations('form')
 /** Drives the two-column name/contact rows so new fields only need an entry here. */
 export const NAME_FIELDS: TextFieldConfig[][] = [
   [

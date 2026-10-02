@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, X } from "lucide-react";
 import Logo from "@/components/ui/Logo";
 import type { NavLink } from "@/lib/home/types";
+import { useRoot } from "@/hooks/use-root";
 
 interface MobileMenuProps {
   open: boolean;
@@ -14,6 +15,7 @@ interface MobileMenuProps {
 }
 
 export default function MobileMenu({ open, onClose, links }: MobileMenuProps) {
+    const isHome = useRoot();
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
