@@ -85,7 +85,7 @@ export default function Header() {
         </nav>
 
         <div className="flex shrink-0 items-center justify-end gap-3 sm:gap-4">
-          <div className="hidden sm:flex lg:hidden xl:flex">
+          <div className="hidden sm:flex lg:hidden xl:flex mx-3">
             <SocialLinks />
           </div>
 
@@ -93,7 +93,7 @@ export default function Header() {
             type="button"
             whileTap={{ scale: 0.95 }}
             onClick={() => setMenuOpen(true)}
-            className={`flex size-11 shrink-0 items-center justify-center rounded-full${isHome? "bg-none" : "bg-ink"}  text-white lg:hidden`}
+            className={`flex size-11 shrink-0 items-center justify-center rounded-full ${isHome? "bg-none" : "bg-primary"}  text-white lg:hidden`}
             aria-label="Open menu"
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"

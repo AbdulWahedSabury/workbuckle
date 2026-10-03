@@ -1,7 +1,9 @@
 "use client";
 
 import type { ChangeEvent, FormEvent } from "react";
-import { Search } from "lucide-react";
+import Image from "next/image";
+import { motion, useReducedMotion } from "framer-motion";
+import { ArrowRight, Search } from "lucide-react";
 
 import RevealSection from "@/components/motion/RevealSection";
 import FadeUp from "@/components/motion/FadeUp";
@@ -12,51 +14,80 @@ export interface JobsSearchHeroProps {
   onSearchSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }
 
+/** Background image — lives at public/images/jobs-hero-bg.jpg (2400×1400). */
+const HERO_BG = "/images/hero-1.png";
+const EASE = [0.22, 1, 0.36, 1] as const;
+
 /** Hero banner with the jobs list page's search form. */
 export default function JobsSearchHero({
   searchValue,
   onSearchChange,
   onSearchSubmit,
 }: JobsSearchHeroProps) {
+  const reduceMotion = useReducedMotion();
+
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     onSearchChange(event.target.value);
   };
 
   return (
-    <RevealSection className="bg-ink px-4 pt-12 pb-16 sm:px-6 sm:pt-20 sm:pb-24 lg:pt-24 lg:pb-28">
+    <RevealSection className="relative bg-ink isolate overflow-hidden px-4 pb-16 pt-16 sm:px-6 sm:pb-24 sm:pt-24 lg:pb-32 lg:pt-32">
+        <motion.div
+          className="absolute inset-0"
+          initial={reduceMotion ? false : { scale: 1.12 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 2.4, ease: EASE }}
+        >
+          <Image
+            src={HERO_BG}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-bottom opacity-20"
+          />
+        </motion.div>
+
+      {/* ─── Content ────────────────────────────────────── */}
       <div className="container-site mx-auto max-w-7xl">
         <FadeUp className="mx-auto max-w-3xl text-center">
-          <span className="mb-3 inline-flex items-center rounded-full bg-white/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-primary sm:mb-4 sm:px-4 sm:py-1.5 sm:text-sm">
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-ink/40 px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-primary backdrop-blur-md sm:px-4 sm:py-1.5 sm:text-[13px]">
+            <span className="size-1.5 rounded-full bg-primary" />
             Jobs List
           </span>
-          <h1 className="text-balance text-2xl font-bold tracking-tight text-white sm:text-4xl lg:text-6xl">
-            Explore our diverse range of career opportunities
+
+          <h1 className="mt-5 text-balance text-3xl font-bold leading-[1.1] tracking-tight text-white drop-shadow-[0_2px_24px_rgb(0_0_0/0.5)] sm:mt-6 sm:text-5xl lg:text-6xl">
+            Explore our diverse range of{" "}
+            <span className="text-primary">career opportunities</span>
           </h1>
         </FadeUp>
 
-        <FadeUp className="mx-auto mt-6 max-w-2xl sm:mt-10">
+        <FadeUp className="mx-auto mt-8 max-w-2xl sm:mt-10">
           <form
             onSubmit={onSearchSubmit}
             role="search"
-            className="flex flex-col gap-2 rounded-2xl bg-gray-1 p-2 sm:flex-row sm:items-center sm:rounded-full sm:p-2"
+            className="group flex flex-col gap-2 rounded-2xl border border-white/15 bg-ink/50 p-2 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.7)] backdrop-blur-xl transition-colors duration-300 focus-within:border-primary/60 sm:flex-row sm:items-center sm:rounded-full"
           >
-            <label className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 text-white sm:gap-3 sm:px-4">
-              <Search className="size-5 flex-none opacity-60" aria-hidden="true" />
+            <label className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2.5 text-white sm:px-5">
+              <Search
+                className="size-5 flex-none text-white/50 transition-colors group-focus-within:text-primary"
+                aria-hidden="true"
+              />
               <span className="sr-only">Search jobs</span>
               <input
                 type="search"
                 value={searchValue}
                 onChange={handleInputChange}
                 placeholder="Search job title, company or keyword"
-                className="w-full min-w-0 bg-transparent text-sm placeholder:text-white/90 focus:outline-none sm:text-base"
+                className="w-full min-w-0 bg-transparent text-sm text-white placeholder:text-white/50 focus:outline-none sm:text-base"
               />
             </label>
             <button
               type="submit"
-              className="flex w-full flex-none items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-ink transition-colors hover:bg-primary-dark sm:w-auto sm:rounded-full sm:py-3.5"
+              className="flex w-full flex-none items-center justify-center gap-2 rounded-xl bg-primary px-7 py-3 font-semibold text-ink transition-all duration-300 hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 active:scale-[0.98] sm:w-auto sm:rounded-full sm:py-3.5"
             >
-              <Search className="size-5" aria-hidden="true" />
               <span>Search</span>
+              <ArrowRight className="size-4" aria-hidden="true" />
             </button>
           </form>
         </FadeUp>

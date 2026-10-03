@@ -108,14 +108,14 @@ export default function HeroSection() {
           </motion.div>
         </motion.div>
       </div>
-      <ImageRing cards={ringCards} reduceMotion={!!reduceMotion} />
+      {/* <ImageRing cards={ringCards} reduceMotion={!!reduceMotion} /> */}
       <div className="container-site relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 1.2, ease: EASE }}
-          className="mx-auto -mt-6 flex max-w-4xl flex-col gap-6 rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:-mt-10 sm:p-8 md:flex-row md:items-center md:justify-between md:gap-10"
-        >
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 1.2, ease: EASE }}
+            className="mx-auto my-4 flex max-w-4xl flex-col gap-6 rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:p-8 md:flex-row md:items-center md:justify-between md:gap-10"
+          >
           <p className="max-w-[14rem] text-left font-semibold text-white/80">{t("statsTitle")}</p>
           <dl className="grid flex-1 grid-cols-1 gap-6 sm:grid-cols-2 md:divide-x md:divide-white/10">
             {stats.map((stat) => (

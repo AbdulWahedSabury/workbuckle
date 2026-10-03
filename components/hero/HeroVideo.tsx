@@ -18,7 +18,7 @@ export default function HeroVideo({ reduceMotion }: { reduceMotion: boolean }) {
   }, [reduceMotion]);
 
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden opacity-80">
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden opacity-40">
       {/* Video, fading in once it can play so it never flashes black */}
       <motion.video
         ref={videoRef}
