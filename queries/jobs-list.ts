@@ -48,12 +48,17 @@ export async function fetchAllJobs(params: JobsListParams): Promise<JobsListResu
   );
 
   // De-duplicate in case jobs shift between pages while loading.
-  const seen = new Set<number>();
-  const jobs = [firstJobs, ...rest.map(jobsOf)].flat().filter((job) => {
+const seen = new Set<number>();
+
+const jobs = [firstJobs, ...rest.map(jobsOf)]
+  .flat()
+  .filter((job) => {
+    if (job.id == null) return true;
+
     if (seen.has(job.id)) return false;
+
     seen.add(job.id);
     return true;
   });
-
   return { jobs, searchedByServer: true };
 }
