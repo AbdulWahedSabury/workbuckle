@@ -1,19 +1,26 @@
+import { useTranslations } from "next-intl";
 import Reveal from "@/components/motion/Reveal";
+import ContactForm from "./ContactForm";
+import ContactImage from "./ContactImage";
 
 export default function ContactHero() {
+  const t = useTranslations("pages.contact");
+
   return (
-    <section className="pt-10 pb-8 sm:pt-12 lg:pt-16">
+    <section className="overflow-x-clip pt-5 sm:pt-10">
       <div className="container-site">
-        <Reveal effect="slideInBottom" className="mx-auto max-w-2xl text-center">
-          <h1 className="mb-4 text-4xl leading-tight tracking-tight text-balance sm:text-5xl lg:text-6xl">
-            Contact us
-          </h1>
-          <p className="text-pretty text-base leading-relaxed sm:text-lg">
-            We&apos;re here to understand your needs and provide tailored solutions. Reach out to
-            our team to explore how we can support your goals and address any questions you may
-            have.
-          </p>
-        </Reveal>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-12.5">
+          <Reveal effect="slideInBottom">
+            <ContactImage src="/images/contact/contact.jpg" alt={t("image_alt")} />
+          </Reveal>
+          <Reveal effect="slideInBottom" delay={200}>
+            <div className="mb-10">
+              <h1 className="mb-4 text-4xl sm:text-5xl lg:text-6xl">{t("title")}</h1>
+              <p className="text-pretty">{t("description")}</p>
+            </div>
+            <ContactForm />
+          </Reveal>
+        </div>
       </div>
     </section>
   );

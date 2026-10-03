@@ -1,87 +1,128 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { motion } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
-
-const fieldClass =
-  "w-full rounded-2xl border border-line bg-white px-5 py-4 text-ink transition-colors duration-300 outline-none hover:border-ink/40 focus:border-ink";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner"; // or "react-hot-toast"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ContactFormType, getContactFormSchema } from "@/schemas/ContactFormSchema";
+import { InputField } from "@/components/form/InputField";
+import { TextAreaField } from "@/components/form/TextAreaField";
+import { Button } from "@/components/ui/button";
 
 export default function ContactForm() {
-  const [submitted, setSubmitted] = useState(false);
+  const f = useTranslations("form");
+  const FormSchema = getContactFormSchema(f);
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmitted(true);
+  const {
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<ContactFormType>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
+      message: "",
+    },
+  });
+
+  const onSubmit = async (data: ContactFormType) => {
+    try {
+      const res = await fetch("/api", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        if (res.status === 429) {
+          toast.error(f("too_many_requests"));
+        } else {
+          toast.error(f("submit_faild"));
+        }
+        return;
+      }
+
+      const result = await res.json();
+
+      if (!result.success) {
+        toast.error(f("submit_faild"));
+        return;
+      }
+
+      toast.success(f("submit_success"));
+      reset();
+    } catch {
+      toast.error(f("error_occured"));
+    }
   };
 
   return (
-    <div className="rounded-card border border-gray-3 bg-white p-5 sm:p-[30px] lg:p-10">
-      <h2 className="mb-2 text-2xl sm:text-3xl">Send us a message</h2>
-      <p className="mb-8">Fill out the form and our team will get back to you shortly.</p>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      noValidate
+      className="space-y-6"
+      aria-describedby="contact-form"
+    >
+      <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
+        <InputField
+          type="text"
+          name="first_name"
+          label={f("first_name.label")}
+          placeholder={f("first_name.placeholder")}
+          required
+          errors={errors}
+          control={control}
+        />
 
-      {submitted ? (
-        <p className="rounded-2xl bg-gray-3 px-6 py-4 font-semibold text-ink" role="status">
-          Thanks for reaching out! We&apos;ll be in touch soon.
-        </p>
-      ) : (
-        <form onSubmit={onSubmit} className="flex flex-col gap-5">
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <div>
-              <label htmlFor="name" className="sr-only">
-                Name
-              </label>
-              <input id="name" name="name" type="text" required placeholder="Name" className={fieldClass} />
-            </div>
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                placeholder="Email address"
-                className={fieldClass}
-              />
-            </div>
-          </div>
+        <InputField
+          type="text"
+          name="last_name"
+          label={f("last_name.label")}
+          placeholder={f("last_name.placeholder")}
+          required
+          errors={errors}
+          control={control}
+        />
 
-          <div>
-            <label htmlFor="phone" className="sr-only">
-              Phone no
-            </label>
-            <input id="phone" name="phone" type="tel" placeholder="Phone no" className={fieldClass} />
-          </div>
+        <InputField
+          type="email"
+          name="email"
+          label={f("email.label")}
+          placeholder={f("email.placeholder")}
+          required
+          errors={errors}
+          control={control}
+        />
 
-          <div>
-            <label htmlFor="message" className="sr-only">
-              Message
-            </label>
-            <textarea
-              id="message"
-              name="message"
-              required
-              rows={5}
-              placeholder="Message"
-              className={`${fieldClass} resize-none`}
-            />
-          </div>
+        <InputField
+          type="tel"
+          name="phone"
+          label={f("phone.label")}
+          placeholder={f("phone.placeholder")}
+          required
+          errors={errors}
+          control={control}
+        />
+      </div>
 
-          <motion.button
-            type="submit"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="group inline-flex w-fit items-center gap-3 rounded-full bg-ink py-2 pr-2 pl-6 font-semibold text-white"
-          >
-            Submit
-            <span className="flex size-10 items-center justify-center rounded-full bg-primary text-ink transition-transform duration-500 group-hover:rotate-45">
-              <ArrowUpRight className="size-4" />
-            </span>
-          </motion.button>
-        </form>
-      )}
-    </div>
+      <TextAreaField
+        label={f("message.label")}
+        name="message"
+        placeholder={f("message.placeholder")}
+        required
+        errors={errors}
+        control={control}
+      />
+
+      <div className="flex items-center justify-end gap-3">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? f("processing") : f("btn")}
+        </Button>
+      </div>
+    </form>
   );
 }

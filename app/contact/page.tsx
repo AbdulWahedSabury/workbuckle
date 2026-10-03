@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import ContactHero from "@/components/sections/contact/ContactHero";
-import ContactMain from "@/components/sections/contact/ContactMain";
+import ContactInfoSection from "@/components/sections/contact/ContactInfoSection";
 import Faq from "@/components/sections/contact/Faq";
 
 export const metadata: Metadata = {
@@ -9,11 +9,11 @@ export const metadata: Metadata = {
     "Reach out to the Work Buckle team — we're here to understand your needs and provide tailored solutions.",
 };
 
-export default async function ContactPage() {
+export default function ContactPage() {
   return (
     <>
       <ContactHero />
-      <ContactMain />
+      <ContactInfoSection />
       <Faq />
     </>
   );

@@ -4,18 +4,8 @@ import type { ComponentType, SVGProps } from "react";
 import { Mail, Phone } from "lucide-react";
 
 import { MotionLink } from "@/components/motion/MotionLink";
+import { CONTACT, mailHref, telHref } from "@/lib/contact";
 import { snappySpring } from "@/lib/motion";
-
-/* ------------------------------------------------------------------ */
-/* Contact details: replace the placeholders with your real ones       */
-/* ------------------------------------------------------------------ */
-
-export const CONTACT = {
-  facebook: "https://www.facebook.com/M.MAVROMATIEMPLOYMENT",
-  instagram: "https://www.instagram.com/mavromatisemploymentbureau?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==",
-  phone: "+357 00 000 000",
-  email: "info@example.com",
-};
 
 /* ------------------------------------------------------------------ */
 /* Brand icons (lucide-react no longer ships brand logos)              */
@@ -54,13 +44,11 @@ type ContactLink = {
   external?: boolean;
 };
 
-const telHref = (phone: string) => `tel:${phone.replace(/[^\d+]/g, "")}`;
-
 export const SOCIALS: ContactLink[] = [
   { label: "Facebook", value: "Facebook", href: CONTACT.facebook, icon: FacebookIcon, external: true },
   { label: "Instagram", value: "Instagram", href: CONTACT.instagram, icon: InstagramIcon, external: true },
   { label: "Call us", value: CONTACT.phone, href: telHref(CONTACT.phone), icon: Phone },
-  { label: "Email us", value: CONTACT.email, href: `mailto:${CONTACT.email}`, icon: Mail },
+  { label: "Email us", value: CONTACT.email, href: mailHref(CONTACT.email), icon: Mail },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -71,12 +59,36 @@ interface SocialLinksProps {
   /**
    * "icons": round icon buttons with a label tooltip (compact, e.g. header).
    * "contact": pills that also show the phone number and email (e.g. footer).
+   * "social": only the social network links, as solid dark circles (contact page).
    */
-  variant?: "icons" | "contact";
+  variant?: "icons" | "contact" | "social";
   className?: string;
 }
 
 export default function SocialLinks({ variant = "icons", className = "" }: SocialLinksProps) {
+  if (variant === "social") {
+    return (
+      <ul className={`flex gap-4 ${className}`}>
+        {SOCIALS.filter((s) => s.external).map(({ label, href, icon: Icon }) => (
+          <li key={label}>
+            <MotionLink
+              href={href}
+              aria-label={label}
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ y: 8 }}
+              whileTap={{ scale: 0.95 }}
+              transition={snappySpring}
+              className="flex size-11 items-center justify-center rounded-full bg-ink text-white transition-colors duration-300 hover:bg-primary hover:text-ink focus-visible:bg-primary focus-visible:text-ink focus-visible:outline-none"
+            >
+              <Icon className="size-5" />
+            </MotionLink>
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
   if (variant === "contact") {
     return (
       <ul className={`flex flex-wrap gap-2.5 ${className}`}>
