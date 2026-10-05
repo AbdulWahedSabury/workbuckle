@@ -8,6 +8,8 @@
   --color-gray-2: #505050;
   --color-gray-3: #f6f6f6;
   --color-line: #0e0e0e12;
+  /* Text on bg-primary. Stays dark in every theme, unlike ink. */
+  --color-on-primary: #0e0e0e;
 
   /* 🛠️ FIX 1: Set Roboto as your absolute global sans-serif and body font */
   --font-sans: var(--next-font-roboto), ui-sans-serif, system-ui, sans-serif;
@@ -61,6 +63,47 @@
 :root {
   /* "outQuart" easing used by the scroll-reveal animations (read from inline styles in Reveal.tsx) */
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/*
+ * Admin dark theme. The admin panel is built only from the tokens above, so
+ * swapping their values restyles all of it. `data-admin-theme` sits on the
+ * admin root (AdminThemeProvider) and is matched from :root via :has() so
+ * <body>, native controls, scrollbars and the drawer backdrop follow too.
+ * Public pages never render the attribute and are unaffected.
+ */
+:root:has([data-admin-theme="dark"]) {
+  --color-white: #17181a; /* cards, sidebar, inputs on focus */
+  --color-gray-3: #0e0f10; /* page background, fills, hovers */
+  --color-ink: #f2f2f2;
+  --color-gray-1: #e0e0e0;
+  --color-gray-2: #a1a1a1;
+  --color-line: #ffffff17;
+  --color-red-50: #2a1416;
+  --color-red-200: #5c2328;
+  --color-red-600: #f87171;
+  --color-red-700: #fca5a5;
+  --color-emerald-50: #0f2a20;
+  --color-emerald-800: #6ee7b7;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:has([data-admin-theme="system"]) {
+    --color-white: #17181a; /* cards, sidebar, inputs on focus */
+    --color-gray-3: #0e0f10; /* page background, fills, hovers */
+    --color-ink: #f2f2f2;
+    --color-gray-1: #e0e0e0;
+    --color-gray-2: #a1a1a1;
+    --color-line: #ffffff17;
+    --color-red-50: #2a1416;
+    --color-red-200: #5c2328;
+    --color-red-600: #f87171;
+    --color-red-700: #fca5a5;
+    --color-emerald-50: #0f2a20;
+    --color-emerald-800: #6ee7b7;
+    color-scheme: dark;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

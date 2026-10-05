@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Poppins, Roboto } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/layout/Header";
 import { NextIntlClientProvider } from "next-intl";
-import Footer from "@/components/layout/Footer";
-import MotionProvider from "@/components/motion/MotionProvider";
 import QueryProvider from "@/providers/QueryProvider";
 import { Toaster } from "sonner";
 
@@ -48,11 +45,7 @@ export default function RootLayout({
       <body className="antialiased">
         <QueryProvider>
           <NextIntlClientProvider>
-            <Header />
-            <MotionProvider>
-              <main className="flex-1">{children}</main>
-            </MotionProvider>
-            <Footer />
+            {children}
           </NextIntlClientProvider>
         </QueryProvider>
         <Toaster />
