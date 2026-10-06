@@ -2,114 +2,97 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
-import Reveal from "../motion/Reveal";
+import { motion, type Variants } from "framer-motion";
 import ArrowButton from "../ui/ArrowButton";
 
 interface Step {
   title: string;
-  description: string;
+  description?: string;
 }
 
-const CHIP_STYLES = [
-  "bg-gray-100 text-slate-900",
-  "bg-slate-900 text-white",
-  "bg-primary text-slate-900",
-];
-
-const containerVariants = {
-  hidden: { opacity: 0 },
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.1,
-    },
+    y: 0,
+    transition: { duration: 0.4, ease: "easeOut" },
   },
 };
 
+function CheckIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      aria-hidden="true"
+      className="mt-0.5 size-4 flex-none text-primary"
+    >
+      <path
+        fillRule="evenodd"
+        d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
 export default function AvailableCard({ category }: { category: string }) {
   const t = useTranslations(`pages.home.available_jobs.categories.${category}`);
-  const steps: Step[] = t.raw("list");
+  const raw = t.raw("list");
+  const steps: Step[] = Array.isArray(raw) ? raw : [];
 
   return (
-    <motion.div
+    <motion.article
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: "-50px" }}
-      className="group my-4 grid grid-cols-1 gap-8 rounded-card bg-white p-4 font-sans sm:p-6 md:gap-10 lg:grid-cols-[1fr_2fr] lg:gap-12 lg:p-8 xl:gap-16 2xl:gap-24"
+      viewport={{ once: true, margin: "-30px" }}
+      variants={cardVariants}
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-shadow duration-300 hover:shadow-lg hover:shadow-slate-200/70"
     >
-      {/* Left Column: Image with Hover Zoom */}
-      <Reveal className="relative aspect-[4/3] overflow-hidden rounded-card sm:aspect-[16/10] lg:aspect-auto lg:h-full lg:min-h-[28rem]">
-        <motion.div
-          className="relative size-full"
-          whileHover={{ scale: 1.05 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-        >
-          <Image
-            src={t("img")}
-            alt={t("image_alt")}
-            fill
-            sizes="(min-width: 1024px) 33vw, 100vw"
-            className="object-cover"
-          />
-        </motion.div>
-      </Reveal>
+      {/* Image */}
+      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
+        <Image
+          src={t("img")}
+          alt={t("image_alt")}
+          fill
+          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+        />
+      </div>
 
-      {/* Right Column: Staggered Content Animation */}
-      <motion.div
-        variants={containerVariants}
-        className="flex flex-col justify-between gap-10 lg:gap-12"
-      >
-        <div className="flex flex-col items-start gap-3 md:gap-5">
-          {/* Standardized Title Typography */}
-          <motion.h3 className="text-2xl font-semibold leading-snug tracking-tight text-slate-900 md:text-3xl">
-            {t("title")}
-          </motion.h3>
+      {/* Content */}
+      <div className="flex flex-1 flex-col p-6">
+        <h3 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
+          {t("title")}
+        </h3>
 
-          {/* Standardized Paragraph Typography */}
-          <motion.p className="text-base font-normal leading-relaxed text-slate-600 md:text-lg">
-            {t("intro")}
-          </motion.p>
+        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">
+          {t("intro")}
+        </p>
 
-          <motion.div>
-            <ArrowButton
-              href={t("slug")}
-              label={t("cta")}
-              className="mt-2 transition-all duration-300 hover:border-primary hover:bg-primary hover:text-slate-900"
-            />
-          </motion.div>
-        </div>
-
-        {/* Steps List */}
-        <motion.ol
-          variants={containerVariants}
-          className="grid grid-cols-1 gap-8 [--gap:1.5rem] sm:grid-cols-3 sm:gap-[var(--gap)] lg:[--gap:2rem] 2xl:[--gap:2.5rem]"
-        >
-          {steps.map((step, i) => (
-            <motion.li
-              key={step.title}
-              className="relative sm:not-last:after:absolute sm:not-last:after:left-12 sm:not-last:after:-right-(--gap) sm:[&:not(:last-child)]:after:top-6 sm:[&:not(:last-child)]:after:h-0.5 sm:[&:not(:last-child)]:after:bg-slate-200 sm:[&:not(:last-child)]:after:content-['']"
-            >
-              {/* Step Number Badge */}
-              <motion.span
-                whileHover={{ scale: 1.08 }}
-                transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                className={`relative z-10 mb-4 flex size-12 items-center justify-center rounded-full text-base font-semibold shadow-sm md:mb-6 md:text-lg ${
-                  CHIP_STYLES[i % CHIP_STYLES.length]
-                }`}
+        {steps.length > 0 && (
+          <ul className="mt-5 space-y-2.5">
+            {steps.slice(0, 3).map((step, i) => (
+              <li
+                key={step.title || i}
+                className="flex items-start gap-2.5 text-sm text-slate-700"
               >
-                {String(i + 1).padStart(2, "0")}
-              </motion.span>
+                <CheckIcon />
+                <span className="line-clamp-1">{step.title}</span>
+              </li>
+            ))}
+          </ul>
+        )}
 
-              {/* Step Heading */}
-              <h4 className="mb-2 text-md font-semibold leading-snug text-slate-900 md:text-lg">
-                {step.title}
-              </h4>
-            </motion.li>
-          ))}
-        </motion.ol>
-      </motion.div>
-    </motion.div>
+        {/* CTA — mt-auto keeps buttons aligned across cards of different heights */}
+        <div className="mt-auto pt-6">
+          <ArrowButton
+            href={t("slug")}
+            label={t("cta")}
+            className="w-full justify-center rounded-xl bg-slate-900 py-3 text-sm font-medium text-white transition-colors duration-200 hover:bg-slate-800"
+          />
+        </div>
+      </div>
+    </motion.article>
   );
 }
