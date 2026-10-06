@@ -20,8 +20,6 @@ const LIST_PATH = '/admin/categories';
 const IMAGE_BUCKET = 'images';
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024; // keep below serverActions.bodySizeLimit
 
-// Privileged server-side Supabase client configured to prevent Next fetch buffer detachment
-const supabase = getSupabaseAdmin();
 
 function parse(formData: FormData) {
   const values = formValues(formData);
@@ -131,11 +129,11 @@ export async function createCategory(
   revalidatePath(LIST_PATH);
   redirect(LIST_PATH);
 }
-
 async function removeImage(imagePath?: string | null): Promise<void> {
   if (!imagePath) return;
 
   try {
+    const supabase = getSupabaseAdmin();
     const { error } = await supabase.storage.from(IMAGE_BUCKET).remove([imagePath]);
     if (error) {
       console.error('Failed to remove image from Supabase Storage:', error);
