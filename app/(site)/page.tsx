@@ -15,9 +15,9 @@ export default function HomePage() {
   return (
     <>
       <HeroSection />
+      <AvailablePositions />
       <WhyCyprus />
       <Companies />
-      <AvailablePositions />
       <HowToApply />
       <RelocationBenefits />
       <JobBoard />

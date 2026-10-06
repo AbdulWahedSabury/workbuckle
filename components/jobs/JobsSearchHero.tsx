@@ -1,12 +1,11 @@
 "use client";
 
 import type { ChangeEvent, FormEvent } from "react";
-import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "framer-motion";
 import { ArrowRight, Search } from "lucide-react";
-
 import RevealSection from "@/components/motion/RevealSection";
 import FadeUp from "@/components/motion/FadeUp";
+import HeroBackground from "../motion/HeroBackground";
 
 export interface JobsSearchHeroProps {
   searchValue: string;
@@ -14,54 +13,32 @@ export interface JobsSearchHeroProps {
   onSearchSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }
 
-/** Background image — lives at public/images/jobs-hero-bg.jpg (2400×1400). */
-const HERO_BG = "/images/hero-1.png";
-const EASE = [0.22, 1, 0.36, 1] as const;
+const HERO_BG = "/images/hero/hospitality.png";
 
-/** Hero banner with the jobs list page's search form. */
 export default function JobsSearchHero({
   searchValue,
   onSearchChange,
   onSearchSubmit,
 }: JobsSearchHeroProps) {
   const reduceMotion = useReducedMotion();
-
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     onSearchChange(event.target.value);
   };
 
   return (
     <RevealSection className="relative bg-ink isolate overflow-hidden px-4 pb-16 pt-16 sm:px-6 sm:pb-24 sm:pt-24 lg:pb-32 lg:pt-32">
-        <motion.div
-          className="absolute inset-0"
-          initial={reduceMotion ? false : { scale: 1.12 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 2.4, ease: EASE }}
-        >
-          <Image
-            src={HERO_BG}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-bottom opacity-20"
-          />
-        </motion.div>
-
-      {/* ─── Content ────────────────────────────────────── */}
+      <HeroBackground src={HERO_BG} />
       <div className="container-site mx-auto max-w-7xl">
         <FadeUp className="mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-ink/40 px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-primary backdrop-blur-md sm:px-4 sm:py-1.5 sm:text-[13px]">
             <span className="size-1.5 rounded-full bg-primary" />
             Jobs List
           </span>
-
           <h1 className="mt-5 text-balance text-3xl font-bold leading-[1.1] tracking-tight text-white drop-shadow-[0_2px_24px_rgb(0_0_0/0.5)] sm:mt-6 sm:text-5xl lg:text-6xl">
             Explore our diverse range of{" "}
             <span className="text-primary">career opportunities</span>
           </h1>
         </FadeUp>
-
         <FadeUp className="mx-auto mt-8 max-w-2xl sm:mt-10">
           <form
             onSubmit={onSearchSubmit}

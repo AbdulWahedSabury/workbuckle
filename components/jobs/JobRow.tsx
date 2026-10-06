@@ -67,14 +67,14 @@ export default function JobRow({ job }: JobRowProps) {
           </li>
           <li className="flex items-center gap-1.5 rounded-full bg-gray-3 px-3 py-1.5 text-ink">
             <MapPin className="size-4" /> {displayLocation}
-            {job.is_remote && <span className="text-gray-2">· Remote OK</span>}
+            {job.is_remote && <span className="text-gray-2">· Remote </span>}
           </li>
-          <li className="flex items-center gap-1.5 rounded-full bg-gray-3 px-3 py-1.5 text-ink">
+          {/* <li className="flex items-center gap-1.5 rounded-full bg-gray-3 px-3 py-1.5 text-ink">
             <Banknote className="size-4" /> {displaySalary}
           </li>
           <li className="flex items-center gap-1.5 rounded-full bg-gray-3 px-3 py-1.5 text-ink">
             <GraduationCap className="size-4" /> {displayExperience}
-          </li>
+          </li> */}
         </ul>
 
         <div className="flex items-center justify-between gap-4 lg:justify-end">

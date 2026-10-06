@@ -29,19 +29,16 @@ export default function CategoryForm({
   submitLabel: string;
 }) {
   const [state, formAction] = useActionState(action, initialActionState);
-  // After a failed submit, show what was typed rather than the saved values.
   const v = state.values;
   const errors = state.errors ?? {};
-  const imageUrl = v ? v.imageUrl : category?.imageUrl;
+  const imageUrl = v ? v.existingImageUrl : category?.imageUrl;
 
   return (
     <form action={formAction} className="flex max-w-2xl flex-col gap-6">
       <FormMessage message={state.message} />
 
       <fieldset className={fieldsetClass}>
-        <legend className={legendClass}>
-          Name
-        </legend>
+        <legend className={legendClass}>Name</legend>
         {locales.map((locale) => {
           const field = categoryNameField(locale);
           return (
@@ -63,9 +60,7 @@ export default function CategoryForm({
       </fieldset>
 
       <fieldset className={fieldsetClass}>
-        <legend className={legendClass}>
-          Details
-        </legend>
+        <legend className={legendClass}>Details</legend>
         <TextField
           name="slug"
           label="Slug"
@@ -76,16 +71,28 @@ export default function CategoryForm({
         />
         <div className="flex items-end gap-4">
           <div className="flex-1">
-            <TextField
-              name="imageUrl"
-              label="Image / icon URL"
-              placeholder="https://… or /images/categories/it.svg"
-              defaultValue={imageUrl}
-              error={errors.imageUrl}
+            {/* Hidden fallback to keep track of the existing image if a new one isn't uploaded */}
+            <input
+              type="hidden"
+              name="existingImageUrl"
+              value={imageUrl ?? ""}
             />
+
+            <label className="block text-sm font-medium mb-1">
+              Category Image / Icon
+            </label>
+            <input
+              type="file"
+              name="imageFile"
+              accept="image/*"
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            {errors.imageUrl && (
+              <p className="mt-1 text-sm text-red-600">{errors.imageUrl}</p>
+            )}
           </div>
           {imageUrl && (
-            // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin-entered hosts
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={imageUrl}
               alt=""
@@ -104,7 +111,9 @@ export default function CategoryForm({
         <CheckboxField
           name="isActive"
           label="Visible on the site"
-          defaultChecked={v ? v.isActive === "on" : (category?.isActive ?? true)}
+          defaultChecked={
+            v ? v.isActive === "on" : (category?.isActive ?? true)
+          }
         />
       </fieldset>
 
