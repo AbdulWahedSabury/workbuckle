@@ -145,6 +145,19 @@ export async function createCategory(
   redirect(LIST_PATH);
 }
 
+async function removeImage(imagePath?: string | null): Promise<void> {
+  if (!imagePath) return;
+
+  try {
+    const { error } = await supabase.storage.from(IMAGE_BUCKET).remove([imagePath]);
+    if (error) {
+      console.error('Failed to remove image from Supabase Storage:', error);
+    }
+  } catch (err) {
+    console.error('Error removing image:', err);
+  }
+}
+
 export async function updateCategory(
   id: string,
   _prev: ActionState,
