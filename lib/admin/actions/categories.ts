@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
-import { createClient } from '@supabase/supabase-js';
 import type { ActionState } from '@/lib/admin/action-state';
 import {
   formValues,
@@ -15,27 +14,14 @@ import {
 } from '@/lib/admin/form';
 import { categoryNameField, jobCategorySchema } from '@/schemas/AdminSchemas';
 import { defaultLocale, locales } from '@/types/locale';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 
 const LIST_PATH = '/admin/categories';
 const IMAGE_BUCKET = 'images';
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024; // keep below serverActions.bodySizeLimit
 
 // Privileged server-side Supabase client configured to prevent Next fetch buffer detachment
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: { persistSession: false },
-    global: {
-      fetch: (url, options) =>
-        fetch(url, {
-          ...options,
-          // @ts-expect-error duplex property is required for Node stream/buffer body payloads
-          duplex: 'half',
-        }),
-    },
-  }
-);
+const supabase = getSupabaseAdmin();
 
 function parse(formData: FormData) {
   const values = formValues(formData);
@@ -68,16 +54,17 @@ async function uploadImage(formData: FormData): Promise<UploadResult> {
     return { ok: false, error: 'Images must be 4 MB or smaller.' };
   }
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceKey) {
+    console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+    return { ok: false, error: 'Image upload is not configured.' };
+  }
+
   const ext = file.name.split('.').pop()?.toLowerCase() || 'bin';
   const imagePath = `categories/${Date.now()}-${crypto.randomUUID()}.${ext}`;
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-  
-  // REST Endpoint for Supabase Storage object upload
   const uploadUrl = `${supabaseUrl}/storage/v1/object/${IMAGE_BUCKET}/${imagePath}`;
 
-  // Use FormData to avoid ArrayBuffer detachment while ensuring proper upload payload
   const uploadPayload = new FormData();
   uploadPayload.append('file', file);
 
@@ -105,9 +92,9 @@ async function uploadImage(formData: FormData): Promise<UploadResult> {
     return { ok: false, error: 'Image upload failed due to a network error.' };
   }
 
-  // Get public URL using Supabase client helper
-  const { data } = supabase.storage.from(IMAGE_BUCKET).getPublicUrl(imagePath);
-  return { ok: true, image: { imageUrl: data.publicUrl, imagePath } };
+  // Same URL getPublicUrl() would return (bucket must be public)
+  const imageUrl = `${supabaseUrl}/storage/v1/object/public/${IMAGE_BUCKET}/${imagePath}`;
+  return { ok: true, image: { imageUrl, imagePath } };
 }
 export async function createCategory(
   _prev: ActionState,
@@ -157,7 +144,6 @@ async function removeImage(imagePath?: string | null): Promise<void> {
     console.error('Error removing image:', err);
   }
 }
-
 export async function updateCategory(
   id: string,
   _prev: ActionState,
