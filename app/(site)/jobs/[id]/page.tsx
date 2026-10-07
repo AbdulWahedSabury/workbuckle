@@ -19,8 +19,8 @@ import HeroBackground from "@/components/motion/HeroBackground"; // Create stand
 import { fetchJob } from "@/queries/job";
 
 const COMPANY_NAME = "Mavromatis Employment Bureau";
-const DEFAULT_LOCATION = "Larnaca";
-const DEFAULT_SCHEDULE = "full_time";
+const DEFAULT_LOCATION = "Cyprus";
+const DEFAULT_SCHEDULE = "";
 
 const SCHEDULE_STYLES: Record<string, string> = {
   full_time: "bg-primary text-ink",

@@ -13,6 +13,9 @@ const CATEGORIES = [
   "front_office",
   "food_&_beverage_culinary",
   "housekeeping_&_operations",
+  "casino_table_games",
+  "front_office_&_concierge",
+  "food_&_beverage"
 ] as const;
 
 export default function AvailablePositions() {

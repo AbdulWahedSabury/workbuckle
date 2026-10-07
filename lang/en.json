@@ -87,7 +87,7 @@
         "eyebrow": "Job Categories",
         "categories": {
           "front_office": {
-            "title": "Front Office & Guest Experience",
+            "title": "Front Office and Concierge Team",
             "img": "/images/available/front-desk.jpg",
             "intro": "Front Office & Guest Experience includes roles focused on welcoming guests, managing check-ins/check-outs, resolving inquiries, and providing exceptional customer service to ensure a smooth, positive stay.",
             "cta": "Explore the positions & Apply",
@@ -106,12 +106,12 @@
             ]
           },
           "food_&_beverage_culinary": {
-            "title": "Food & Beverage / Culinary",
+            "title": "Food and Beverage Team",
             "img": "/images/available/beverage.jpg",
             "intro": "Food & Beverage / Culinary encompasses roles focused on food preparation, menu creation, kitchen operations, and table service, ensuring high standards of quality, safety, and dining customer service.",
             "cta": "Explore the positions & Apply",
             "image_alt": "Hospitality team working together",
-            "slug": "https://mavromatisservices.com/vacancies/",
+            "slug": "/jobs/4352464",
             "list": [
               {
                 "title": "Fine Dining Waiters & Waitresses "
@@ -125,18 +125,68 @@
             ]
           },
           "housekeeping_&_operations": {
-            "title": "Housekeeping & Operations",
+            "title": "Housekeeping Department",
             "img": "/images/available/housekeeping.jpg",
             "intro": "Housekeeping & Operations includes roles dedicated to maintaining clean, safe, and organized facilities, overseeing daily property maintenance, and managing behind-the-scenes logistics to ensure smooth property functioning.",
             "cta": "Explore the positions & Apply",
             "image_alt": "Hospitality team working together",
-            "slug": "https://mavromatisservices.com/vacancies/",
+            "slug": "/jobs/4465983",
             "list": [
               {
                 "title": "Floor Supervisors & Housekeeping Staff "
               },
               {
                 "title": "Spa Therapists & Wellness Staff"
+              }
+            ]
+          },
+           "casino_table_games": {
+            "title": "Casino Table Games - Dealer",
+            "img": "/images/available/casino.jpg",
+            "intro": "Casino Table Games roles involve delivering professional and engaging gaming experiences, managing table games with accuracy and integrity, and ensuring a welcoming and entertaining environment for guests.",
+            "cta": "Explore the positions & Apply",
+            "image_alt": "Casino dealer managing a table game",
+            "slug": "/jobs/1637382",
+            "list": [
+              {
+                "title": "Casino Table Games - Dealer"
+              }
+            ]
+          },
+
+          "food_&_beverage": {
+            "title": "Food & Beverage Positions",
+            "img": "/images/available/beverage.jpg",
+            "intro": "Food & Beverage roles focus on delivering excellent dining experiences, providing attentive guest service, preparing and serving drinks and food, and supporting the smooth operation of restaurants and hospitality venues.",
+            "cta": "Explore the positions & Apply",
+            "image_alt": "Food and beverage team serving guests",
+            "slug": "/jobs/3997510",
+            "list": [
+              {
+                "title": "Waiter"
+              },
+              {
+                "title": "Bartender"
+              },
+              {
+                "title": "F&B Supervisor"
+              }
+            ]
+          },
+
+          "front_office_&_concierge": {
+            "title": "Front Office and Concierge Team",
+            "img": "/images/available/front-desk.jpg",
+            "intro": "Front Office and Concierge roles are responsible for creating a warm first impression, assisting guests with their needs, managing front desk operations, and providing professional information and personalized services throughout their stay.",
+            "cta": "Explore the positions & Apply",
+            "image_alt": "Front office and concierge team assisting guests",
+            "slug": "/jobs/4441934",
+            "list": [
+              {
+                "title": "Front Office Staff"
+              },
+              {
+                "title": "Concierge Team"
               }
             ]
           }

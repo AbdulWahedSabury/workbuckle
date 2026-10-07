@@ -26,8 +26,8 @@ interface JobRowProps {
   job:JobDetailsResponse;
 }
 export default function JobRow({ job }: JobRowProps) {
-  const displayLocation = job.city || "Larnaca"; 
-  const displayScheduleTag = job.contract_details || "full_time";
+  const displayLocation = job.city || "Cyprus"; 
+  const displayScheduleTag = job.contract_details || "";
   const displayScheduleLabel = formatSchedule(displayScheduleTag);
   
   const displaySalary = "€1,500 Gross (Neg.)";
