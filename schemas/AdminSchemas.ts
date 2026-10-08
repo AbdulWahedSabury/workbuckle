@@ -61,6 +61,13 @@ export const citySchema = z.object({
   state: optionalText(120),
 });
 
+// ─── Job types ───────────────────────────────────────────────────────────────
+
+export const jobTypeSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required.').max(120),
+  slug,
+});
+
 // ─── Site settings ───────────────────────────────────────────────────────────
 
 export const siteSettingSchema = z.object({

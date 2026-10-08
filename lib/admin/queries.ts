@@ -185,6 +185,56 @@ export async function getCity(id: string) {
   return prisma.city.findUnique({ where: { id } });
 }
 
+export type JobTypeWithCount = Prisma.JobTypeGetPayload<{
+  include: { _count: { select: { jobs: true } } };
+}>;
+
+export const JOB_TYPE_SORT_KEYS = ['name', 'slug', 'jobs', 'updatedAt'] as const;
+export type JobTypeSortKey = (typeof JOB_TYPE_SORT_KEYS)[number];
+
+const jobTypeOrderBy: Record<
+  JobTypeSortKey,
+  (dir: SortDir) => Prisma.JobTypeOrderByWithRelationInput[]
+> = {
+  name: (dir) => [{ name: dir }],
+  slug: (dir) => [{ slug: dir }],
+  jobs: (dir) => [{ jobs: { _count: dir } }, { name: 'asc' }],
+  updatedAt: (dir) => [{ updatedAt: dir }],
+};
+
+/** One page of job types matching `q` by name or slug. Default order is by name. */
+export async function listJobTypes(
+  params: ListParams<JobTypeSortKey>
+): Promise<Paginated<JobTypeWithCount>> {
+  await requireAdmin();
+  const { q, sort } = params;
+  const where: Prisma.JobTypeWhereInput | undefined = q
+    ? {
+        OR: [
+          { name: { contains: q, mode: 'insensitive' } },
+          { slug: { contains: q, mode: 'insensitive' } },
+        ],
+      }
+    : undefined;
+
+  const total = await prisma.jobType.count({ where });
+  const { skip, take, ...info } = paginate(params, total);
+  const rows = await prisma.jobType.findMany({
+    where,
+    orderBy: [...(sort ? jobTypeOrderBy[sort.key](sort.dir) : [{ name: 'asc' as const }]), { id: 'asc' }],
+    include: { _count: { select: { jobs: true } } },
+    skip,
+    take,
+  });
+  return { ...info, rows };
+}
+
+export async function getJobType(id: string) {
+  await requireAdmin();
+  if (!UUID_RE.test(id)) return null;
+  return prisma.jobType.findUnique({ where: { id } });
+}
+
 export async function getSiteSettings() {
   await requireAdmin();
   return prisma.siteSetting.findUnique({ where: { id: SITE_SETTING_ID } });

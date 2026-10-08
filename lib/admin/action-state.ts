@@ -9,3 +9,6 @@ export type ActionState = {
 };
 
 export const initialActionState: ActionState = {};
+
+/** Result of a row delete that can be refused, e.g. a record still in use. */
+export type DeleteResult = { error?: string };
