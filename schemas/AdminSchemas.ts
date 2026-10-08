@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { defaultLocale, locales } from '@/types/locale';
+import { Role } from '@/lib/generated/prisma/enums';
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -168,3 +169,36 @@ export const cvFileSchema = z
     (f) => (CV_EXTENSIONS as readonly string[]).includes(f.name.split('.').pop()?.toLowerCase() ?? ''),
     'The CV must be a PDF, DOC or DOCX file.'
   );
+
+// ─── Users ───────────────────────────────────────────────────────────────────
+
+export const PASSWORD_MIN_LENGTH = 12;
+
+const email = z.string().trim().toLowerCase().email('Enter a valid email address.').max(255);
+
+const userFields = {
+  email,
+  name: optionalText(120),
+  role: z.nativeEnum(Role, { errorMap: () => ({ message: 'Choose a role.' }) }),
+};
+
+export const userCreateSchema = z.object({
+  ...userFields,
+  password: z
+    .string()
+    .min(PASSWORD_MIN_LENGTH, `Use at least ${PASSWORD_MIN_LENGTH} characters.`)
+    .max(200),
+});
+
+/** Blank password → undefined, i.e. keep the current one. */
+export const userUpdateSchema = z.object({
+  ...userFields,
+  password: z
+    .string()
+    .max(200)
+    .optional()
+    .transform((v) => (v ? v : undefined))
+    .refine((v) => v === undefined || v.length >= PASSWORD_MIN_LENGTH, {
+      message: `Use at least ${PASSWORD_MIN_LENGTH} characters, or leave blank to keep the current password.`,
+    }),
+});

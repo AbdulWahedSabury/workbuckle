@@ -1,5 +1,6 @@
+import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/admin/auth';
+import { requireAdmin, requireView } from '@/lib/admin/auth';
 import { paginate, type ListParams, type Paginated, type SortDir } from '@/lib/admin/list-params';
 import type { Prisma } from '@/lib/generated/prisma/client';
 import { defaultLocale } from '@/types/locale';
@@ -12,15 +13,89 @@ const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function getAdminCounts() {
-  await requireAdmin();
-  const [categories, activeCategories, cities, jobs, publishedJobs] = await Promise.all([
+  await requireView('dashboard');
+  const [categories, activeCategories, cities, jobs, publishedJobs, candidates] = await Promise.all([
     prisma.jobCategory.count(),
     prisma.jobCategory.count({ where: { isActive: true } }),
     prisma.city.count(),
     prisma.job.count(),
     prisma.job.count({ where: { status: 'published' } }),
+    prisma.candidate.count(),
   ]);
-  return { categories, activeCategories, cities, jobs, publishedJobs };
+  return { categories, activeCategories, cities, jobs, publishedJobs, candidates };
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** UTC calendar day, e.g. "2026-10-08"; the key the activity chart buckets by. */
+function dayKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+export type ActivityDay = { date: string; count: number };
+
+/**
+ * Candidate activity for the dashboard: counts per status, applications per
+ * day for the last `days` days (oldest first), this week against last week,
+ * the newest applications and the jobs with the most applicants. Cached per
+ * request, since several dashboard widgets read it.
+ */
+export const getCandidateInsights = cache(async (days = 14) => {
+  await requireView('candidates');
+  const now = new Date();
+  const todayStart = new Date(`${dayKey(now)}T00:00:00.000Z`);
+  const since = new Date(todayStart.getTime() - (days - 1) * DAY_MS);
+  const weekAgo = new Date(now.getTime() - 7 * DAY_MS);
+  const twoWeeksAgo = new Date(now.getTime() - 14 * DAY_MS);
+
+  const [byStatus, recentDates, thisWeek, lastWeek, latest, topJobs] = await Promise.all([
+    prisma.candidate.groupBy({ by: ['status'], _count: { _all: true } }),
+    prisma.candidate.findMany({ where: { createdAt: { gte: since } }, select: { createdAt: true } }),
+    prisma.candidate.count({ where: { createdAt: { gte: weekAgo } } }),
+    prisma.candidate.count({ where: { createdAt: { gte: twoWeeksAgo, lt: weekAgo } } }),
+    prisma.candidate.findMany({
+      orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+      take: 5,
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        status: true,
+        createdAt: true,
+        job: { select: { title: true } },
+      },
+    }),
+    prisma.job.findMany({
+      where: { candidates: { some: {} } },
+      orderBy: [{ candidates: { _count: 'desc' } }, { updatedAt: 'desc' }],
+      take: 5,
+      select: { id: true, title: true, status: true, _count: { select: { candidates: true } } },
+    }),
+  ]);
+
+  const perDay = new Map<string, number>();
+  for (const { createdAt } of recentDates) {
+    const key = dayKey(createdAt);
+    perDay.set(key, (perDay.get(key) ?? 0) + 1);
+  }
+  const activity: ActivityDay[] = Array.from({ length: days }, (_, i) => {
+    const date = dayKey(new Date(since.getTime() + i * DAY_MS));
+    return { date, count: perDay.get(date) ?? 0 };
+  });
+
+  const statusCounts = { pending: 0, success: 0, rejected: 0 } as Record<string, number>;
+  for (const row of byStatus) statusCounts[row.status] = row._count._all;
+
+  return { statusCounts, activity, thisWeek, lastWeek, latest, topJobs };
+});
+
+/** Jobs per status (draft | published | closed). */
+export async function getJobStatusCounts(): Promise<Record<string, number>> {
+  await requireView('jobs');
+  const rows = await prisma.job.groupBy({ by: ['status'], _count: { _all: true } });
+  const counts: Record<string, number> = { published: 0, draft: 0, closed: 0 };
+  for (const row of rows) counts[row.status] = row._count._all;
+  return counts;
 }
 
 export type RecentChange = {
@@ -33,7 +108,7 @@ export type RecentChange = {
 
 /** Most recently edited categories and cities, newest first. */
 export async function listRecentChanges(limit = 6): Promise<RecentChange[]> {
-  await requireAdmin();
+  await requireView('categories');
   const [categories, cities] = await Promise.all([
     prisma.jobCategory.findMany({
       orderBy: { updatedAt: 'desc' },
@@ -103,7 +178,7 @@ const nameCollator = new Intl.Collator(defaultLocale, { sensitivity: 'base', num
 export async function listCategories(
   params: ListParams<CategorySortKey>
 ): Promise<Paginated<CategoryWithTranslations>> {
-  await requireAdmin();
+  await requireView('categories');
   const { q, sort } = params;
   const where: Prisma.JobCategoryWhereInput | undefined = q
     ? {
@@ -142,7 +217,7 @@ export async function listCategories(
 }
 
 export async function getCategory(id: string) {
-  await requireAdmin();
+  await requireView('categories');
   if (!UUID_RE.test(id)) return null;
   return prisma.jobCategory.findUnique({
     where: { id },
@@ -167,7 +242,7 @@ export type CityWithCount = Prisma.CityGetPayload<{
 }>;
 
 export async function listCities(params: ListParams<CitySortKey>): Promise<Paginated<CityWithCount>> {
-  await requireAdmin();
+  await requireView('cities');
   const { q, sort } = params;
   const where: Prisma.CityWhereInput | undefined = q
     ? {
@@ -192,7 +267,7 @@ export async function listCities(params: ListParams<CitySortKey>): Promise<Pagin
 }
 
 export async function getCity(id: string) {
-  await requireAdmin();
+  await requireView('cities');
   if (!UUID_RE.test(id)) return null;
   return prisma.city.findUnique({ where: { id } });
 }
@@ -218,7 +293,7 @@ const jobTypeOrderBy: Record<
 export async function listJobTypes(
   params: ListParams<JobTypeSortKey>
 ): Promise<Paginated<JobTypeWithCount>> {
-  await requireAdmin();
+  await requireView('jobTypes');
   const { q, sort } = params;
   const where: Prisma.JobTypeWhereInput | undefined = q
     ? {
@@ -242,7 +317,7 @@ export async function listJobTypes(
 }
 
 export async function getJobType(id: string) {
-  await requireAdmin();
+  await requireView('jobTypes');
   if (!UUID_RE.test(id)) return null;
   return prisma.jobType.findUnique({ where: { id } });
 }
@@ -268,7 +343,7 @@ const jobOrderBy: Record<JobSortKey, (dir: SortDir) => Prisma.JobOrderByWithRela
 
 /** One page of jobs matching `q` by title, city or type. Default order is newest edit first. */
 export async function listJobs(params: ListParams<JobSortKey>): Promise<Paginated<JobListRow>> {
-  await requireAdmin();
+  await requireView('jobs');
   const { q, sort } = params;
   const where: Prisma.JobWhereInput | undefined = q
     ? {
@@ -296,7 +371,7 @@ export async function listJobs(params: ListParams<JobSortKey>): Promise<Paginate
 }
 
 export async function getJob(id: string) {
-  await requireAdmin();
+  await requireView('jobs');
   if (!UUID_RE.test(id)) return null;
   return prisma.job.findUnique({ where: { id } });
 }
@@ -336,7 +411,7 @@ export async function getJobFormOptions(currentCategoryId?: string) {
 }
 
 export async function getSiteSettings() {
-  await requireAdmin();
+  await requireView('settings');
   return prisma.siteSetting.findUnique({ where: { id: SITE_SETTING_ID } });
 }
 
@@ -366,7 +441,7 @@ export async function listCandidates(
   params: ListParams<CandidateSortKey>,
   jobId?: string
 ): Promise<Paginated<CandidateListRow>> {
-  await requireAdmin();
+  await requireView('candidates');
   const { q, sort } = params;
   const where: Prisma.CandidateWhereInput = {
     ...(jobId ? { jobId } : {}),
@@ -411,11 +486,64 @@ export async function getCandidateJobOptions(): Promise<SelectOption[]> {
 }
 
 export async function getCandidate(id: string) {
-  await requireAdmin();
+  await requireView('candidates');
   return prisma.candidate.findUnique({
     where: { id },
     include: {
       job: { select: { id: true, title: true, city: { select: { name: true } } } },
     },
   });
+}
+
+// ─── Users ───────────────────────────────────────────────────────────────────
+
+const userListSelect = {
+  id: true,
+  email: true,
+  name: true,
+  role: true,
+  createdAt: true,
+} satisfies Prisma.UserSelect;
+
+export type UserListRow = Prisma.UserGetPayload<{ select: typeof userListSelect }>;
+
+export const USER_SORT_KEYS = ['email', 'name', 'role', 'createdAt'] as const;
+export type UserSortKey = (typeof USER_SORT_KEYS)[number];
+
+const userOrderBy: Record<UserSortKey, (dir: SortDir) => Prisma.UserOrderByWithRelationInput[]> = {
+  email: (dir) => [{ email: dir }],
+  name: (dir) => [{ name: { sort: dir, nulls: 'last' } }, { email: 'asc' }],
+  role: (dir) => [{ role: dir }, { email: 'asc' }],
+  createdAt: (dir) => [{ createdAt: dir }],
+};
+
+/** One page of users matching `q` by email or name. Default order is by email. */
+export async function listUsers(params: ListParams<UserSortKey>): Promise<Paginated<UserListRow>> {
+  await requireView('users');
+  const { q, sort } = params;
+  const where: Prisma.UserWhereInput | undefined = q
+    ? {
+        OR: [
+          { email: { contains: q, mode: 'insensitive' } },
+          { name: { contains: q, mode: 'insensitive' } },
+        ],
+      }
+    : undefined;
+
+  const total = await prisma.user.count({ where });
+  const { skip, take, ...info } = paginate(params, total);
+  const rows = await prisma.user.findMany({
+    where,
+    orderBy: [...(sort ? userOrderBy[sort.key](sort.dir) : [{ email: 'asc' as const }]), { id: 'asc' }],
+    select: userListSelect,
+    skip,
+    take,
+  });
+  return { ...info, rows };
+}
+
+export async function getUser(id: string) {
+  await requireView('users');
+  if (!UUID_RE.test(id)) return null;
+  return prisma.user.findUnique({ where: { id }, select: userListSelect });
 }

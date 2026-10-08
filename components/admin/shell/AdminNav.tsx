@@ -2,27 +2,33 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Briefcase, BriefcaseBusiness, LayoutDashboard, MapPin, Settings, Tags, Users, type LucideIcon } from "lucide-react";
+import { Briefcase, BriefcaseBusiness, LayoutDashboard, MapPin, Settings, ShieldCheck, Tags, Users, type LucideIcon } from "lucide-react";
+import type { Role } from "@/lib/generated/prisma/enums";
+import { canView, type AdminSection } from "@/lib/auth/roles";
 import { cn } from "@/lib/utils";
 
-type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean };
+type NavItem = { href: string; label: string; icon: LucideIcon; section: AdminSection; exact?: boolean };
 
 const NAV_ITEMS: readonly NavItem[] = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/admin/jobs", label: "Jobs", icon: BriefcaseBusiness },
-  { href: "/admin/candidates", label: "Candidates", icon: Users },
-  { href: "/admin/categories", label: "Job categories", icon: Tags },
-  { href: "/admin/job-types", label: "Job types", icon: Briefcase },
-  { href: "/admin/cities", label: "Cities", icon: MapPin },
-  { href: "/admin/settings", label: "Site settings", icon: Settings },
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard, section: "dashboard", exact: true },
+  { href: "/admin/jobs", label: "Jobs", icon: BriefcaseBusiness, section: "jobs" },
+  { href: "/admin/candidates", label: "Candidates", icon: Users, section: "candidates" },
+  { href: "/admin/categories", label: "Job categories", icon: Tags, section: "categories" },
+  { href: "/admin/job-types", label: "Job types", icon: Briefcase, section: "jobTypes" },
+  { href: "/admin/cities", label: "Cities", icon: MapPin, section: "cities" },
+  { href: "/admin/settings", label: "Site settings", icon: Settings, section: "settings" },
+  { href: "/admin/users", label: "Users", icon: ShieldCheck, section: "users" },
 ];
 
 function isActive(pathname: string, { href, exact }: NavItem) {
   return exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** Admin section links. The active item uses the site's dark pill (see JobFilterTabs). */
-export default function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
+/**
+ * Admin section links, filtered to what `role` may open. The active item uses
+ * the site's dark pill (see JobFilterTabs).
+ */
+export default function AdminNav({ role, onNavigate }: { role: Role; onNavigate?: () => void }) {
   const pathname = usePathname();
 
   return (
@@ -31,7 +37,7 @@ export default function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
         Manage
       </p>
       <ul className="flex flex-col gap-1">
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.filter((item) => canView(role, item.section)).map((item) => {
           const active = isActive(pathname, item);
           const Icon = item.icon;
           return (

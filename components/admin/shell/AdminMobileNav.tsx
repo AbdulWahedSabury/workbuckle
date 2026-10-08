@@ -3,9 +3,11 @@
 import { useRef } from "react";
 import { Menu, X } from "lucide-react";
 import Logo from "@/components/ui/Logo";
+import type { Role } from "@/lib/generated/prisma/enums";
 import { cn } from "@/lib/utils";
 import { iconButtonClass } from "../styles";
 import AdminNav from "./AdminNav";
+import SignOutButton from "./SignOutButton";
 import ThemeToggle from "./ThemeToggle";
 import ViewSiteLink from "./ViewSiteLink";
 
@@ -13,7 +15,7 @@ import ViewSiteLink from "./ViewSiteLink";
  * Top bar + slide-in drawer for screens below `lg`. A modal <dialog> gives
  * focus trapping, Escape-to-close and an inert background without extra code.
  */
-export default function AdminMobileNav() {
+export default function AdminMobileNav({ user }: { user: { email: string; role: Role } }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const close = () => dialogRef.current?.close();
 
@@ -49,10 +51,11 @@ export default function AdminMobileNav() {
               <X aria-hidden="true" />
             </button>
           </div>
-          <AdminNav onNavigate={close} />
+          <AdminNav role={user.role} onNavigate={close} />
           <div className="mt-auto flex flex-col gap-4">
             <ThemeToggle />
             <ViewSiteLink />
+            <SignOutButton user={user} />
           </div>
         </div>
       </dialog>

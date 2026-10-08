@@ -10,6 +10,7 @@ import {
 } from "@/lib/admin/queries";
 import { DataTable, type Column } from "@/components/admin/data-table";
 import { DeleteButton } from "@/components/admin/buttons";
+import { viewerCanEdit } from "@/lib/admin/auth";
 import EmptyState from "@/components/admin/EmptyState";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { iconButtonClass } from "@/components/admin/styles";
@@ -71,8 +72,14 @@ const columns: Column<JobTypeWithCount, JobTypeSortKey>[] = [
         </Link>
         <DeleteButton
           action={deleteJobType.bind(null, type.id)}
-          confirmMessage={`Delete "${type.name}"?`}
+          title="Delete this job type?"
+          description={
+            <>
+              <strong>{type.name}</strong> will be permanently removed from the job types.
+            </>
+          }
           label={`Delete ${type.name}`}
+          successMessage="Job type deleted."
           disabledReason={
             type._count.jobs > 0 ? "In use by jobs — reassign them first" : undefined
           }
@@ -89,11 +96,13 @@ export default async function JobTypesTable({
 }) {
   const params = parseListParams(await searchParams, JOB_TYPE_SORT_KEYS);
   const { rows, ...pageInfo } = await listJobTypes(params);
+  const canEdit = await viewerCanEdit();
 
   return (
     <DataTable
       caption="Job types"
-      columns={columns}
+      // Read-only roles get no Actions column: it only holds edit/delete.
+      columns={canEdit ? columns : columns.filter((c) => c.id !== "actions")}
       rows={rows}
       getRowKey={(type) => type.id}
       pagination={{ ...pageInfo, itemLabel: "job types" }}

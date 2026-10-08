@@ -44,12 +44,14 @@ export function TextField({
   type = "text",
   placeholder,
   dir,
+  autoComplete,
   ...base
 }: BaseProps & {
   defaultValue?: string | number | null;
   type?: string;
   placeholder?: string;
   dir?: string;
+  autoComplete?: string;
 }) {
   return (
     <FieldShell {...base}>
@@ -58,6 +60,7 @@ export function TextField({
         name={base.name}
         type={type}
         dir={dir}
+        autoComplete={autoComplete}
         placeholder={placeholder}
         required={base.required}
         defaultValue={defaultValue ?? ""}

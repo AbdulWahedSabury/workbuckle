@@ -119,6 +119,11 @@
     scroll-behavior: smooth;
   }
 
+  /* No page scroll behind an open modal (ConfirmDialog). */
+  html:has(dialog:modal) {
+    overflow: hidden;
+  }
+
   /* 🛠️ FIX 2: Explicitly hardcode Roboto to the body tag to bypass fallback delays */
   body {
     font-family: var(--next-font-roboto), sans-serif;

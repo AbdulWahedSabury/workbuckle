@@ -10,6 +10,7 @@ import {
 } from "@/lib/admin/queries";
 import { DataTable, type Column } from "@/components/admin/data-table";
 import { DeleteButton } from "@/components/admin/buttons";
+import { viewerCanEdit } from "@/lib/admin/auth";
 import EmptyState from "@/components/admin/EmptyState";
 import { iconButtonClass } from "@/components/admin/styles";
 import { formatDate } from "./format";
@@ -63,8 +64,14 @@ const columns: Column<CityWithCount, CitySortKey>[] = [
         </Link>
         <DeleteButton
           action={deleteCity.bind(null, city.id)}
-          confirmMessage={`Delete "${city.name}"?`}
+          title="Delete this city?"
+          description={
+            <>
+              <strong>{city.name}</strong> will be permanently removed from the city list.
+            </>
+          }
           label={`Delete ${city.name}`}
+          successMessage="City deleted."
           disabledReason={
             city._count.jobs > 0 ? "In use by jobs — reassign them first" : undefined
           }
@@ -81,11 +88,13 @@ export default async function CitiesTable({
 }) {
   const params = parseListParams(await searchParams, CITY_SORT_KEYS);
   const { rows, ...pageInfo } = await listCities(params);
+  const canEdit = await viewerCanEdit();
 
   return (
     <DataTable
       caption="Cities"
-      columns={columns}
+      // Read-only roles get no Actions column: it only holds edit/delete.
+      columns={canEdit ? columns : columns.filter((c) => c.id !== "actions")}
       rows={rows}
       getRowKey={(city) => city.id}
       pagination={{ ...pageInfo, itemLabel: "cities" }}

@@ -4,6 +4,7 @@ import { deleteJob } from "@/lib/admin/actions/jobs";
 import { parseListParams } from "@/lib/admin/list-params";
 import { JOB_SORT_KEYS, listJobs, type JobListRow, type JobSortKey } from "@/lib/admin/queries";
 import { DataTable, type Column } from "@/components/admin/data-table";
+import AdminOnly from "@/components/admin/AdminOnly";
 import { DeleteButton } from "@/components/admin/buttons";
 import EmptyState from "@/components/admin/EmptyState";
 import StatusBadge, { type StatusTone } from "@/components/admin/StatusBadge";
@@ -83,19 +84,30 @@ const columns: Column<JobListRow, JobSortKey>[] = [
             </span>
           )}
         </Link>
-        <Link
-          href={`/admin/jobs/${job.id}/edit`}
-          aria-label={`Edit ${job.title}`}
-          title="Edit"
-          className={iconButtonClass}
-        >
-          <Pencil aria-hidden="true" />
-        </Link>
-        <DeleteButton
-          action={deleteJob.bind(null, job.id)}
-          confirmMessage={`Delete "${job.title}"?`}
-          label={`Delete ${job.title}`}
-        />
+        <AdminOnly>
+          <Link
+            href={`/admin/jobs/${job.id}/edit`}
+            aria-label={`Edit ${job.title}`}
+            title="Edit"
+            className={iconButtonClass}
+          >
+            <Pencil aria-hidden="true" />
+          </Link>
+          <DeleteButton
+            action={deleteJob.bind(null, job.id)}
+            title="Delete this job?"
+            description={
+              <>
+                <strong>{job.title}</strong> will be permanently deleted
+                {job._count.candidates > 0 &&
+                  `, along with its ${job._count.candidates} ${job._count.candidates === 1 ? "candidate" : "candidates"}`}
+                .
+              </>
+            }
+            label={`Delete ${job.title}`}
+            successMessage="Job deleted."
+          />
+        </AdminOnly>
       </div>
     ),
   },

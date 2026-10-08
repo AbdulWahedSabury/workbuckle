@@ -40,9 +40,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`h-full ${inter.variable} ${poppins.variable} ${roboto.variable}`}
     >
-      <body className="antialiased">
+      <body className="antialiased" 
+      suppressHydrationWarning>
         <QueryProvider>
           <NextIntlClientProvider>
             {children}

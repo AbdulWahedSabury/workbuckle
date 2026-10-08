@@ -9,6 +9,7 @@ import {
   type CandidateSortKey,
 } from "@/lib/admin/queries";
 import { DataTable, type Column } from "@/components/admin/data-table";
+import AdminOnly from "@/components/admin/AdminOnly";
 import { DeleteButton } from "@/components/admin/buttons";
 import CandidateStatusSelect from "@/components/admin/CandidateStatusSelect";
 import EmptyState from "@/components/admin/EmptyState";
@@ -52,9 +53,24 @@ const columns: Column<CandidateListRow, CandidateSortKey>[] = [
     sortKey: "job",
     hideBelow: "md",
     cell: (c) => (
-      <Link href={`/admin/jobs/${c.job.id}/edit`} className="font-medium text-ink hover:underline">
-        {c.job.title}
-      </Link>
+      // Read-only roles can't open the job editor; link to its applicants instead.
+      <AdminOnly
+        fallback={
+          <Link
+            href={`/admin/candidates?job=${c.job.id}`}
+            className="font-medium text-ink hover:underline"
+          >
+            {c.job.title}
+          </Link>
+        }
+      >
+        <Link
+          href={`/admin/jobs/${c.job.id}/edit`}
+          className="font-medium text-ink hover:underline"
+        >
+          {c.job.title}
+        </Link>
+      </AdminOnly>
     ),
   },
   {
@@ -66,7 +82,9 @@ const columns: Column<CandidateListRow, CandidateSortKey>[] = [
       return (
         <div className="flex flex-col items-start gap-2">
           <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
-          <CandidateStatusSelect id={c.id} status={c.status} name={fullName(c)} />
+          <AdminOnly>
+            <CandidateStatusSelect id={c.id} status={c.status} name={fullName(c)} />
+          </AdminOnly>
         </div>
       );
     },
@@ -108,11 +126,20 @@ const columns: Column<CandidateListRow, CandidateSortKey>[] = [
         >
           <ExternalLink aria-hidden="true" />
         </a>
-        <DeleteButton
-          action={deleteCandidate.bind(null, c.id)}
-          confirmMessage={`Delete candidate "${fullName(c)}" and their CV?`}
-          label={`Delete ${fullName(c)}`}
-        />
+        <AdminOnly>
+          <DeleteButton
+            action={deleteCandidate.bind(null, c.id)}
+            title="Delete this candidate?"
+            description={
+              <>
+                <strong>{fullName(c)}</strong>&rsquo;s application and uploaded CV will be
+                permanently deleted.
+              </>
+            }
+            label={`Delete ${fullName(c)}`}
+            successMessage="Candidate deleted."
+          />
+        </AdminOnly>
       </div>
     ),
   },

@@ -1,17 +1,21 @@
 import type { ReactNode } from "react";
 import Logo from "@/components/ui/Logo";
 import type { AdminTheme } from "@/lib/admin/theme";
+import type { Role } from "@/lib/generated/prisma/enums";
 import AdminMobileNav from "./AdminMobileNav";
 import AdminNav from "./AdminNav";
 import AdminThemeProvider from "./AdminThemeProvider";
+import SignOutButton from "./SignOutButton";
 import ThemeToggle from "./ThemeToggle";
 import ViewSiteLink from "./ViewSiteLink";
 
 export default function AdminShell({
   theme,
+  user,
   children,
 }: {
   theme: AdminTheme;
+  user: { email: string; role: Role };
   children: ReactNode;
 }) {
   return (
@@ -30,15 +34,16 @@ export default function AdminShell({
             Admin
           </span>
         </div>
-        <AdminNav />
+        <AdminNav role={user.role} />
         <div className="mt-auto flex flex-col gap-4">
           <ThemeToggle />
           <ViewSiteLink />
+          <SignOutButton user={user} />
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <AdminMobileNav />
+        <AdminMobileNav user={user} />
         <main id="admin-main" className="w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
           {children}
         </main>

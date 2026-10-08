@@ -10,6 +10,7 @@ import {
 } from "@/lib/admin/queries";
 import { DataTable, type Column } from "@/components/admin/data-table";
 import { DeleteButton } from "@/components/admin/buttons";
+import { viewerCanEdit } from "@/lib/admin/auth";
 import EmptyState from "@/components/admin/EmptyState";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { iconButtonClass } from "@/components/admin/styles";
@@ -126,8 +127,15 @@ const columns: Column<CategoryRow, CategorySortKey>[] = [
         </Link>
         <DeleteButton
           action={deleteCategory.bind(null, category.id)}
-          confirmMessage={`Delete "${category.name}" and all its translations?`}
+          title="Delete this category?"
+          description={
+            <>
+              <strong>{category.name}</strong> and all of its translations will be permanently
+              deleted.
+            </>
+          }
           label={`Delete ${category.name}`}
+          successMessage="Category deleted."
           disabledReason={
             category._count.jobs > 0 ? "In use by jobs — reassign them first" : undefined
           }
@@ -144,6 +152,7 @@ export default async function CategoriesTable({
 }) {
   const params = parseListParams(await searchParams, CATEGORY_SORT_KEYS);
   const { rows: categories, ...pageInfo } = await listCategories(params);
+  const canEdit = await viewerCanEdit();
   const rows: CategoryRow[] = categories.map((category) => ({
     ...category,
     name: categoryDisplayName(category),
@@ -153,7 +162,8 @@ export default async function CategoriesTable({
   return (
     <DataTable
       caption="Job categories"
-      columns={columns}
+      // Read-only roles get no Actions column: it only holds edit/delete.
+      columns={canEdit ? columns : columns.filter((c) => c.id !== "actions")}
       rows={rows}
       getRowKey={(category) => category.id}
       pagination={{ ...pageInfo, itemLabel: "categories" }}

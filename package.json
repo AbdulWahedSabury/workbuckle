@@ -10,9 +10,11 @@
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "admin:create": "tsx scripts/create-admin.ts"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.11.3",
     "@hookform/resolvers": "^5.9.1",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
@@ -30,6 +32,7 @@
     "framer-motion": "^13.5.0",
     "lucide-react": "^1.47.0",
     "next": "16.3.6",
+    "next-auth": "5.0.0-beta.32",
     "next-intl": "^4.14.7",
     "nodemailer": "^10.0.14",
     "pg": "^8.23.1",
@@ -54,6 +57,7 @@
     "eslint-config-next": "^14.2.35",
     "prisma": "^7.10.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   }
 }

@@ -10,7 +10,14 @@ import { fieldsetClass, legendClass } from "./styles";
 
 type Settings = Omit<SiteSetting, "id" | "createdAt" | "updatedAt">;
 
-export default function SettingsForm({ settings }: { settings: Settings }) {
+export default function SettingsForm({
+  settings,
+  readOnly = false,
+}: {
+  settings: Settings;
+  /** Read-only roles see the values with every field disabled. */
+  readOnly?: boolean;
+}) {
   const [state, formAction] = useActionState(
     updateSiteSettings,
     initialActionState
@@ -21,8 +28,10 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
 
   return (
     <form action={formAction} className="flex max-w-2xl flex-col gap-6">
-      <FormMessage message={state.message} />
+      <FormMessage message={readOnly ? "You have read-only access to settings." : state.message} />
 
+      {/* A disabled outer fieldset disables every control inside it. */}
+      <fieldset disabled={readOnly} className="flex flex-col gap-6">
       <fieldset className={fieldsetClass}>
         <legend className={legendClass}>
           General
@@ -89,10 +98,13 @@ export default function SettingsForm({ settings }: { settings: Settings }) {
           error={errors.maintenanceMessage}
         />
       </fieldset>
+      </fieldset>
 
-      <div>
-        <SubmitButton>Save settings</SubmitButton>
-      </div>
+      {!readOnly && (
+        <div>
+          <SubmitButton>Save settings</SubmitButton>
+        </div>
+      )}
     </form>
   );
 }
