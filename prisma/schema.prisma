@@ -94,12 +94,38 @@ model Job {
   city             City        @relation(fields: [cityId], references: [id], onDelete: Restrict)
   jobType          JobType     @relation(fields: [jobTypeId], references: [id], onDelete: Restrict)
   jobCategory      JobCategory @relation(fields: [jobCategoryId], references: [id], onDelete: Restrict)
+  candidates       Candidate[]
 
   @@index([cityId])
   @@index([jobTypeId])
   @@index([jobCategoryId])
   @@index([status])
   @@map("jobs")
+}
+
+model Candidate {
+  id          String   @id @default(cuid())
+  firstName   String   @map("first_name") @db.VarChar(120)
+  lastName    String   @map("last_name") @db.VarChar(120)
+  phone       String   @db.VarChar(40)
+  email       String   @db.VarChar(255)
+  linkedin    String?  @map("linkedin_url") @db.VarChar(2048)
+  // Public URL of the CV in Supabase Storage; cvPath is the object key used to remove it.
+  cvUrl       String   @map("cv_url") @db.VarChar(2048)
+  cvPath      String?  @map("cv_path") @db.VarChar(1024)
+  coverLetter String?  @map("cover_letter") @db.Text
+  // pending | rejected | success — validated in schemas/AdminSchemas.ts.
+  status      String   @default("pending") @db.VarChar(20)
+  jobId       String   @map("job_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  // Cascade keeps deleteJob working; candidates go with their job.
+  job         Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("candidates")
 }
 
 model SiteSetting {

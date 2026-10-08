@@ -126,3 +126,45 @@ export const siteSettingSchema = z.object({
   maintenanceMode: checkbox,
   maintenanceMessage: optionalText(2000),
 });
+
+// ─── Candidates ──────────────────────────────────────────────────────────────
+
+export const CANDIDATE_STATUSES = ['pending', 'rejected', 'success'] as const;
+export type CandidateStatus = (typeof CANDIDATE_STATUSES)[number];
+
+export const CV_MAX_BYTES = 10 * 1024 * 1024;
+export const CV_EXTENSIONS = ['pdf', 'doc', 'docx'] as const;
+
+const requiredText = (label: string, max: number) =>
+  z.string().trim().min(1, `${label} is required.`).max(max, `${label} is too long.`);
+
+export const candidateSchema = z.object({
+  firstName: requiredText('First name', 120),
+  lastName: requiredText('Last name', 120),
+  phone: requiredText('Phone', 40).regex(/^[+\d][\d\s().-]{5,}$/, 'Enter a valid phone number.'),
+  email: z.string().trim().min(1, 'Email is required.').max(255).email('Enter a valid email address.'),
+  linkedin: z
+    .string()
+    .trim()
+    .max(2048)
+    .refine((v) => v === '' || /^https?:\/\//i.test(v), { message: 'Enter a full URL (https://…).' })
+    .optional()
+    .transform((v) => (v ? v : null)),
+  coverLetter: optionalText(10_000),
+  jobId: relationId('job'),
+  status: z
+    .enum(CANDIDATE_STATUSES, { errorMap: () => ({ message: 'Choose a status.' }) })
+    .default('pending'),
+});
+
+export const candidateStatusSchema = z.enum(CANDIDATE_STATUSES);
+
+/** The uploaded CV: required, pdf/doc/docx, at most CV_MAX_BYTES. */
+export const cvFileSchema = z
+  .instanceof(File, { message: 'Upload your CV.' })
+  .refine((f) => f.size > 0, 'Upload your CV.')
+  .refine((f) => f.size <= CV_MAX_BYTES, 'The CV must be 10 MB or smaller.')
+  .refine(
+    (f) => (CV_EXTENSIONS as readonly string[]).includes(f.name.split('.').pop()?.toLowerCase() ?? ''),
+    'The CV must be a PDF, DOC or DOCX file.'
+  );

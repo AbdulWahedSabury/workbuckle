@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Pencil, SearchX } from "lucide-react";
+import { Pencil, SearchX, Users } from "lucide-react";
 import { deleteJob } from "@/lib/admin/actions/jobs";
 import { parseListParams } from "@/lib/admin/list-params";
 import { JOB_SORT_KEYS, listJobs, type JobListRow, type JobSortKey } from "@/lib/admin/queries";
@@ -70,6 +70,19 @@ const columns: Column<JobListRow, JobSortKey>[] = [
     className: "w-px py-2",
     cell: (job) => (
       <div className="flex justify-end gap-1">
+        <Link
+          href={`/admin/candidates?job=${job.id}`}
+          aria-label={`View ${job._count.candidates} candidates for ${job.title}`}
+          title={`Candidates (${job._count.candidates})`}
+          className={`${iconButtonClass} relative`}
+        >
+          <Users aria-hidden="true" />
+          {job._count.candidates > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] leading-4 font-bold text-gray-100">
+              {job._count.candidates}
+            </span>
+          )}
+        </Link>
         <Link
           href={`/admin/jobs/${job.id}/edit`}
           aria-label={`Edit ${job.title}`}

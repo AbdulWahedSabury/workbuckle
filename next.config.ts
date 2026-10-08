@@ -4,8 +4,8 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
-      // Category image uploads go through a Server Action (default limit is 1 MB).
-      bodySizeLimit: '5mb',
+      // Category images and candidate CVs (up to 10 MB) go through Server Actions (default limit is 1 MB).
+      bodySizeLimit: '11mb',
     },
   },
   images: {

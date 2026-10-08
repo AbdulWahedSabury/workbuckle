@@ -250,6 +250,7 @@ export async function getJobType(id: string) {
 const jobListInclude = {
   city: { select: { name: true } },
   jobType: { select: { name: true } },
+  _count: { select: { candidates: true } },
 } satisfies Prisma.JobInclude;
 
 export type JobListRow = Prisma.JobGetPayload<{ include: typeof jobListInclude }>;
@@ -337,4 +338,84 @@ export async function getJobFormOptions(currentCategoryId?: string) {
 export async function getSiteSettings() {
   await requireAdmin();
   return prisma.siteSetting.findUnique({ where: { id: SITE_SETTING_ID } });
+}
+
+// ─── Candidates ──────────────────────────────────────────────────────────────
+
+const candidateListInclude = {
+  job: { select: { id: true, title: true } },
+} satisfies Prisma.CandidateInclude;
+
+export type CandidateListRow = Prisma.CandidateGetPayload<{ include: typeof candidateListInclude }>;
+
+export const CANDIDATE_SORT_KEYS = ['name', 'job', 'status', 'createdAt'] as const;
+export type CandidateSortKey = (typeof CANDIDATE_SORT_KEYS)[number];
+
+const candidateOrderBy: Record<
+  CandidateSortKey,
+  (dir: SortDir) => Prisma.CandidateOrderByWithRelationInput[]
+> = {
+  name: (dir) => [{ lastName: dir }, { firstName: dir }],
+  job: (dir) => [{ job: { title: dir } }, { createdAt: 'desc' }],
+  status: (dir) => [{ status: dir }, { createdAt: 'desc' }],
+  createdAt: (dir) => [{ createdAt: dir }],
+};
+
+/** One page of candidates matching `q` by name, email or job title. Default order is newest first. */
+export async function listCandidates(
+  params: ListParams<CandidateSortKey>,
+  jobId?: string
+): Promise<Paginated<CandidateListRow>> {
+  await requireAdmin();
+  const { q, sort } = params;
+  const where: Prisma.CandidateWhereInput = {
+    ...(jobId ? { jobId } : {}),
+    ...(q
+      ? {
+          OR: [
+            { firstName: { contains: q, mode: 'insensitive' } },
+            { lastName: { contains: q, mode: 'insensitive' } },
+            { email: { contains: q, mode: 'insensitive' } },
+            { job: { title: { contains: q, mode: 'insensitive' } } },
+          ],
+        }
+      : {}),
+  };
+
+  const total = await prisma.candidate.count({ where });
+  const { skip, take, ...info } = paginate(params, total);
+  const rows = await prisma.candidate.findMany({
+    where,
+    orderBy: [
+      ...(sort ? candidateOrderBy[sort.key](sort.dir) : [{ createdAt: 'desc' as const }]),
+      { id: 'asc' },
+    ],
+    include: candidateListInclude,
+    skip,
+    take,
+  });
+  return { ...info, rows };
+}
+
+/** Jobs a candidate can be attached to, newest first. */
+export async function getCandidateJobOptions(): Promise<SelectOption[]> {
+  await requireAdmin();
+  const jobs = await prisma.job.findMany({
+    orderBy: { createdAt: 'desc' },
+    select: { id: true, title: true, status: true },
+  });
+  return jobs.map((j) => ({
+    value: j.id,
+    label: j.status === 'published' ? j.title : `${j.title} (${j.status})`,
+  }));
+}
+
+export async function getCandidate(id: string) {
+  await requireAdmin();
+  return prisma.candidate.findUnique({
+    where: { id },
+    include: {
+      job: { select: { id: true, title: true, city: { select: { name: true } } } },
+    },
+  });
 }

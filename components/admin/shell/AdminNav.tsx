@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Briefcase, BriefcaseBusiness, LayoutDashboard, MapPin, Settings, Tags, type LucideIcon } from "lucide-react";
+import { Briefcase, BriefcaseBusiness, LayoutDashboard, MapPin, Settings, Tags, Users, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean };
@@ -10,6 +10,7 @@ type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean 
 const NAV_ITEMS: readonly NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/jobs", label: "Jobs", icon: BriefcaseBusiness },
+  { href: "/admin/candidates", label: "Candidates", icon: Users },
   { href: "/admin/categories", label: "Job categories", icon: Tags },
   { href: "/admin/job-types", label: "Job types", icon: Briefcase },
   { href: "/admin/cities", label: "Cities", icon: MapPin },
