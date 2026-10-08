@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Mirrors the public site's inputs (components/form/InputField.tsx): filled
@@ -9,7 +10,7 @@ type BaseProps = {
   name: string;
   label: string;
   error?: string[];
-  hint?: string;
+  hint?: React.ReactNode;
   required?: boolean;
 };
 
@@ -89,6 +90,49 @@ export function TextAreaField({
   );
 }
 
+export function SelectField({
+  defaultValue,
+  options,
+  placeholder,
+  ...base
+}: BaseProps & {
+  defaultValue?: string | null;
+  options: readonly { value: string; label: string }[];
+  /** Shown as an unselectable first option while nothing is chosen. */
+  placeholder?: string;
+}) {
+  return (
+    <FieldShell {...base}>
+      <div className="relative">
+        <select
+          id={base.name}
+          name={base.name}
+          required={base.required}
+          defaultValue={defaultValue ?? ""}
+          aria-invalid={base.error?.length ? true : undefined}
+          aria-describedby={base.error?.length ? `${base.name}-error` : undefined}
+          className={cn(inputClass, "cursor-pointer appearance-none pr-10")}
+        >
+          {placeholder && (
+            <option value="" disabled>
+              {placeholder}
+            </option>
+          )}
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <ChevronDown
+          aria-hidden="true"
+          className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-gray-2"
+        />
+      </div>
+    </FieldShell>
+  );
+}
+
 export function CheckboxField({
   name,
   label,
@@ -97,7 +141,7 @@ export function CheckboxField({
 }: {
   name: string;
   label: string;
-  hint?: string;
+  hint?: React.ReactNode;
   defaultChecked?: boolean;
 }) {
   return (

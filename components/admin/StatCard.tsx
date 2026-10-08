@@ -50,7 +50,7 @@ export default function StatCard({ label, value, detail, icon: Icon, href }: Sta
 
 export function StatGridSkeleton({ count = 4 }: { count?: number }) {
   return (
-    <div role="status" aria-label="Loading" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div role="status" aria-label="Loading" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
       {Array.from({ length: count }, (_, i) => (
         <div key={i} className="h-[178px] rounded-sm-card border border-line bg-white p-6">
           <span className="block size-10 animate-pulse rounded-full bg-gray-3 motion-reduce:animate-none" />

@@ -68,6 +68,45 @@ export const jobTypeSchema = z.object({
   slug,
 });
 
+// ─── Jobs ────────────────────────────────────────────────────────────────────
+
+export const JOB_STATUSES = ['draft', 'published', 'closed'] as const;
+export type JobStatus = (typeof JOB_STATUSES)[number];
+
+/** Rich-text fields, stored as (sanitized) HTML. */
+export const JOB_RICH_TEXT_FIELDS = [
+  'description',
+  'responsibilities',
+  'requirements',
+  'benefits',
+] as const;
+
+const relationId = (label: string) =>
+  z.string({ required_error: `Choose a ${label}.` }).uuid(`Choose a ${label}.`);
+
+/** Required HTML: an empty editor still submits markup like "<p></p>". */
+const richText = (label: string) =>
+  z
+    .string()
+    .max(50_000, `${label} is too long.`)
+    .refine((html) => html.replace(/<[^>]*>|&nbsp;/g, '').trim().length > 0, {
+      message: `${label} is required.`,
+    });
+
+export const jobSchema = z.object({
+  title: z.string().trim().min(1, 'Title is required.').max(200),
+  salary: z.string().trim().min(1, 'Salary is required.').max(120),
+  experience: z.string().trim().min(1, 'Experience is required.').max(120),
+  cityId: relationId('city'),
+  jobTypeId: relationId('job type'),
+  jobCategoryId: relationId('category'),
+  description: richText('Description'),
+  responsibilities: richText('Responsibilities'),
+  requirements: richText('Requirements'),
+  benefits: richText('Benefits'),
+  status: z.enum(JOB_STATUSES, { errorMap: () => ({ message: 'Choose a status.' }) }),
+});
+
 // ─── Site settings ───────────────────────────────────────────────────────────
 
 export const siteSettingSchema = z.object({

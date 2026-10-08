@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { connection } from "next/server";
-import { Eye, EyeOff, MapPin, Tags } from "lucide-react";
+import { Briefcase, Eye, EyeOff, MapPin, Tags } from "lucide-react";
 import PageHeader from "@/components/admin/PageHeader";
 import StatCard, { StatGridSkeleton } from "@/components/admin/StatCard";
 import StatusBadge from "@/components/admin/StatusBadge";
@@ -39,11 +39,11 @@ export default function AdminDashboardPage() {
 
 async function DashboardMetrics() {
   await connection();
-  const { categories, activeCategories, cities } = await getAdminCounts();
+  const { categories, activeCategories, cities, jobs, publishedJobs } = await getAdminCounts();
   const hidden = categories - activeCategories;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
       <StatCard href="/admin/categories" label="Job categories" value={categories} icon={Tags} />
       <StatCard
         href="/admin/categories?sort=status&dir=asc"
@@ -60,6 +60,13 @@ async function DashboardMetrics() {
         icon={EyeOff}
       />
       <StatCard href="/admin/cities" label="Cities" value={cities} icon={MapPin} />
+      <StatCard
+        href="/admin/jobs"
+        label="Jobs"
+        value={jobs}
+        detail={jobs ? `${publishedJobs} published` : undefined}
+        icon={Briefcase}
+      />
     </div>
   );
 }

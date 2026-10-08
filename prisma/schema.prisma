@@ -29,11 +29,11 @@ model JobCategory {
   createdAt    DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt    DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(3)
   translations JobCategoryTranslation[]
+  jobs         Job[]
 
   @@index([isActive, sortOrder])
   @@map("job_categories")
 }
-
 
 model JobCategoryTranslation {
   id         String      @id @default(uuid()) @db.Uuid
@@ -56,6 +56,7 @@ model City {
   state     String?  @db.VarChar(120)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  jobs      Job[]
 
   @@index([name])
   @@index([state])
@@ -74,15 +75,30 @@ model JobType {
 }
 
 model Job {
-  id        String   @id @default(uuid()) @db.Uuid
-  title     String   @db.VarChar(200)
-  jobTypeId String   @map("job_type_id") @db.Uuid
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
-  // Restrict: a job type that jobs still use can't be deleted.
-  jobType   JobType  @relation(fields: [jobTypeId], references: [id], onDelete: Restrict)
+  id               String      @id @default(uuid()) @db.Uuid
+  title            String      @db.VarChar(200)
+  salary           String      @db.VarChar(120)
+  cityId           String      @map("city_id") @db.Uuid
+  jobTypeId        String      @map("type_id") @db.Uuid
+  jobCategoryId    String      @map("job_category_id") @db.Uuid
+  experience       String      @db.VarChar(120)
+  description      String      @db.Text
+  responsibilities String      @db.Text
+  requirements     String      @db.Text
+  benefits         String      @db.Text
+  // draft | published | closed — validated in schemas/AdminSchemas.ts.
+  status           String      @default("draft") @db.VarChar(20)
+  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+  // Restrict: a city, type or category that jobs still use can't be deleted.
+  city             City        @relation(fields: [cityId], references: [id], onDelete: Restrict)
+  jobType          JobType     @relation(fields: [jobTypeId], references: [id], onDelete: Restrict)
+  jobCategory      JobCategory @relation(fields: [jobCategoryId], references: [id], onDelete: Restrict)
 
+  @@index([cityId])
   @@index([jobTypeId])
+  @@index([jobCategoryId])
+  @@index([status])
   @@map("jobs")
 }
 

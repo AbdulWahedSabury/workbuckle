@@ -1,16 +1,20 @@
 import Link from "next/link";
 import { Pencil, SearchX } from "lucide-react";
-import type { City } from "@/lib/generated/prisma/client";
 import { deleteCity } from "@/lib/admin/actions/cities";
 import { parseListParams } from "@/lib/admin/list-params";
-import { CITY_SORT_KEYS, listCities, type CitySortKey } from "@/lib/admin/queries";
+import {
+  CITY_SORT_KEYS,
+  listCities,
+  type CitySortKey,
+  type CityWithCount,
+} from "@/lib/admin/queries";
 import { DataTable, type Column } from "@/components/admin/data-table";
 import { DeleteButton } from "@/components/admin/buttons";
 import EmptyState from "@/components/admin/EmptyState";
 import { iconButtonClass } from "@/components/admin/styles";
 import { formatDate } from "./format";
 
-const columns: Column<City, CitySortKey>[] = [
+const columns: Column<CityWithCount, CitySortKey>[] = [
   {
     id: "name",
     header: "Name",
@@ -61,6 +65,9 @@ const columns: Column<City, CitySortKey>[] = [
           action={deleteCity.bind(null, city.id)}
           confirmMessage={`Delete "${city.name}"?`}
           label={`Delete ${city.name}`}
+          disabledReason={
+            city._count.jobs > 0 ? "In use by jobs — reassign them first" : undefined
+          }
         />
       </div>
     ),

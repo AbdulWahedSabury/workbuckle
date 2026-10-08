@@ -128,6 +128,9 @@ const columns: Column<CategoryRow, CategorySortKey>[] = [
           action={deleteCategory.bind(null, category.id)}
           confirmMessage={`Delete "${category.name}" and all its translations?`}
           label={`Delete ${category.name}`}
+          disabledReason={
+            category._count.jobs > 0 ? "In use by jobs — reassign them first" : undefined
+          }
         />
       </div>
     ),

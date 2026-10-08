@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
-import type { ActionState } from '@/lib/admin/action-state';
+import type { ActionState, DeleteResult } from '@/lib/admin/action-state';
+import { deleteUnlessUsedByJobs } from '@/lib/admin/delete-guard';
 import {
   formValues,
   isNotFound,
@@ -71,8 +72,11 @@ export async function updateCity(
   redirect(LIST_PATH);
 }
 
-export async function deleteCity(id: string): Promise<void> {
+export async function deleteCity(id: string): Promise<DeleteResult> {
   await requireAdmin();
-  await prisma.city.deleteMany({ where: { id } });
-  revalidatePath(LIST_PATH);
+  const result = await deleteUnlessUsedByJobs('city', { cityId: id }, (tx) =>
+    tx.city.deleteMany({ where: { id } })
+  );
+  if (!result.error) revalidatePath(LIST_PATH);
+  return result;
 }

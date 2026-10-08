@@ -144,3 +144,45 @@
 @utility section-spacing {
   @apply py-[60px] md:py-[75px] lg:py-[90px];
 }
+
+/*
+ * Rich-text HTML (the admin job editor, and job content wherever it's
+ * rendered): restores the list/heading/link styles Tailwind's reset removes.
+ */
+@layer components {
+  .rich-text {
+    @apply text-sm leading-relaxed font-normal text-ink;
+  }
+  .rich-text > * + * {
+    margin-top: 0.75em;
+  }
+  .rich-text h2 {
+    @apply text-lg;
+  }
+  .rich-text h3 {
+    @apply text-base;
+  }
+  .rich-text ul {
+    @apply list-disc pl-5;
+  }
+  .rich-text ol {
+    @apply list-decimal pl-5;
+  }
+  .rich-text li + li {
+    margin-top: 0.25em;
+  }
+  .rich-text blockquote {
+    @apply border-l-2 border-primary pl-4 text-gray-1;
+  }
+  .rich-text a {
+    @apply text-primary-dark underline underline-offset-2;
+  }
+  /* TipTap placeholder on an empty editor. */
+  .rich-text p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+    @apply text-gray-2/70;
+  }
+}

@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
 import { paginate, type ListParams, type Paginated, type SortDir } from '@/lib/admin/list-params';
-import type { City, Prisma } from '@/lib/generated/prisma/client';
+import type { Prisma } from '@/lib/generated/prisma/client';
 import { defaultLocale } from '@/types/locale';
 
 /** SiteSetting is a single-row table; this is that row's id. */
@@ -13,12 +13,14 @@ const UUID_RE =
 
 export async function getAdminCounts() {
   await requireAdmin();
-  const [categories, activeCategories, cities] = await Promise.all([
+  const [categories, activeCategories, cities, jobs, publishedJobs] = await Promise.all([
     prisma.jobCategory.count(),
     prisma.jobCategory.count({ where: { isActive: true } }),
     prisma.city.count(),
+    prisma.job.count(),
+    prisma.job.count({ where: { status: 'published' } }),
   ]);
-  return { categories, activeCategories, cities };
+  return { categories, activeCategories, cities, jobs, publishedJobs };
 }
 
 export type RecentChange = {
@@ -72,7 +74,12 @@ export function categoryDisplayName(category: {
   );
 }
 
-type CategoryWithTranslations = Prisma.JobCategoryGetPayload<{ include: { translations: true } }>;
+const categoryListInclude = {
+  translations: true,
+  _count: { select: { jobs: true } },
+} satisfies Prisma.JobCategoryInclude;
+
+type CategoryWithTranslations = Prisma.JobCategoryGetPayload<{ include: typeof categoryListInclude }>;
 
 export const CATEGORY_SORT_KEYS = ['name', 'slug', 'sortOrder', 'status'] as const;
 export type CategorySortKey = (typeof CATEGORY_SORT_KEYS)[number];
@@ -111,7 +118,7 @@ export async function listCategories(
   // sorting loads the matches, sorts and slices here. Fine at category-list
   // scale (tens of rows); every other order pages in the database.
   if (sort?.key === 'name') {
-    const all = await prisma.jobCategory.findMany({ where, include: { translations: true } });
+    const all = await prisma.jobCategory.findMany({ where, include: categoryListInclude });
     const sign = sort.dir === 'asc' ? 1 : -1;
     all.sort((a, b) => sign * nameCollator.compare(categoryDisplayName(a), categoryDisplayName(b)));
     const { skip, take, ...info } = paginate(params, all.length);
@@ -127,7 +134,7 @@ export async function listCategories(
       // Stable tie-break, so rows don't hop between pages across requests.
       { id: 'asc' },
     ],
-    include: { translations: true },
+    include: categoryListInclude,
     skip,
     take,
   });
@@ -155,7 +162,11 @@ const cityOrderBy: Record<CitySortKey, (dir: SortDir) => Prisma.CityOrderByWithR
 };
 
 /** One page of cities matching `q` by name or region. Default order is by name. */
-export async function listCities(params: ListParams<CitySortKey>): Promise<Paginated<City>> {
+export type CityWithCount = Prisma.CityGetPayload<{
+  include: { _count: { select: { jobs: true } } };
+}>;
+
+export async function listCities(params: ListParams<CitySortKey>): Promise<Paginated<CityWithCount>> {
   await requireAdmin();
   const { q, sort } = params;
   const where: Prisma.CityWhereInput | undefined = q
@@ -173,6 +184,7 @@ export async function listCities(params: ListParams<CitySortKey>): Promise<Pagin
     where,
     // `id` last keeps ties in a stable order, so rows don't hop between pages.
     orderBy: [...(sort ? cityOrderBy[sort.key](sort.dir) : [{ name: 'asc' as const }]), { id: 'asc' }],
+    include: { _count: { select: { jobs: true } } },
     skip,
     take,
   });
@@ -233,6 +245,93 @@ export async function getJobType(id: string) {
   await requireAdmin();
   if (!UUID_RE.test(id)) return null;
   return prisma.jobType.findUnique({ where: { id } });
+}
+
+const jobListInclude = {
+  city: { select: { name: true } },
+  jobType: { select: { name: true } },
+} satisfies Prisma.JobInclude;
+
+export type JobListRow = Prisma.JobGetPayload<{ include: typeof jobListInclude }>;
+
+export const JOB_SORT_KEYS = ['title', 'city', 'type', 'status', 'updatedAt'] as const;
+export type JobSortKey = (typeof JOB_SORT_KEYS)[number];
+
+const jobOrderBy: Record<JobSortKey, (dir: SortDir) => Prisma.JobOrderByWithRelationInput[]> = {
+  title: (dir) => [{ title: dir }],
+  city: (dir) => [{ city: { name: dir } }, { title: 'asc' }],
+  type: (dir) => [{ jobType: { name: dir } }, { title: 'asc' }],
+  status: (dir) => [{ status: dir }, { updatedAt: 'desc' }],
+  updatedAt: (dir) => [{ updatedAt: dir }],
+};
+
+/** One page of jobs matching `q` by title, city or type. Default order is newest edit first. */
+export async function listJobs(params: ListParams<JobSortKey>): Promise<Paginated<JobListRow>> {
+  await requireAdmin();
+  const { q, sort } = params;
+  const where: Prisma.JobWhereInput | undefined = q
+    ? {
+        OR: [
+          { title: { contains: q, mode: 'insensitive' } },
+          { city: { name: { contains: q, mode: 'insensitive' } } },
+          { jobType: { name: { contains: q, mode: 'insensitive' } } },
+        ],
+      }
+    : undefined;
+
+  const total = await prisma.job.count({ where });
+  const { skip, take, ...info } = paginate(params, total);
+  const rows = await prisma.job.findMany({
+    where,
+    orderBy: [
+      ...(sort ? jobOrderBy[sort.key](sort.dir) : [{ updatedAt: 'desc' as const }]),
+      { id: 'asc' },
+    ],
+    include: jobListInclude,
+    skip,
+    take,
+  });
+  return { ...info, rows };
+}
+
+export async function getJob(id: string) {
+  await requireAdmin();
+  if (!UUID_RE.test(id)) return null;
+  return prisma.job.findUnique({ where: { id } });
+}
+
+export type SelectOption = { value: string; label: string };
+
+/**
+ * Choices for the job form's selects. Only active categories are offered,
+ * plus `currentCategoryId` when editing a job whose category was since hidden,
+ * so saving doesn't silently change it.
+ */
+export async function getJobFormOptions(currentCategoryId?: string) {
+  await requireAdmin();
+  const [cities, jobTypes, categories] = await Promise.all([
+    prisma.city.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true, state: true } }),
+    prisma.jobType.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true } }),
+    prisma.jobCategory.findMany({
+      where: currentCategoryId
+        ? { OR: [{ isActive: true }, { id: currentCategoryId }] }
+        : { isActive: true },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+      include: { translations: true },
+    }),
+  ]);
+
+  return {
+    cities: cities.map((c): SelectOption => ({
+      value: c.id,
+      label: c.state ? `${c.name}, ${c.state}` : c.name,
+    })),
+    jobTypes: jobTypes.map((t): SelectOption => ({ value: t.id, label: t.name })),
+    categories: categories.map((c): SelectOption => ({
+      value: c.id,
+      label: c.isActive ? categoryDisplayName(c) : `${categoryDisplayName(c)} (hidden)`,
+    })),
+  };
 }
 
 export async function getSiteSettings() {

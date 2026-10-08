@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import { Prisma } from '@/lib/generated/prisma/client';
 import { requireAdmin } from '@/lib/admin/auth';
+import { deleteUnlessUsedByJobs } from '@/lib/admin/delete-guard';
 import type { ActionState, DeleteResult } from '@/lib/admin/action-state';
 import {
   formValues,
@@ -100,29 +100,11 @@ export async function updateJobType(
   redirect(LIST_PATH);
 }
 
-function inUseMessage(count: number) {
-  return `This job type is used by ${count} ${count === 1 ? 'job' : 'jobs'}. Reassign them before deleting it.`;
-}
-
 export async function deleteJobType(id: string): Promise<DeleteResult> {
   await requireAdmin();
-
-  try {
-    const jobCount = await prisma.$transaction(async (tx) => {
-      const count = await tx.job.count({ where: { jobTypeId: id } });
-      if (count === 0) await tx.jobType.deleteMany({ where: { id } });
-      return count;
-    });
-    if (jobCount > 0) return { error: inUseMessage(jobCount) };
-  } catch (error) {
-    // A job was linked between the count and the delete; the FK's ON DELETE
-    // RESTRICT rejected it.
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
-      return { error: inUseMessage(await prisma.job.count({ where: { jobTypeId: id } })) };
-    }
-    throw error;
-  }
-
-  revalidatePath(LIST_PATH);
-  return {};
+  const result = await deleteUnlessUsedByJobs('job type', { jobTypeId: id }, (tx) =>
+    tx.jobType.deleteMany({ where: { id } })
+  );
+  if (!result.error) revalidatePath(LIST_PATH);
+  return result;
 }
