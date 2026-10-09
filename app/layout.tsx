@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Inter, Poppins, Roboto } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import QueryProvider from "@/providers/QueryProvider";
@@ -17,9 +18,11 @@ const poppins = Poppins({
   variable: "--next-font-poppins",
 });
 
-const roboto = Roboto({
-  weight: ["400", "500"],
-  subsets: ["latin"],
+// Self-hosted: next/font/google fails to resolve Roboto's font files on Vercel's Turbopack build.
+// Latin-subset variable font from Google Fonts (covers en + de).
+const roboto = localFont({
+  src: "./fonts/roboto-latin-variable.woff2",
+  weight: "400 500",
   variable: "--next-font-roboto",
 });
 
