@@ -8,6 +8,6 @@ export default defineConfig({
   },
   datasource: {
     // Read directly (not via `env()`) so `prisma generate` works without a DB.
-    url: process.env.DATABASE_URL,
+    url: process.env.DIRECT_URL || process.env.DATABASE_URL || "",
   },
 });
