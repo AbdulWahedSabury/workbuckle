@@ -430,6 +430,166 @@
     "job":{
       "apply":"Apply for role",
       "back":"Back to all jobs"
+    },
+    "privacy": {
+      "eyebrow": "Legal",
+      "title": "Privacy policy",
+      "updated": "Last updated: {date}",
+      "updated_date": "Oct 09, 2026",
+      "intro": "Your privacy matters to us. This policy explains what personal information Work Buckle collects when you browse our website, apply for a job or get in touch, how we use it, and the choices you have.",
+      "toc": "On this page",
+      "sections": {
+        "collect": {
+          "title": "Collecting personal information",
+          "body": "We only collect the information we need to connect you with the right role and to answer your questions. Depending on how you use Work Buckle, this may include:",
+          "items": [
+            "Contact details such as your first and last name, email address and phone number.",
+            "Your CV or resume, cover letter and, if you choose to share it, your LinkedIn profile.",
+            "The job you applied for and the status of your application.",
+            "Messages you send us through the contact form, by email or by phone."
+          ]
+        },
+        "use": {
+          "title": "How we use your information",
+          "body": "We use your personal information for recruitment purposes and to run our service, including to:",
+          "items": [
+            "Review your application and match you with suitable hospitality roles.",
+            "Contact you about interviews, job offers, relocation and onboarding.",
+            "Reply to enquiries and provide support.",
+            "Keep our website secure and meet our legal obligations."
+          ]
+        },
+        "share": {
+          "title": "Sharing personal information",
+          "body": "We never sell your personal information. We only share it when it is necessary to help you find work, and only with:",
+          "items": [
+            "Employers and hotels you have applied to, or that we put you forward to with your consent.",
+            "Trusted service providers who process data on our behalf, such as our applicant tracking system, file storage and email providers.",
+            "Public authorities, where we are required to by law, for example for work permit or visa processes.",
+            "A successor business, if Work Buckle is ever reorganised or acquired."
+          ]
+        },
+        "retention": {
+          "title": "How long we keep it",
+          "body": "We keep application data for as long as needed to complete the recruitment process and to consider you for future roles, unless you ask us to delete it sooner. Enquiries are kept only as long as needed to respond and follow up."
+        },
+        "rights": {
+          "title": "Your rights",
+          "body": "Under the EU General Data Protection Regulation (GDPR) you have the right to:",
+          "items": [
+            "Access the personal information we hold about you.",
+            "Ask us to correct or update inaccurate information.",
+            "Ask us to delete your information or restrict how we use it.",
+            "Object to processing or withdraw your consent at any time.",
+            "Receive a copy of your data in a portable format.",
+            "Lodge a complaint with the Commissioner for Personal Data Protection in Cyprus."
+          ]
+        },
+        "security": {
+          "title": "Keeping your data secure",
+          "body": "We use appropriate technical and organisational measures to protect your information, including encrypted connections and restricted, role-based access to candidate records. No method of transmission over the internet is completely secure, but we work hard to protect your data."
+        },
+        "cookies": {
+          "title": "Cookies",
+          "body": "Our public website does not use advertising or tracking cookies. We only use strictly necessary cookies, for example to keep authorised team members signed in to our admin area."
+        },
+        "changes": {
+          "title": "Changes to this policy",
+          "body": "We may update this policy from time to time. When we do, we will change the “last updated” date at the top of this page."
+        },
+        "contact": {
+          "title": "Contact us",
+          "body": "If you have any questions about this policy or want to exercise your rights, get in touch with our team:",
+          "email": "Email",
+          "phone": "Phone",
+          "address": "Address"
+        }
+      }
+    },
+    "terms": {
+      "eyebrow": "Legal",
+      "title": "Terms and conditions",
+      "updated": "Last updated: {date}",
+      "updated_date": "Oct 12, 2026",
+      "intro": "These terms explain the rules for using the Work Buckle website and our recruitment services, whether you are looking for your next role in hospitality or hiring for your team. Please read them carefully before you apply for a job or get in touch.",
+      "toc": "On this page",
+      "sections": {
+        "acceptance": {
+          "title": "Acceptance of these terms",
+          "body": "By browsing our website, submitting an application or using any of our services, you agree to these terms and to our privacy policy. If you do not agree with them, please do not use the website or our services."
+        },
+        "services": {
+          "title": "Our services",
+          "body": "Work Buckle is a recruitment agency based in Cyprus that connects hospitality professionals with employers across Cyprus and Europe. Our services include:",
+          "items": [
+            "Publishing job openings on behalf of hotels, resorts and other employers.",
+            "Reviewing applications and putting suitable candidates forward to employers.",
+            "Arranging interviews and keeping candidates and employers updated throughout the process.",
+            "Supporting successful candidates with relocation, accommodation and onboarding where offered."
+          ]
+        },
+        "candidates": {
+          "title": "If you are a candidate",
+          "body": "When you apply for a role through Work Buckle, you agree to:",
+          "items": [
+            "Provide information that is true, accurate and up to date, including in your CV and cover letter.",
+            "Only apply for roles you are legally able to accept, and tell us about anything that may affect your right to work.",
+            "Let us share your application with the employers you apply to, or that we put you forward to with your consent.",
+            "Tell us promptly if your circumstances change or if you are no longer available."
+          ]
+        },
+        "employers": {
+          "title": "If you are an employer",
+          "body": "When you work with Work Buckle to hire, you agree to:",
+          "items": [
+            "Give accurate details about each role, including duties, pay, working hours and any accommodation offered.",
+            "Treat candidates fairly and comply with all applicable employment and anti-discrimination laws.",
+            "Use candidate information only to recruit for the role it was shared for, and keep it confidential.",
+            "Follow any separate agreement you have signed with us, which takes priority over these terms where they differ."
+          ]
+        },
+        "no_guarantee": {
+          "title": "No guarantee of employment",
+          "body": "We work hard to match the right people with the right roles, but we cannot guarantee that a candidate will be offered a job or that an employer will fill a vacancy. Hiring decisions are made by employers, and the employment contract is between the employer and the candidate, not with Work Buckle."
+        },
+        "acceptable_use": {
+          "title": "Acceptable use",
+          "body": "You must use our website lawfully and respectfully. In particular, you must not:",
+          "items": [
+            "Submit false, misleading or someone else's information.",
+            "Upload files that contain viruses or other harmful code.",
+            "Try to gain unauthorised access to our website, admin area or systems.",
+            "Copy or scrape job listings or other content for commercial use without our permission."
+          ]
+        },
+        "content": {
+          "title": "Website content",
+          "body": "The text, images, logos and design of this website belong to Work Buckle or are used with permission. You may view and share our job listings for personal, non-commercial purposes, but you may not reproduce or reuse our content in any other way without our written consent."
+        },
+        "liability": {
+          "title": "Limitation of liability",
+          "body": "We do our best to keep the information on our website accurate and up to date, but job details are provided by employers and may change. To the extent permitted by law, Work Buckle is not liable for any loss arising from your use of the website, from information supplied by employers or candidates, or from the outcome of any application or employment."
+        },
+        "privacy": {
+          "title": "Your privacy",
+          "body": "We handle your personal information in line with our privacy policy, which explains what we collect, how we use it and the rights you have under the EU General Data Protection Regulation (GDPR)."
+        },
+        "law": {
+          "title": "Governing law",
+          "body": "These terms are governed by the laws of the Republic of Cyprus. Any dispute relating to them or to our services will be handled by the courts of Cyprus, unless the law of your country of residence gives you the right to bring proceedings there."
+        },
+        "changes": {
+          "title": "Changes to these terms",
+          "body": "We may update these terms from time to time. When we do, we will change the “last updated” date at the top of this page. Continuing to use our website after a change means you accept the updated terms."
+        },
+        "contact": {
+          "title": "Contact us",
+          "body": "If you have any questions about these terms, get in touch with our team:",
+          "email": "Email",
+          "phone": "Phone",
+          "address": "Address"
+        }
+      }
     }
   },
   "sections": {
