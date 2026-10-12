@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 /**
  * TipTap editor whose HTML is mirrored into a hidden input named `name`, so it
  * posts with the surrounding form's native FormData. The output is sanitized
- * server-side (lib/admin/rich-text.ts); keep the two in step when adding tools.
+ * server-side (lib/rich-text.ts); keep the two in step when adding tools.
  */
 export default function RichTextEditor({
   name,

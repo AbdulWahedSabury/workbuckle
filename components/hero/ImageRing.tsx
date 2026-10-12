@@ -1,3 +1,5 @@
+"use client";
+
 import { motion,useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useEffect, useRef } from "react";
 import RingCardView from "./RingCardView";

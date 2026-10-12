@@ -11,7 +11,7 @@ import { NAME_FIELDS, RESUME_ACCEPT, RESUME_HINT } from "./applyConfig";
 import { useTranslations } from "next-intl";
 
 export interface ApplicationFormProps {
-  jobId?: number;
+  jobId: string;
 }
 
 export default function ApplicationForm({ jobId }: ApplicationFormProps) {
@@ -19,7 +19,7 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
 
   const {
     formData,
-    updateField,  
+    updateField,
     setResume,
     resetForm,
     handleSubmit,

@@ -7,18 +7,13 @@ import FadeUp from "@/components/motion/FadeUp";
 import { useTranslations } from "next-intl";
 
 export interface JobApplyHeroProps {
-  position_name?: string;     
-  location_display?: string;  
-  contract_details?: string;  
+  title: string;
+  location: string;
+  jobType: string;
   backHref: string;
 }
 
-export default function JobApplyHero({
-  position_name,
-  location_display,
-  contract_details,
-  backHref,
-}: JobApplyHeroProps) {
+export default function JobApplyHero({ title, location, jobType, backHref }: JobApplyHeroProps) {
   const t = useTranslations('pages.job')
   return (
     <RevealSection className="bg-ink px-4 pt-10 pb-14 sm:px-6 sm:pt-14 sm:pb-20 lg:pt-20 lg:pb-24">
@@ -41,15 +36,15 @@ export default function JobApplyHero({
 
             <div className="min-w-0">
               <span className="inline-flex items-center rounded-full bg-primary px-3 py-1 text-xs font-semibold uppercase tracking-wider text-ink">
-                {contract_details}
+                {jobType}
               </span>
               <h1 className="mt-3 text-balance text-2xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-                {position_name}
+                {title}
               </h1>
 
               <ul className="mt-5 flex flex-wrap gap-2 text-xs font-semibold sm:text-sm" aria-label="Key details">
                 <li className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-white">
-                  <MapPin className="size-4" aria-hidden="true" /> {location_display}
+                  <MapPin className="size-4" aria-hidden="true" /> {location}
                 </li>
                 
               </ul>

@@ -13,13 +13,12 @@ import {
   slugify,
   validationError,
 } from '@/lib/admin/form';
+import { removeImage, uploadImage } from '@/lib/admin/image-upload';
 import { categoryNameField, jobCategorySchema } from '@/schemas/AdminSchemas';
 import { defaultLocale, locales } from '@/types/locale';
-import { removeImage, uploadImage } from '@/lib/admin/image-upload';
 
 const LIST_PATH = '/admin/categories';
 const IMAGE_FOLDER = 'categories';
-
 
 function parse(formData: FormData) {
   const values = formValues(formData);
@@ -37,6 +36,7 @@ function translationRows(data: Record<string, unknown>) {
     return typeof name === 'string' && name ? [{ locale, name }] : [];
   });
 }
+
 export async function createCategory(
   _prev: ActionState,
   formData: FormData
@@ -72,6 +72,7 @@ export async function createCategory(
   revalidatePath(LIST_PATH);
   redirect(LIST_PATH);
 }
+
 export async function updateCategory(
   id: string,
   _prev: ActionState,
@@ -87,6 +88,9 @@ export async function updateCategory(
   const upload = await uploadImage(formData, 'imageFile', IMAGE_FOLDER);
   if (!upload.ok) return { errors: { imageUrl: [upload.error] }, values };
   const image = upload.image ?? { imageUrl };
+  const previous = upload.image
+    ? await prisma.jobCategory.findUnique({ where: { id }, select: { imagePath: true } })
+    : null;
 
   try {
     await prisma.$transaction([
@@ -116,16 +120,26 @@ export async function updateCategory(
     throw error;
   }
 
+  // The replaced image is no longer referenced.
+  await removeImage(previous?.imagePath);
+
   revalidatePath(LIST_PATH);
   redirect(LIST_PATH);
 }
 
 export async function deleteCategory(id: string): Promise<DeleteResult> {
   await requireAdmin();
-  const result = await deleteUnlessUsedByJobs('category', { jobCategoryId: id }, (tx) =>
-    tx.jobCategory.deleteMany({ where: { id } })
-  );
-  if (!result.error) revalidatePath(LIST_PATH);
+  let imagePath: string | null = null;
+  const result = await deleteUnlessUsedByJobs('category', { jobCategoryId: id }, async (tx) => {
+    const category = await tx.jobCategory.findUnique({ where: { id }, select: { imagePath: true } });
+    await tx.jobCategory.deleteMany({ where: { id } });
+    imagePath = category?.imagePath ?? null;
+  });
+  // Only once the row is really gone; a refused delete keeps its image.
+  if (!result.error) {
+    await removeImage(imagePath);
+    revalidatePath(LIST_PATH);
+  }
   return result;
 }
 

@@ -53,7 +53,7 @@ export default function ImageUploadField({
   return (
     <FieldShell
       {...base}
-      hint={base.hint ?? (preview ? "New image — saved when you submit." : "PNG, JPG, WebP or SVG, up to 4 MB.")}
+      hint={base.hint ?? (preview ? "New image — saved when you submit." : "PNG, JPG, WebP, GIF, AVIF or SVG, up to 4 MB.")}
     >
       <input type="hidden" name={existingName} value={existingUrl ?? ""} />
       <div className="flex items-center gap-4">
@@ -71,7 +71,7 @@ export default function ImageUploadField({
             id={base.name}
             name={base.name}
             type="file"
-            accept="image/*"
+            accept="image/png,image/jpeg,image/webp,image/gif,image/avif,image/svg+xml"
             disabled={disabled}
             onChange={onChange}
             aria-invalid={base.error?.length ? true : undefined}

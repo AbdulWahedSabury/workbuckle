@@ -177,6 +177,16 @@ export const candidateSchema = z.object({
 
 export const candidateStatusSchema = z.enum(CANDIDATE_STATUSES);
 
+/** The public apply form: the visitor's own details. The job and status are set by the server. */
+export const applicationSchema = candidateSchema.pick({
+  firstName: true,
+  lastName: true,
+  phone: true,
+  email: true,
+  linkedin: true,
+  coverLetter: true,
+});
+
 /** The uploaded CV: required, pdf/doc/docx, at most CV_MAX_BYTES. */
 export const cvFileSchema = z
   .instanceof(File, { message: 'Upload your CV.' })

@@ -1,13 +1,13 @@
+import 'server-only';
 import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin, requireView } from '@/lib/admin/auth';
 import { paginate, type ListParams, type Paginated, type SortDir } from '@/lib/admin/list-params';
 import type { Prisma } from '@/lib/generated/prisma/client';
+import { SITE_SETTING_ID } from '@/lib/site-settings';
+import { isUuid } from '@/lib/utils';
 import { defaultLocale } from '@/types/locale';
 
-// Ids come from the URL; a malformed one would make Postgres reject the query.
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function getAdminCounts() {
   await requireView('dashboard');
@@ -215,7 +215,7 @@ export async function listCategories(
 
 export async function getCategory(id: string) {
   await requireView('categories');
-  if (!UUID_RE.test(id)) return null;
+  if (!isUuid(id)) return null;
   return prisma.jobCategory.findUnique({
     where: { id },
     include: { translations: true },
@@ -265,7 +265,7 @@ export async function listCities(params: ListParams<CitySortKey>): Promise<Pagin
 
 export async function getCity(id: string) {
   await requireView('cities');
-  if (!UUID_RE.test(id)) return null;
+  if (!isUuid(id)) return null;
   return prisma.city.findUnique({ where: { id } });
 }
 
@@ -315,7 +315,7 @@ export async function listJobTypes(
 
 export async function getJobType(id: string) {
   await requireView('jobTypes');
-  if (!UUID_RE.test(id)) return null;
+  if (!isUuid(id)) return null;
   return prisma.jobType.findUnique({ where: { id } });
 }
 
@@ -369,7 +369,7 @@ export async function listJobs(params: ListParams<JobSortKey>): Promise<Paginate
 
 export async function getJob(id: string) {
   await requireView('jobs');
-  if (!UUID_RE.test(id)) return null;
+  if (!isUuid(id)) return null;
   return prisma.job.findUnique({ where: { id } });
 }
 
@@ -536,6 +536,14 @@ export async function listUsers(params: ListParams<UserSortKey>): Promise<Pagina
 
 export async function getUser(id: string) {
   await requireView('users');
-  if (!UUID_RE.test(id)) return null;
+  if (!isUuid(id)) return null;
   return prisma.user.findUnique({ where: { id }, select: userListSelect });
+}
+
+// ─── Site settings ───────────────────────────────────────────────────────────
+
+/** The settings row for the admin form; null until it's first saved. */
+export async function getSiteSettings() {
+  await requireView('settings');
+  return prisma.siteSetting.findUnique({ where: { id: SITE_SETTING_ID } });
 }

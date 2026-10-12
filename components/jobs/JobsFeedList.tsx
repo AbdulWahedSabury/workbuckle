@@ -5,10 +5,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import JobRow from "@/components/jobs/JobRow";
 import { JobsLoadingState } from "@/components/jobs/JobsLoadingState";
 import { JobsEmptyState } from "@/components/jobs/JobsEmptyState";
-import { JobDetailsResponse, JobFilter } from "@/types/job";
+import type { JobFilter, PublicJobSummary } from "@/types/job";
 
 export interface JobsFeedListProps {
-  jobs: JobDetailsResponse[];
+  jobs: PublicJobSummary[];
   filter: JobFilter;
   isPending: boolean;
   isError: boolean;

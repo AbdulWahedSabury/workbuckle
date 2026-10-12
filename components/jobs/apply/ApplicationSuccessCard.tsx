@@ -18,7 +18,7 @@ export default function ApplicationSuccessCard({
       <h2 className="text-2xl font-bold text-ink sm:text-3xl">Application Submitted!</h2>
       <p className="mt-3 text-sm text-gray-2 sm:text-base">
         Thank you, <span className="font-semibold text-ink">{firstName}</span>. Your application
-        has been successfully sent to Manatal.
+        has been received. We&apos;ll be in touch soon.
       </p>
       <div className="mt-8 flex justify-center">
         <button

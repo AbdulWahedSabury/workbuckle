@@ -4,18 +4,19 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Logo from "@/components/ui/Logo";
-import type { NavLink } from "@/lib/home/types";
-import { useRoot } from "@/hooks/use-root";
+import type { Menu } from "@/types/navigation";
 
 interface MobileMenuProps {
   open: boolean;
   onClose: () => void;
-  links: NavLink[];
+  /** Labels are keys under `navigation` in lang/*.json, as in the desktop header. */
+  links: Menu;
 }
 
 export default function MobileMenu({ open, onClose, links }: MobileMenuProps) {
-    const isHome = useRoot();
+  const t = useTranslations("navigation");
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
@@ -65,13 +66,13 @@ export default function MobileMenu({ open, onClose, links }: MobileMenuProps) {
               variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
             >
               {links.map((link) => (
-                <motion.div key={link.label} variants={{ hidden: { opacity: 0, x: 24 }, show: { opacity: 1, x: 0 } }}>
+                <motion.div key={link.href} variants={{ hidden: { opacity: 0, x: 24 }, show: { opacity: 1, x: 0 } }}>
                   <Link
                     href={link.href}
                     onClick={onClose}
                     className="flex items-center justify-between border-b border-line py-4 font-heading text-lg font-medium text-ink"
                   >
-                    {link.label}
+                    {t(link.label)}
                     <ArrowRight className="size-4 text-gray-2" />
                   </Link>
                 </motion.div>

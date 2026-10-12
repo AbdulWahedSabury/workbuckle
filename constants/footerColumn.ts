@@ -8,8 +8,6 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
           { label: "categories", href: "/categories" },
           { label: "companies", href: "/companies" },
       ],
-      label: '',
-      href: ''
   },
   {
       title: "Company",
@@ -18,7 +16,5 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
           { label: "privacy", href: "/privacy" },
           { label: "terms", href: "/terms" },
       ],
-      label: '',
-      href: ''
   },
 ];

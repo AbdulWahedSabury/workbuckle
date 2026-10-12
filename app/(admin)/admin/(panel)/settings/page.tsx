@@ -3,12 +3,15 @@ import { connection } from "next/server";
 import PageHeader from "@/components/admin/PageHeader";
 import SettingsForm from "@/components/admin/SettingsForm";
 import { requireView, viewerCanEdit } from "@/lib/admin/auth";
-import { getSiteSettings } from "@/lib/admin/siteSetting";
+import { getSiteSettings } from "@/lib/admin/queries";
+import { DEFAULT_SITE_NAME } from "@/lib/site-settings";
+import type { RawApiSettings } from "@/types/setting";
 
 export const metadata: Metadata = { title: "Site settings" };
 
-const DEFAULT_SETTINGS = {
-  siteName: "Workbuckle",
+// Same name the public site falls back to while the row doesn't exist.
+const DEFAULT_SETTINGS: RawApiSettings = {
+  siteName: DEFAULT_SITE_NAME,
   contactEmail: null,
   contactPhone: null,
   logoUrl: null,

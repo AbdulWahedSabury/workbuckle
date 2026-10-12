@@ -3,35 +3,25 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight, Banknote, Clock, GraduationCap, MapPin, Building2 } from "lucide-react";
 import { MotionLink } from "@/components/motion/MotionLink";
+import { jobTypeKey } from "@/lib/jobs/job-type";
 import { snappySpring, spring } from "@/lib/motion";
-import { JobDetailsResponse } from "@/types/job";
+import type { PublicJobSummary } from "@/types/job";
 
-// 1. Updated mapping keys to match Manatal's "contract_details" options
+// Keyed by jobTypeKey(slug); other job types use the default.
 const SCHEDULE_STYLES: Record<string, string> = {
-  "full_time": "bg-ink text-white",
-  "part_time": "bg-primary/15 text-primary-dark",
-  "internship": "bg-emerald-100 text-emerald-800",
+  full_time: "bg-ink text-white",
+  part_time: "bg-primary/15 text-primary-dark",
+  internship: "bg-emerald-100 text-emerald-800",
 };
+const DEFAULT_SCHEDULE_STYLE = "bg-ink text-white";
 
-// Helper utility to convert snake_case contract details to readable tags
-const formatSchedule = (slug: string) => {
-  if (!slug) return "Full-Time";
-  return slug
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join("-");
-};
+const chipClass = "flex items-center gap-1.5 rounded-full bg-gray-3 px-3 py-1.5 text-ink";
 
 interface JobRowProps {
-  job:JobDetailsResponse;
+  job: PublicJobSummary;
 }
+
 export default function JobRow({ job }: JobRowProps) {
-  const displayLocation = job.city || "Cyprus"; 
-  const displayScheduleTag = job.contract_details || "";
-  const displayScheduleLabel = formatSchedule(displayScheduleTag);
-  
-  const displaySalary = "€1,500 Gross (Neg.)";
-  const displayExperience = "1-3 years exp.";
 
   return (
     <div className="w-full">
@@ -54,27 +44,24 @@ export default function JobRow({ job }: JobRowProps) {
             <Building2 className="size-6" />
           </span>
           <div className="min-w-0">
-            <h3 className="truncate text-lg sm:text-xl font-bold">{job.position_name}</h3>
-            <p className="text-sm text-gray-500">
-              Mavromatis Employment Bureau
-            </p>
+            <h3 className="truncate text-lg sm:text-xl font-bold">{job.title}</h3>
+            <p className="truncate text-sm text-gray-500">{job.category}</p>
           </div>
         </div>
 
         <ul className="flex flex-1 flex-wrap gap-2 text-sm font-semibold" aria-label="Job details">
-          <li className={`rounded-full px-3 py-1.5 ${SCHEDULE_STYLES[displayScheduleTag] || "bg-ink text-white"}`}>
-            {displayScheduleLabel}
+          <li className={`rounded-full px-3 py-1.5 ${SCHEDULE_STYLES[jobTypeKey(job.jobTypeSlug)] ?? DEFAULT_SCHEDULE_STYLE}`}>
+            {job.jobType}
           </li>
-          <li className="flex items-center gap-1.5 rounded-full bg-gray-3 px-3 py-1.5 text-ink">
-            <MapPin className="size-4" /> {displayLocation}
-            {job.is_remote && <span className="text-gray-2">· Remote </span>}
+          <li className={chipClass}>
+            <MapPin className="size-4" aria-hidden="true" /> {job.city}
           </li>
-          {/* <li className="flex items-center gap-1.5 rounded-full bg-gray-3 px-3 py-1.5 text-ink">
-            <Banknote className="size-4" /> {displaySalary}
+          <li className={chipClass}>
+            <Banknote className="size-4" aria-hidden="true" /> {job.salary}
           </li>
-          <li className="flex items-center gap-1.5 rounded-full bg-gray-3 px-3 py-1.5 text-ink">
-            <GraduationCap className="size-4" /> {displayExperience}
-          </li> */}
+          <li className={chipClass}>
+            <GraduationCap className="size-4" aria-hidden="true" /> {job.experience}
+          </li>
         </ul>
 
         <div className="flex items-center justify-between gap-4 lg:justify-end">

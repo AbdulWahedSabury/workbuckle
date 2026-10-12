@@ -1,35 +1,34 @@
-export type ContractType = "full_time" | "part_time" | "internship" | "temporary" | "freelance";
-
-export interface JobDetailsResponse {
-  id?: number;
-  hash: string;
-  position_name: string;
-  description?: string;
-  country?: string;
-  state?: string;
-  city?: string;
-  address?: string;
-  zipcode?: string;
-  location_display?: string;
-  is_salary_visible?: boolean;
-  is_remote?: boolean | null; // Note: API uses `is_remote`, not `remote`
-  contract_details?: ContractType | string; // Note: API uses `contract_details`, not `contract_type`
-  is_pinned_in_career_page?: boolean;
+/** A published job as the public list shows it (JSON from GET /api/jobs). */
+export interface PublicJobSummary {
+  id: string;
+  title: string;
+  salary: string;
+  experience: string;
+  city: string;
+  /** Job type name, e.g. "Full-time". */
+  jobType: string;
+  /** Job type slug, e.g. "full-time"; picks the badge colour. */
+  jobTypeSlug: string;
+  /** Category name in the requested locale. */
+  category: string;
 }
 
-export interface JobListResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: JobDetailsResponse[];
+/** A published job with everything its detail page shows. Rich-text fields are sanitized HTML. */
+export interface PublicJob extends PublicJobSummary {
+  /** "City, Region", or just the city. */
+  location: string;
+  description: string;
+  responsibilities: string;
+  requirements: string;
+  benefits: string;
+  categoryImage: string | null;
 }
 
 export type JobFilter = "All" | "Limassol" | "Larnaca" | "Nicosia" | "Paphos";
 
-export function matchesFilter(job: JobDetailsResponse, filter: JobFilter): boolean {
+/** Location tabs match the job's city name, ignoring case, spaces and hyphens. */
+export function matchesFilter(job: PublicJobSummary, filter: JobFilter): boolean {
   if (filter === "All") return true;
-  if (!job.city) return false;
-  const normalizedFilter = filter.toLowerCase().replace(/[- ]/g, "_");
-  const normalizedContract = job.city.toLowerCase().replace(/[- ]/g, "_");
-  return normalizedContract === normalizedFilter;
+  const normalize = (value: string) => value.toLowerCase().replace(/[- ]/g, "_");
+  return normalize(job.city) === normalize(filter);
 }

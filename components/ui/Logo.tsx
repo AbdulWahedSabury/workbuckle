@@ -1,3 +1,5 @@
+"use client"
+import { useSiteSetting } from "@/providers/SiteSettingProvider";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -6,18 +8,19 @@ interface LogoProps {
   href?: string;
 }
 
-export default function Logo({ tone = "dark", href = "/" }: LogoProps) {
+export default function Logo({ tone = "light", href = "/" }: LogoProps) {
+    const {logo,name} = useSiteSetting();
   return (
     <Link href={href} className="flex items-center gap-2.5" aria-label="Work Buckle home">
       <Image
-        src="/images/logo.png"
+        src={logo}
         alt="Work Buckle logo mark — orange magnifier speech bubble with black WB monogram"
         width={44}
         height={44}
         className="size-10 object-contain lg:size-11"
         preload
       />
-      WorkBuckle
+      {name}
     </Link>
   );
 }

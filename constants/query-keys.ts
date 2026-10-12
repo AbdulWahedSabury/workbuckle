@@ -1,13 +1,7 @@
-export const JOBS_QUERY_KEY = 'JOBS';
-export const FAQS_QUERY_KEY = 'FAQS';
-export const BRANCHES_QUERY_KEY = 'BRANCHES';
-export const BLOG_QUERY_KEY = 'BLOG';
-export const GALLERY_QUERY_KEY = 'GALLERY';
-export const FEATURED_GALLARY_QUERY_KEY = 'FEATURED_GALLARY';
-export const CLIENTS_QUERY_KEY = 'CLIENTS';
-export const PRODUCTS_QUERY_KEY = 'PRODUCTS';
-export const CUSTOMIZATION_QUERY_KEY = 'CUSTOMIZATION';
-export const VIDEOS_QUERY_KEY = 'VIDEOS';
-export const COUPON_QUERY_KEY = 'COUPON';
-export const CATEGORY_QUERY_KEY = 'CATEGORY';
-export const PAGE_QUERY_KEY = 'PAGE';
+import type { JobsQuery } from "@/queries/job";
+
+/** React Query keys. Build keys here so every reader of the same data shares one cache entry. */
+export const jobsKeys = {
+  all: ["jobs"] as const,
+  list: (query: JobsQuery) => [...jobsKeys.all, "list", query] as const,
+};

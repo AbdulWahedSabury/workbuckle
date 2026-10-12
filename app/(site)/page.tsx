@@ -1,5 +1,3 @@
-"use client";
-
 import Companies from "@/components/companies/Companies";
 import CtaBanner from "@/components/ui/CtaBanner";
 import HeroSection from "@/components/hero/HeroSection";

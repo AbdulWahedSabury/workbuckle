@@ -1,3 +1,4 @@
+import 'server-only';
 import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
 import type { RawApiSettings, Setting } from '@/types/setting';
@@ -9,7 +10,7 @@ export const SITE_SETTING_ID = 1;
 export const DEFAULT_SITE_NAME = 'Work Buckle';
 
 /**
- * Public read of the settings row (no auth check, unlike getSiteSettings in lib/admin/siteSetting.ts).
+ * Public read of the settings row (no auth check, unlike getSiteSettings in lib/admin/queries.ts).
  * Returns null if the row doesn't exist or the database is unreachable, so callers fall back to defaults.
  */
 export const getPublicSiteSettings = cache(async (): Promise<RawApiSettings | null> => {

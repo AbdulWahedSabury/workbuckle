@@ -1,10 +1,8 @@
 import type { LucideIcon } from "lucide-react";
-import { Mail, Phone, User, Link as LinkIcon } from "lucide-react";
+import { Mail, Phone, User } from "lucide-react";
 
+import { CV_EXTENSIONS, CV_MAX_BYTES } from "@/schemas/AdminSchemas";
 import type { ApplicationTextFieldName } from "./types";
-
-export const ApplyUrl = (jobId: string) =>
-  `https://api.manatal.com/open/v3/career-page/mavromatis-employment-bureau/jobs/${jobId}/apply/`;
 
 export interface TextFieldConfig {
   name: ApplicationTextFieldName;
@@ -60,8 +58,11 @@ export const NAME_FIELDS: TextFieldConfig[][] = [
 ];
 
 
-export const RESUME_ACCEPT = ".pdf,.docx";
-export const RESUME_HINT = "PDF or DOCX (Max 10MB)";
+// Same rules the server applies (cvFileSchema).
+export const RESUME_EXTENSIONS: readonly string[] = CV_EXTENSIONS;
+export const RESUME_MAX_BYTES = CV_MAX_BYTES;
+export const RESUME_ACCEPT = CV_EXTENSIONS.map((ext) => `.${ext}`).join(",");
+export const RESUME_HINT = `PDF, DOC or DOCX (Max ${CV_MAX_BYTES / (1024 * 1024)}MB)`;
 
 export const EMPTY_APPLICATION_FORM = {
   firstName: "",

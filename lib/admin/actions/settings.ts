@@ -5,9 +5,9 @@ import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
 import type { ActionState } from '@/lib/admin/action-state';
 import { formValues, validationError } from '@/lib/admin/form';
+import { imagePathFromUrl, removeImage, uploadImage } from '@/lib/admin/image-upload';
+import { SITE_SETTING_ID } from '@/lib/site-settings';
 import { siteSettingSchema } from '@/schemas/AdminSchemas';
-import { removeImage, uploadImage } from '@/lib/admin/image-upload';
-import { SITE_SETTING_ID } from '../siteSetting';
 
 const LOGO_FOLDER = 'settings';
 
@@ -26,6 +26,10 @@ export async function updateSiteSettings(
   if (!upload.ok) return { errors: { logoUrl: [upload.error] }, values };
   const data = upload.image ? { ...result.data, logoUrl: upload.image.imageUrl } : result.data;
 
+  const previous = upload.image
+    ? await prisma.siteSetting.findUnique({ where: { id: SITE_SETTING_ID }, select: { logoUrl: true } })
+    : null;
+
   try {
     await prisma.siteSetting.upsert({
       where: { id: SITE_SETTING_ID },
@@ -36,6 +40,9 @@ export async function updateSiteSettings(
     await removeImage(upload.image?.imagePath);
     throw error;
   }
+
+  // The replaced logo is no longer referenced; only files in our bucket are removed.
+  await removeImage(imagePathFromUrl(previous?.logoUrl));
 
   // Settings can be read anywhere on the site, so refresh every route.
   revalidatePath('/', 'layout');

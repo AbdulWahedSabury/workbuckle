@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef } from "react";
 import {motion}  from "framer-motion";
 const HERO_VIDEO_SRC = "/images/hero-video-1.mp4";

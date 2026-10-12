@@ -1,34 +1,17 @@
-import { API } from "@/constants/api";
-import { JobDetailsResponse, JobListResponse } from "@/types/job";
-import { Locale } from "next-intl";
+import type { PublicJobSummary } from "@/types/job";
 
-export async function fetchJobs(query: string): Promise<JobListResponse> {
-  let allResults: JobDetailsResponse[] = [];
-  let nextUrl: string | null = `${API.JOBS}?${query}`;
-  let totalCount = 0;
-  while (nextUrl) {
-    const res = await fetch(nextUrl);
-    if (!res.ok) {
-      throw new Error(`Failed to fetch jobs: ${res.statusText}`);
-    }
-    const data: JobListResponse = await res.json();
-    allResults = [...allResults, ...data.results];
-    totalCount = data.count;
-    nextUrl = data.next;
-  }
-  return {
-    count: totalCount,
-    next: null,
-    previous: null,
-    results: allResults,
-  };
+export interface JobsQuery {
+  search: string;
+  locale: string;
 }
 
-export async function fetchJob(
-  id: string,
-  locale: Locale
-): Promise<JobDetailsResponse> {
-  const res = await fetch(`${API.JOBS}/${id}?locale=${locale}`);
-  if (!res.ok) throw new Error('...');
-  return res.json();
+/** Every published job matching `search`, from this app's own API (app/api/jobs/route.ts). */
+export async function fetchJobs({ search, locale }: JobsQuery): Promise<PublicJobSummary[]> {
+  const params = new URLSearchParams({ locale });
+  if (search) params.set("search", search);
+
+  const res = await fetch(`/api/jobs?${params}`);
+  if (!res.ok) throw new Error(`Failed to fetch jobs: ${res.status} ${res.statusText}`);
+  const data: { jobs: PublicJobSummary[] } = await res.json();
+  return data.jobs;
 }

@@ -3,19 +3,17 @@
 import { useActionState } from "react";
 import { initialActionState } from "@/lib/admin/action-state";
 import { updateSiteSettings } from "@/lib/admin/actions/settings";
-import type { SiteSetting } from "@/lib/generated/prisma/browser";
+import type { RawApiSettings } from "@/types/setting";
 import { CheckboxField, FormMessage, TextAreaField, TextField } from "./fields";
 import { SubmitButton } from "./buttons";
 import ImageUploadField from "./ImageUploadField";
 import { fieldsetClass, legendClass } from "./styles";
 
-type Settings = Omit<SiteSetting, "id" | "createdAt" | "updatedAt">;
-
 export default function SettingsForm({
   settings,
   readOnly = false,
 }: {
-  settings: Settings;
+  settings: RawApiSettings;
   /** Read-only roles see the values with every field disabled. */
   readOnly?: boolean;
 }) {

@@ -4,79 +4,73 @@ import { getContactFormSchema } from "@/schemas/ContactFormSchema";
 import { getCorsHeaders } from "@/utils/cors";
 import mailer from "@/utils/mailer";
 
+/** Visitor input goes into the email's HTML, so it must not be able to inject markup. */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export async function OPTIONS(req: Request) {
-  const origin = req.headers.get("origin");
-  const headers = getCorsHeaders(origin);
+  const headers = getCorsHeaders(req.headers.get("origin"));
   return new Response(null, { status: 204, headers });
 }
 
+/** Contact form submission: validates the fields and emails them to EMAIL_SENDER. */
 export async function POST(req: Request) {
-  const t = await getTranslations("form");
+  const headers = getCorsHeaders(req.headers.get("origin"));
 
-  // Handle CORS manually
-  const origin = req.headers.get("origin");
-  const headers = getCorsHeaders(origin);
-
-  // Parse request body
-  const body = await req.json();
-  const schema = getContactFormSchema(t);
-
-  // Validate with Zod
-  const validation = schema.safeParse(body);
-  if (!validation.success) {
-    const errors: Record<string, string[]> =
-      validation.error.flatten().fieldErrors;
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
     return NextResponse.json(
-      {
-        success: false,
-        message: "Validation failed",
-        errors: Object.keys(errors).reduce(
-          (acc, key) => ({
-            ...acc,
-            [key]: errors[key]?.[0] ?? "Invalid field",
-          }),
-          {},
-        ),
-      },
+      { success: false, message: "Invalid request body" },
+      { status: 400, headers },
+    );
+  }
+
+  const t = await getTranslations("form");
+  const validation = getContactFormSchema(t).safeParse(body);
+  if (!validation.success) {
+    const fieldErrors: Record<string, string[] | undefined> =
+      validation.error.flatten().fieldErrors;
+    const errors = Object.fromEntries(
+      Object.entries(fieldErrors).map(([key, messages]) => [key, messages?.[0] ?? "Invalid field"]),
+    );
+    return NextResponse.json(
+      { success: false, message: "Validation failed", errors },
       { status: 400, headers },
     );
   }
 
   const { first_name, last_name, phone, email, message } = validation.data;
-
-  // Prepare email
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: process.env.EMAIL_SENDER,
-    subject: `Contact from ${first_name} ${last_name}`,
-    html: `
+  const html = `
       <h2>New Contact Form Submission</h2>
-      <p><strong>First Name:</strong> ${first_name}</p>
-      <p><strong>Last Name:</strong> ${last_name}</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Phone:</strong> ${phone}</p>
+      <p><strong>First Name:</strong> ${escapeHtml(first_name)}</p>
+      <p><strong>Last Name:</strong> ${escapeHtml(last_name)}</p>
+      <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+      <p><strong>Phone:</strong> ${escapeHtml(phone)}</p>
       <p><strong>Message:</strong></p>
-      <p>${message}</p>
-    `,
-  };
+      <p>${escapeHtml(message).replace(/\r?\n/g, "<br>")}</p>
+    `;
 
   try {
-    // Send email
-    await mailer.sendMail(mailOptions);
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Message sent successfully",
-      },
-      { headers },
-    );
+    await mailer.sendMail({
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_SENDER,
+      subject: `Contact from ${first_name} ${last_name}`,
+      html,
+    });
+    return NextResponse.json({ success: true, message: "Message sent successfully" }, { headers });
   } catch (error) {
+    // Logged server-side only: SMTP errors can include host and account details.
+    console.error("Contact form email failed:", error);
     return NextResponse.json(
-      {
-        success: false,
-        message: `Failed to send message ${error}`,
-      },
+      { success: false, message: "Failed to send message" },
       { status: 500, headers },
     );
   }

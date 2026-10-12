@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useLocale, useTranslations } from "next-intl";
-import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import FadeUp from "@/components/motion/FadeUp";
 import RevealSection from "@/components/motion/RevealSection";
 import JobFilterTabs from "@/components/jobs/JobFilterTabs";
@@ -12,38 +11,21 @@ import CtaButton from "@/components/ui/CtaButton";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { fadeUp } from "@/lib/motion";
 
-import { useSearchQueryParam } from "@/hooks/use-search-query-params";
-import { JOBS_QUERY_KEY } from "@/constants/query-keys";
-import { fetchJobs } from "@/queries/job";
+import { useJobs } from "@/hooks/use-jobs-list";
 import { JobFilter, matchesFilter } from "@/types/job";
 import { JobsLoadingState } from "./JobsLoadingState";
 import { JobsEmptyState } from "./JobsEmptyState";
 import { JOB_FILTERS } from "@/constants/job_filters";
 
-const STALE_TIME = 1000 * 60 * 60; // 1 hour
-const GC_TIME = 1000 * 60 * 60 * 2; // 2 hours
+const FEATURED_COUNT = 10;
 
 export default function JobBoard() {
   const t = useTranslations("pages.home.featured_jobs");
-  const locale = useLocale();
+  const { data, isPending } = useJobs();
 
-  const { query } = useSearchQueryParam({
-    search: "",
-    sort: "",
-    locale,
-  });
-  const { data, isPending } = useQuery({
-    queryKey: [JOBS_QUERY_KEY, query],
-    queryFn: () => fetchJobs(query),
-    staleTime: STALE_TIME,
-    gcTime: GC_TIME,
-  });
-
-  const apiJobs = data?.results ?? [];
   const [filter, setFilter] = useState<JobFilter>("All");
-  const filteredJobs = apiJobs.filter((job) => matchesFilter(job, filter));
-  const latestTenJobs = filteredJobs.slice(0, 10);
-
+  const filteredJobs = (data ?? []).filter((job) => matchesFilter(job, filter));
+  const latestJobs = filteredJobs.slice(0, FEATURED_COUNT);
 
   return (
     <RevealSection id="jobs" className="section-spacing">
@@ -78,8 +60,8 @@ export default function JobBoard() {
               >
                 <JobsLoadingState />
               </motion.li>
-            ) : latestTenJobs.length > 0 ? (
-              latestTenJobs.map((job) => (
+            ) : latestJobs.length > 0 ? (
+              latestJobs.map((job) => (
                 <motion.li
                   key={job.id}
                   layout

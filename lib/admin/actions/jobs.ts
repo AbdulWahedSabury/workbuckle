@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
 import type { ActionState } from '@/lib/admin/action-state';
 import { formValues, isNotFound, validationError } from '@/lib/admin/form';
-import { sanitizeRichText } from '@/lib/admin/rich-text';
+import { sanitizeRichText } from '@/lib/rich-text';
 import { JOB_RICH_TEXT_FIELDS, jobSchema } from '@/schemas/AdminSchemas';
 import type { z } from 'zod';
 

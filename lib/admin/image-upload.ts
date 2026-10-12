@@ -4,9 +4,24 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 const IMAGE_BUCKET = 'images';
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024; // keep below serverActions.bodySizeLimit
 
+/** Accepted image types and the extension each is stored under (never taken from the client's file name). */
+const IMAGE_EXTENSIONS: Record<string, string> = {
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+  'image/avif': 'avif',
+  'image/svg+xml': 'svg',
+};
+
 export type UploadResult =
   | { ok: true; image: { imageUrl: string; imagePath: string } | null }
   | { ok: false; error: string };
+
+/** Public URL prefix of the bucket; same URL getPublicUrl() would return (bucket must be public). */
+function publicBucketUrl(supabaseUrl: string): string {
+  return `${supabaseUrl}/storage/v1/object/public/${IMAGE_BUCKET}/`;
+}
 
 /**
  * Uploads the file in `formData[field]` to the public Supabase `images` bucket under `folder/`.
@@ -20,8 +35,9 @@ export async function uploadImage(
   const file = formData.get(field);
   if (!(file instanceof File) || file.size === 0) return { ok: true, image: null };
 
-  if (!file.type.startsWith('image/')) {
-    return { ok: false, error: 'Please choose an image file.' };
+  const ext = IMAGE_EXTENSIONS[file.type];
+  if (!ext) {
+    return { ok: false, error: 'Please choose a PNG, JPG, WebP, GIF, AVIF or SVG image.' };
   }
   if (file.size > MAX_IMAGE_BYTES) {
     return { ok: false, error: 'Images must be 4 MB or smaller.' };
@@ -34,7 +50,6 @@ export async function uploadImage(
     return { ok: false, error: 'Image upload is not configured.' };
   }
 
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'bin';
   const imagePath = `${folder}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
   const uploadUrl = `${supabaseUrl}/storage/v1/object/${IMAGE_BUCKET}/${imagePath}`;
 
@@ -65,11 +80,21 @@ export async function uploadImage(
     return { ok: false, error: 'Image upload failed due to a network error.' };
   }
 
-  // Same URL getPublicUrl() would return (bucket must be public)
-  const imageUrl = `${supabaseUrl}/storage/v1/object/public/${IMAGE_BUCKET}/${imagePath}`;
-  return { ok: true, image: { imageUrl, imagePath } };
+  return { ok: true, image: { imageUrl: `${publicBucketUrl(supabaseUrl)}${imagePath}`, imagePath } };
 }
 
+/**
+ * The object key of an image this bucket serves, from its public URL; null for
+ * anything else (an external URL, a /public path), which must not be removed.
+ */
+export function imagePathFromUrl(url: string | null | undefined): string | null {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url || !supabaseUrl) return null;
+  const prefix = publicBucketUrl(supabaseUrl);
+  return url.startsWith(prefix) ? decodeURIComponent(url.slice(prefix.length)) : null;
+}
+
+/** Deletes an uploaded image. Failures are logged, not thrown: a leftover file is harmless. */
 export async function removeImage(imagePath?: string | null): Promise<void> {
   if (!imagePath) return;
 

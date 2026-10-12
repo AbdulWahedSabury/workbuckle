@@ -1,40 +1,15 @@
 'use server';
 
-import { randomUUID } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
 import type { ActionState, DeleteResult } from '@/lib/admin/action-state';
 import { formValues, isNotFound, validationError } from '@/lib/admin/form';
-import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { removeCv, uploadCv } from '@/lib/cv-storage';
 import { candidateSchema, candidateStatusSchema, cvFileSchema } from '@/schemas/AdminSchemas';
 
 const LIST_PATH = '/admin/candidates';
-const CV_BUCKET = 'cv-uploads';
-
-/** Uploads the CV and returns its object key and public URL (the bucket must be public). */
-async function uploadCv(file: File): Promise<{ path: string; url: string }> {
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'pdf';
-  const path = `${new Date().getFullYear()}/${randomUUID()}.${ext}`;
-  const supabase = getSupabaseAdmin();
-
-  const { error } = await supabase.storage
-    .from(CV_BUCKET)
-    .upload(path, Buffer.from(await file.arrayBuffer()), {
-      contentType: file.type || 'application/octet-stream',
-      upsert: false,
-    });
-  if (error) throw error;
-
-  return { path, url: supabase.storage.from(CV_BUCKET).getPublicUrl(path).data.publicUrl };
-}
-
-async function removeCv(path: string | null) {
-  if (!path) return;
-  const { error } = await getSupabaseAdmin().storage.from(CV_BUCKET).remove([path]);
-  if (error) console.error('Failed to remove CV from Supabase Storage:', error);
-}
 
 export async function createCandidate(
   _prev: ActionState,
@@ -125,7 +100,7 @@ export async function deleteCandidate(id: string): Promise<DeleteResult> {
 
   const candidate = await prisma.candidate.findUnique({ where: { id }, select: { cvPath: true } });
   await prisma.candidate.deleteMany({ where: { id } });
-  await removeCv(candidate?.cvPath ?? null);
+  await removeCv(candidate?.cvPath);
 
   revalidatePath(LIST_PATH);
   revalidatePath('/admin');
