@@ -4,12 +4,11 @@ import type { ComponentType, SVGProps } from "react";
 import { Mail, Phone } from "lucide-react";
 
 import { MotionLink } from "@/components/motion/MotionLink";
-import { CONTACT, mailHref, telHref } from "@/lib/contact";
+import { mailHref, telHref } from "@/lib/contact";
 import { snappySpring } from "@/lib/motion";
+import { useSiteSetting } from "@/providers/SiteSettingProvider";
+import type { Setting } from "@/types/setting";
 
-/* ------------------------------------------------------------------ */
-/* Brand icons (lucide-react no longer ships brand logos)              */
-/* ------------------------------------------------------------------ */
 
 type IconProps = SVGProps<SVGSVGElement>;
 
@@ -44,12 +43,16 @@ type ContactLink = {
   external?: boolean;
 };
 
-export const SOCIALS: ContactLink[] = [
-  { label: "Facebook", value: "Facebook", href: CONTACT.facebook, icon: FacebookIcon, external: true },
-  { label: "Instagram", value: "Instagram", href: CONTACT.instagram, icon: InstagramIcon, external: true },
-  { label: "Call us", value: CONTACT.phone, href: telHref(CONTACT.phone), icon: Phone },
-  { label: "Email us", value: CONTACT.email, href: mailHref(CONTACT.email), icon: Mail },
-];
+/** Links built from the admin site settings; any left blank there are omitted. */
+function contactLinks(setting: Setting): ContactLink[] {
+  const links: (ContactLink | false)[] = [
+    !!setting.facebook && { label: "Facebook", value: "Facebook", href: setting.facebook, icon: FacebookIcon, external: true },
+    !!setting.instagram && { label: "Instagram", value: "Instagram", href: setting.instagram, icon: InstagramIcon, external: true },
+    !!setting.phone && { label: "Call us", value: setting.phone, href: telHref(setting.phone), icon: Phone },
+    !!setting.email && { label: "Email us", value: setting.email, href: mailHref(setting.email), icon: Mail },
+  ];
+  return links.filter((link) => link !== false);
+}
 
 /* ------------------------------------------------------------------ */
 /* Component                                                           */
@@ -66,10 +69,12 @@ interface SocialLinksProps {
 }
 
 export default function SocialLinks({ variant = "icons", className = "" }: SocialLinksProps) {
+  const socials = contactLinks(useSiteSetting());
+
   if (variant === "social") {
     return (
       <ul className={`flex gap-4 ${className}`}>
-        {SOCIALS.filter((s) => s.external).map(({ label, href, icon: Icon }) => (
+        {socials.filter((s) => s.external).map(({ label, href, icon: Icon }) => (
           <li key={label}>
             <MotionLink
               href={href}
@@ -92,7 +97,7 @@ export default function SocialLinks({ variant = "icons", className = "" }: Socia
   if (variant === "contact") {
     return (
       <ul className={`flex flex-wrap gap-2.5 ${className}`}>
-        {SOCIALS.map(({ label, value, href, icon: Icon, external }) => (
+        {socials.map(({ label, value, href, icon: Icon, external }) => (
           <li key={label}>
             <MotionLink
               href={href}
@@ -116,7 +121,7 @@ export default function SocialLinks({ variant = "icons", className = "" }: Socia
 
   return (
     <ul className={`flex gap-3 ${className}`}>
-      {SOCIALS.map(({ label, value, href, icon: Icon, external }) => (
+      {socials.map(({ label, value, href, icon: Icon, external }) => (
         <li key={label} className="group relative">
           <MotionLink
             href={href}

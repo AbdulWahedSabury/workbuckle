@@ -11,7 +11,8 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
-    "admin:create": "tsx scripts/create-admin.ts"
+    "admin:create": "tsx scripts/create-admin.ts",
+    "settings:update": "tsx scripts/update-site-settings.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",

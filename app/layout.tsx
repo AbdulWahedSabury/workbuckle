@@ -4,7 +4,11 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import QueryProvider from "@/providers/QueryProvider";
+import SiteSettingProvider from "@/providers/SiteSettingProvider";
 import { Toaster } from "sonner";
+import { getSiteSetting } from "@/lib/site-settings";
+import JsonLd from "@/components/seo/JsonLd";
+import { organizationSchema } from "@/components/seo/organizationSchema";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,31 +30,42 @@ const roboto = localFont({
   variable: "--next-font-roboto",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Work Buckle — Find work that fits",
-    template: "%s | Work Buckle",
-  },
-  description:
-    "Work Buckle connects job seekers with hiring teams. Browse featured roles, top companies, and career categories.",
-};
+// Settings are refreshed when admin settings are saved (revalidatePath('/', 'layout') in lib/admin/actions/settings.ts).
+export async function generateMetadata(): Promise<Metadata> {
+  const setting = await getSiteSetting();
+  return {
+    title: {
+      default: setting.meta_title || "Work Buckle — Find work that fits",
+      template: `%s | ${setting.name}`,
+    },
+    description:
+      setting.meta_description ||
+      "Work Buckle connects job seekers with hiring teams. Browse featured roles, top companies, and career categories.",
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Same cached query as generateMetadata, so this costs no extra round trip.
+  const setting = await getSiteSetting();
+
   return (
     <html
       lang="en"
       data-scroll-behavior="smooth"
       className={`h-full ${inter.variable} ${poppins.variable} ${roboto.variable}`}
     >
-      <body className="antialiased" 
+      <body className="antialiased"
       suppressHydrationWarning>
+        <JsonLd data={organizationSchema(setting)} />
         <QueryProvider>
           <NextIntlClientProvider>
-            {children}
+            <SiteSettingProvider setting={setting}>
+              {children}
+            </SiteSettingProvider>
           </NextIntlClientProvider>
         </QueryProvider>
         <Toaster />

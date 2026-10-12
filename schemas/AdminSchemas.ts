@@ -31,6 +31,17 @@ const optionalImageUrl = z
   .optional()
   .transform((v) => (v ? v : null));
 
+/** External link, e.g. a social profile (https://…). */
+const optionalLinkUrl = z
+  .string()
+  .trim()
+  .max(2048)
+  .refine((v) => v === '' || /^https?:\/\//.test(v), {
+    message: 'Enter a full URL starting with https://.',
+  })
+  .optional()
+  .transform((v) => (v ? v : null));
+
 /** HTML checkboxes send "on" when checked and nothing when unchecked. */
 const checkbox = z.preprocess((v) => v === 'on' || v === 'true', z.boolean());
 
@@ -124,6 +135,12 @@ export const siteSettingSchema = z.object({
   contactPhone: optionalText(40),
   logoUrl: optionalImageUrl,
   faviconUrl: optionalImageUrl,
+  metaTitle: optionalText(120),
+  metaDescription: optionalText(320),
+  facebookUrl: optionalLinkUrl,
+  linkedinUrl: optionalLinkUrl,
+  instagramUrl: optionalLinkUrl,
+  about: optionalText(5000),
   maintenanceMode: checkbox,
   maintenanceMessage: optionalText(2000),
 });

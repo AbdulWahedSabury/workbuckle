@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 const inputClass =
   "h-12 w-full rounded-xl border border-transparent bg-gray-3 px-4 text-sm text-ink outline-none transition-[border-color,box-shadow,background-color] placeholder:text-gray-2/70 hover:border-ink/10 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/15 aria-invalid:border-red-500 aria-invalid:bg-red-50/40";
 
-type BaseProps = {
+export type BaseProps = {
   name: string;
   label: string;
   error?: string[];
@@ -14,7 +14,7 @@ type BaseProps = {
   required?: boolean;
 };
 
-function FieldShell({
+export function FieldShell({
   name,
   label,
   error,

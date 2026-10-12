@@ -6,6 +6,7 @@ import { updateSiteSettings } from "@/lib/admin/actions/settings";
 import type { SiteSetting } from "@/lib/generated/prisma/browser";
 import { CheckboxField, FormMessage, TextAreaField, TextField } from "./fields";
 import { SubmitButton } from "./buttons";
+import ImageUploadField from "./ImageUploadField";
 import { fieldsetClass, legendClass } from "./styles";
 
 type Settings = Omit<SiteSetting, "id" | "createdAt" | "updatedAt">;
@@ -63,11 +64,11 @@ export default function SettingsForm({
         <legend className={legendClass}>
           Branding
         </legend>
-        <TextField
-          name="logoUrl"
-          label="Logo URL"
-          placeholder="https://… or /images/logo.svg"
-          defaultValue={v ? v.logoUrl : settings.logoUrl}
+        <ImageUploadField
+          name="logoFile"
+          label="Logo"
+          existingName="logoUrl"
+          existingUrl={v ? v.logoUrl : settings.logoUrl}
           error={errors.logoUrl}
         />
         <TextField
@@ -76,6 +77,61 @@ export default function SettingsForm({
           placeholder="https://… or /favicon.ico"
           defaultValue={v ? v.faviconUrl : settings.faviconUrl}
           error={errors.faviconUrl}
+        />
+      </fieldset>
+
+      <fieldset className={fieldsetClass}>
+        <legend className={legendClass}>
+          SEO
+        </legend>
+        <TextField
+          name="metaTitle"
+          label="Meta title"
+          hint="Browser tab and search result title. Falls back to the website name."
+          defaultValue={v ? v.metaTitle : settings.metaTitle}
+          error={errors.metaTitle}
+        />
+        <TextAreaField
+          name="metaDescription"
+          label="Meta description"
+          defaultValue={v ? v.metaDescription : settings.metaDescription}
+          error={errors.metaDescription}
+        />
+      </fieldset>
+
+      <fieldset className={fieldsetClass}>
+        <legend className={legendClass}>
+          Social &amp; about
+        </legend>
+        <TextField
+          name="facebookUrl"
+          label="Facebook"
+          type="url"
+          placeholder="https://facebook.com/…"
+          defaultValue={v ? v.facebookUrl : settings.facebookUrl}
+          error={errors.facebookUrl}
+        />
+        <TextField
+          name="linkedinUrl"
+          label="LinkedIn"
+          type="url"
+          placeholder="https://linkedin.com/company/…"
+          defaultValue={v ? v.linkedinUrl : settings.linkedinUrl}
+          error={errors.linkedinUrl}
+        />
+        <TextField
+          name="instagramUrl"
+          label="Instagram"
+          type="url"
+          placeholder="https://instagram.com/…"
+          defaultValue={v ? v.instagramUrl : settings.instagramUrl}
+          error={errors.instagramUrl}
+        />
+        <TextAreaField
+          name="about"
+          label="About"
+          defaultValue={v ? v.about : settings.about}
+          error={errors.about}
         />
       </fieldset>
 

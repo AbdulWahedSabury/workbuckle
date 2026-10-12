@@ -3,7 +3,7 @@ import { connection } from "next/server";
 import PageHeader from "@/components/admin/PageHeader";
 import SettingsForm from "@/components/admin/SettingsForm";
 import { requireView, viewerCanEdit } from "@/lib/admin/auth";
-import { getSiteSettings } from "@/lib/admin/queries";
+import { getSiteSettings } from "@/lib/admin/siteSetting";
 
 export const metadata: Metadata = { title: "Site settings" };
 
@@ -13,6 +13,12 @@ const DEFAULT_SETTINGS = {
   contactPhone: null,
   logoUrl: null,
   faviconUrl: null,
+  metaTitle: null,
+  metaDescription: null,
+  facebookUrl: null,
+  linkedinUrl: null,
+  instagramUrl: null,
+  about: null,
   maintenanceMode: false,
   maintenanceMessage: null,
 };

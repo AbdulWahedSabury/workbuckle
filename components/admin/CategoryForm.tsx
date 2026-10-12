@@ -7,6 +7,7 @@ import { categoryNameField } from "@/schemas/AdminSchemas";
 import { defaultLocale, locales } from "@/types/locale";
 import { CheckboxField, FormMessage, TextField } from "./fields";
 import { SubmitButton } from "./buttons";
+import ImageUploadField from "./ImageUploadField";
 import { fieldsetClass, legendClass, secondaryLinkClass } from "./styles";
 
 const LOCALE_LABELS: Record<string, string> = { en: "English", de: "German" };
@@ -69,37 +70,13 @@ export default function CategoryForm({
           defaultValue={v ? v.slug : category?.slug}
           error={errors.slug}
         />
-        <div className="flex items-end gap-4">
-          <div className="flex-1">
-            {/* Hidden fallback to keep track of the existing image if a new one isn't uploaded */}
-            <input
-              type="hidden"
-              name="existingImageUrl"
-              value={imageUrl ?? ""}
-            />
-
-            <label className="block text-sm font-medium mb-1">
-              Category Image / Icon
-            </label>
-            <input
-              type="file"
-              name="imageFile"
-              accept="image/*"
-              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            />
-            {errors.imageUrl && (
-              <p className="mt-1 text-sm text-red-600">{errors.imageUrl}</p>
-            )}
-          </div>
-          {imageUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={imageUrl}
-              alt=""
-              className="size-11 shrink-0 rounded-xl border border-line bg-white object-contain"
-            />
-          )}
-        </div>
+        <ImageUploadField
+          name="imageFile"
+          label="Category image / icon"
+          existingName="existingImageUrl"
+          existingUrl={imageUrl}
+          error={errors.imageUrl}
+        />
         <TextField
           name="sortOrder"
           label="Sort order"

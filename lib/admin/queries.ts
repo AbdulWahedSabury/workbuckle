@@ -5,9 +5,6 @@ import { paginate, type ListParams, type Paginated, type SortDir } from '@/lib/a
 import type { Prisma } from '@/lib/generated/prisma/client';
 import { defaultLocale } from '@/types/locale';
 
-/** SiteSetting is a single-row table; this is that row's id. */
-export const SITE_SETTING_ID = 1;
-
 // Ids come from the URL; a malformed one would make Postgres reject the query.
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -408,11 +405,6 @@ export async function getJobFormOptions(currentCategoryId?: string) {
       label: c.isActive ? categoryDisplayName(c) : `${categoryDisplayName(c)} (hidden)`,
     })),
   };
-}
-
-export async function getSiteSettings() {
-  await requireView('settings');
-  return prisma.siteSetting.findUnique({ where: { id: SITE_SETTING_ID } });
 }
 
 // ─── Candidates ──────────────────────────────────────────────────────────────
