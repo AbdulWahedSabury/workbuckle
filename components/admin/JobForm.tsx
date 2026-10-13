@@ -8,6 +8,7 @@ import { JOB_STATUSES, type JobStatus } from "@/schemas/AdminSchemas";
 import { FormMessage, SelectField, TextField } from "./fields";
 import { SubmitButton } from "./buttons";
 import RichTextEditor from "./RichTextEditor";
+import SearchableSelectField from "./SearchableSelectField";
 import { fieldsetClass, legendClass, secondaryLinkClass } from "./styles";
 
 export type JobFormValues = {
@@ -17,6 +18,7 @@ export type JobFormValues = {
   cityId: string;
   jobTypeId: string;
   jobCategoryId: string;
+  campaignId: string;
   description: string;
   responsibilities: string;
   requirements: string;
@@ -28,6 +30,7 @@ export type JobFormOptions = {
   cities: SelectOption[];
   jobTypes: SelectOption[];
   categories: SelectOption[];
+  campaigns: SelectOption[];
 };
 
 const STATUS_LABELS: Record<JobStatus, string> = {
@@ -189,6 +192,31 @@ export default function JobForm({
               defaultValue={value("cityId")}
               error={errors.cityId}
               hint={emptyHint(options.cities, "cities", "/admin/cities/new")}
+            />
+            <SearchableSelectField
+              name="campaignId"
+              label="Campaign"
+              placeholder="Search campaigns"
+              emptyLabel="No campaign"
+              options={options.campaigns}
+              defaultValue={value("campaignId")}
+              error={errors.campaignId}
+              hint={
+                options.campaigns.length ? (
+                  "Optional. Lists this job under a campaign on the site."
+                ) : (
+                  <>
+                    Optional. No campaigns yet —{" "}
+                    <Link
+                      href="/admin/campaigns/new"
+                      className="font-semibold text-primary-dark underline underline-offset-2"
+                    >
+                      create one
+                    </Link>
+                    .
+                  </>
+                )
+              }
             />
           </fieldset>
 

@@ -11,7 +11,7 @@ import StatusBadge, { type StatusTone } from "@/components/admin/StatusBadge";
 import { iconButtonClass } from "@/components/admin/styles";
 import { formatDate } from "./format";
 
-const STATUS_BADGE: Record<string, { tone: StatusTone; label: string }> = {
+export const STATUS_BADGE: Record<string, { tone: StatusTone; label: string }> = {
   published: { tone: "success", label: "Published" },
   draft: { tone: "neutral", label: "Draft" },
   closed: { tone: "danger", label: "Closed" },

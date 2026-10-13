@@ -7,6 +7,7 @@ export type AdminSection =
   | 'dashboard'
   | 'jobs'
   | 'candidates'
+  | 'campaigns'
   | 'categories'
   | 'jobTypes'
   | 'cities'
@@ -17,6 +18,7 @@ const ALL_SECTIONS: readonly AdminSection[] = [
   'dashboard',
   'jobs',
   'candidates',
+  'campaigns',
   'categories',
   'jobTypes',
   'cities',

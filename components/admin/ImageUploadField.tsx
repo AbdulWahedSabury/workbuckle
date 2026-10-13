@@ -6,7 +6,8 @@ import { FieldShell, type BaseProps } from "./fields";
 
 /**
  * File input with a live preview. The current image travels in a hidden
- * `existingName` input so the action can keep it when no new file is chosen.
+ * `existingName` input so the action can keep it when no new file is chosen;
+ * omit `existingName` when another field already submits it.
  */
 export default function ImageUploadField({
   existingName,
@@ -15,7 +16,7 @@ export default function ImageUploadField({
   ...base
 }: BaseProps & {
   /** Name of the hidden input carrying the current image URL. */
-  existingName: string;
+  existingName?: string;
   existingUrl?: string | null;
   disabled?: boolean;
 }) {
@@ -55,7 +56,7 @@ export default function ImageUploadField({
       {...base}
       hint={base.hint ?? (preview ? "New image — saved when you submit." : "PNG, JPG, WebP, GIF, AVIF or SVG, up to 4 MB.")}
     >
-      <input type="hidden" name={existingName} value={existingUrl ?? ""} />
+      {existingName && <input type="hidden" name={existingName} value={existingUrl ?? ""} />}
       <div className="flex items-center gap-4">
         <div className="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-line bg-gray-3">
           {shown ? (

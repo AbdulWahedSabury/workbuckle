@@ -1,13 +1,25 @@
 "use client";
 
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { ImageOff } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
+import type { CampaignPayload } from "@/types/campaign";
 import ArrowButton from "../ui/ArrowButton";
 
-interface Step {
-  title: string;
-  description?: string;
+/** Job titles shown per card; the rest are one click away on /jobs. */
+const MAX_LISTED_JOBS = 3;
+
+const STORAGE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/`
+  : null;
+
+/**
+ * True for images the Next image optimizer may load: /public paths and our
+ * Supabase bucket (see images.remotePatterns in next.config.ts). Other hosts
+ * an admin typed in are served as-is rather than failing.
+ */
+function canOptimize(src: string): boolean {
+  return (src.startsWith("/") && !src.startsWith("//")) || (STORAGE_URL !== null && src.startsWith(STORAGE_URL));
 }
 
 const cardVariants: Variants = {
@@ -36,10 +48,17 @@ function CheckIcon() {
   );
 }
 
-export default function AvailableCard({ category }: { category: string }) {
-  const t = useTranslations(`pages.home.available_jobs.categories.${category}`);
-  const raw = t.raw("list");
-  const steps: Step[] = Array.isArray(raw) ? raw : [];
+export default function AvailableCard({
+  campaign,
+  href,
+  ctaLabel,
+}: {
+  campaign: CampaignPayload;
+  /** The campaign's jobs on /jobs. */
+  href: string;
+  ctaLabel: string;
+}) {
+  const jobs = campaign["jobs-list-title"];
 
   return (
     <motion.article
@@ -51,34 +70,41 @@ export default function AvailableCard({ category }: { category: string }) {
     >
       {/* Image */}
       <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
-        <Image
-          src={t("img")}
-          alt={t("image_alt")}
-          fill
-          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-        />
+        {campaign.img ? (
+          <Image
+            src={campaign.img}
+            alt={campaign.image_alt ?? ""}
+            fill
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            unoptimized={!canOptimize(campaign.img)}
+            className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+          />
+        ) : (
+          <div className="flex size-full items-center justify-center text-slate-300">
+            <ImageOff className="size-8" aria-hidden="true" />
+          </div>
+        )}
       </div>
 
       {/* Content */}
       <div className="flex flex-1 flex-col p-6">
         <h3 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
-          {t("title")}
+          {campaign.title}
         </h3>
 
         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-slate-600">
-          {t("intro")}
+          {campaign.intro}
         </p>
 
-        {steps.length > 0 && (
+        {jobs.length > 0 && (
           <ul className="mt-5 space-y-2.5">
-            {steps.slice(0, 3).map((step, i) => (
+            {jobs.slice(0, MAX_LISTED_JOBS).map((job, i) => (
               <li
-                key={step.title || i}
+                key={`${i}-${job.title}`}
                 className="flex items-start gap-2.5 text-sm text-slate-700"
               >
                 <CheckIcon />
-                <span className="line-clamp-1">{step.title}</span>
+                <span className="line-clamp-1">{job.title}</span>
               </li>
             ))}
           </ul>
@@ -87,8 +113,8 @@ export default function AvailableCard({ category }: { category: string }) {
         {/* CTA — mt-auto keeps buttons aligned across cards of different heights */}
         <div className="mt-auto pt-6">
           <ArrowButton
-            href={t("slug")}
-            label={t("cta")}
+            href={href}
+            label={ctaLabel}
             className="w-full justify-center rounded-xl bg-slate-900 py-3 text-sm font-medium text-white transition-colors duration-200 hover:bg-slate-800"
           />
         </div>

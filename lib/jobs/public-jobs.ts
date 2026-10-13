@@ -76,13 +76,15 @@ function publicJobsWhere({
   location,
   type,
   category,
-}: Pick<JobsListParams, 'search' | 'location' | 'type' | 'category'>): Prisma.JobWhereInput {
+  campaign,
+}: Pick<JobsListParams, 'search' | 'location' | 'type' | 'category' | 'campaign'>): Prisma.JobWhereInput {
   const contains = { contains: search, mode: 'insensitive' } as const;
   return {
     status: PUBLIC_STATUS,
     ...(location && { city: { slug: location } }),
     ...(type && { jobType: { slug: type } }),
     ...(category && { jobCategory: { slug: category } }),
+    ...(campaign && { campaignId: campaign }),
     ...(search && {
       OR: [
         { title: contains },
@@ -112,11 +114,11 @@ export async function listPublishedJobsPage(
 
 /**
  * Cities with at least one published job, A–Z, for the location filter. Each
- * count applies the other active filters (search, type, category) but not the
+ * count applies the other active filters (search, type, category, campaign) but not the
  * location itself, so a chip says how many roles picking it would show.
  */
 export async function listPublicCities(
-  params: Pick<JobsListParams, 'search' | 'type' | 'category'>
+  params: Pick<JobsListParams, 'search' | 'type' | 'category' | 'campaign'>
 ): Promise<CityOption[]> {
   const cities = await prisma.city.findMany({
     where: { jobs: { some: { status: PUBLIC_STATUS } } },

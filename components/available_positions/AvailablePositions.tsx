@@ -1,87 +1,74 @@
-"use client";
-
-import { useCallback } from "react";
-import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useTranslations } from "next-intl";
-
+import { Suspense, type ReactNode } from "react";
+import { getTranslations } from "next-intl/server";
+import { listPublicCampaigns } from "@/lib/campaigns/public-campaigns";
+import { EMPTY_JOBS_PARAMS, writeJobsParams } from "@/lib/jobs/jobs-params";
+import type { CampaignPayload } from "@/types/campaign";
 import RevealSection from "../motion/RevealSection";
-import AvailableCard from "./AvailableCard";
 import SectionHeader from "../ui/SectionHeader";
+import AvailableCard from "./AvailableCard";
+import CampaignCarousel from "./CampaignCarousel";
 
-const CATEGORIES = [
-  "front_office",
-  "food_&_beverage_culinary",
-  "housekeeping_&_operations",
-  "casino_table_games",
-  "front_office_&_concierge",
-  "food_&_beverage"
-] as const;
-
+const SLIDE_CLASS = "min-w-0 flex-[0_0_100%] pl-4 sm:flex-[0_0_50%] lg:flex-[0_0_33.333%]";
+function campaignJobsHref(id: string): string {
+  return `/jobs?${writeJobsParams({ ...EMPTY_JOBS_PARAMS, campaign: id })}`;
+}
 export default function AvailablePositions() {
-  const t = useTranslations("pages.home.available_jobs");
-
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: "start",
-    loop: false,
-    dragFree: false,
-    containScroll: "trimSnaps",
-  });
-
-  const scrollPrev = useCallback(() => {
-    if (emblaApi) emblaApi.scrollPrev();
-  }, [emblaApi]);
-
-  const scrollNext = useCallback(() => {
-    if (emblaApi) emblaApi.scrollNext();
-  }, [emblaApi]);
-
+  return (
+    <Suspense fallback={<PositionsFallback />}>
+      <PositionsContent />
+    </Suspense>
+  );
+}
+async function PositionsContent() {
+  let campaigns: CampaignPayload[] = [];
+  try {
+    campaigns = await listPublicCampaigns();
+  } catch (error) {
+    console.error("Failed to list campaigns:", error);
+  }
+  const live = campaigns.filter((campaign) => campaign["jobs-list-title"].length > 0);
+  if (live.length === 0) return null;
+  const t = await getTranslations("pages.home.available_jobs");
+  return (
+    <PositionsSection>
+      <CampaignCarousel header={<PositionsHeader />}>
+        {live.map((campaign) => (
+          <div key={campaign.id} className={SLIDE_CLASS}>
+            <AvailableCard
+              campaign={campaign}
+              href={campaignJobsHref(campaign.id)}
+              ctaLabel={t("cta")}
+            />
+          </div>
+        ))}
+      </CampaignCarousel>
+    </PositionsSection>
+  );
+}
+function PositionsFallback() {
+  return (
+    <PositionsSection>
+      <PositionsHeader />
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {[0, 1, 2].map((index) => (
+          <div
+            key={index}
+            aria-hidden="true"
+            className={`h-112 animate-pulse rounded-2xl bg-white ${index === 1 ? "hidden sm:block" : index === 2 ? "hidden lg:block" : ""}`}
+          />
+        ))}
+      </div>
+    </PositionsSection>
+  );
+}
+function PositionsSection({ children }: { children: ReactNode }) {
   return (
     <RevealSection className="bg-gray-3 py-15 md:py-18.75 lg:py-22.5">
-      <div className="container-site">
-        {/* Header with Navigation Controls */}
-        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
-          <SectionHeader
-            eyebrow={t("eyebrow")}
-            title={t("title")}
-            description=""
-          />
-
-          {/* Navigation Buttons */}
-          <div className="flex items-center gap-2 pb-2">
-            <button
-              onClick={scrollPrev}
-              type="button"
-              aria-label="Previous jobs"
-              className="flex size-10 items-center justify-center rounded-full border border-line bg-white text-ink transition-colors hover:bg-gray-100 hover:text-black focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <ChevronLeft className="size-5" />
-            </button>
-            <button
-              onClick={scrollNext}
-              type="button"
-              aria-label="Next jobs"
-              className="flex size-10 items-center justify-center rounded-full border border-line bg-white text-ink transition-colors hover:bg-gray-100 hover:text-black focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <ChevronRight className="size-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Slider Viewport */}
-        <div className="mt-8 overflow-hidden" ref={emblaRef}>
-          <div className="-ml-4 flex">
-            {CATEGORIES.map((category) => (
-              <div
-                key={category}
-                className="min-w-0 flex-[0_0_100%] pl-4 sm:flex-[0_0_50%] lg:flex-[0_0_33.333%]"
-              >
-                <AvailableCard category={category} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <div className="container-site">{children}</div>
     </RevealSection>
   );
+}
+async function PositionsHeader() {
+  const t = await getTranslations("pages.home.available_jobs");
+  return <SectionHeader eyebrow={t("eyebrow")} title={t("title")} description="" />;
 }

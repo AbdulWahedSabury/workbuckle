@@ -319,6 +319,73 @@ export async function getJobType(id: string) {
   return prisma.jobType.findUnique({ where: { id } });
 }
 
+// ─── Campaigns ───────────────────────────────────────────────────────────────
+
+export type CampaignWithCount = Prisma.CampaignGetPayload<{
+  include: { _count: { select: { jobs: true } } };
+}>;
+
+export const CAMPAIGN_SORT_KEYS = ['title', 'jobs', 'updatedAt'] as const;
+export type CampaignSortKey = (typeof CAMPAIGN_SORT_KEYS)[number];
+
+const campaignOrderBy: Record<
+  CampaignSortKey,
+  (dir: SortDir) => Prisma.CampaignOrderByWithRelationInput[]
+> = {
+  title: (dir) => [{ title: dir }],
+  jobs: (dir) => [{ jobs: { _count: dir } }, { title: 'asc' }],
+  updatedAt: (dir) => [{ updatedAt: dir }],
+};
+
+/** One page of campaigns matching `q` by title or intro. Default order is newest edit first. */
+export async function listCampaigns(
+  params: ListParams<CampaignSortKey>
+): Promise<Paginated<CampaignWithCount>> {
+  await requireView('campaigns');
+  const { q, sort } = params;
+  const where: Prisma.CampaignWhereInput | undefined = q
+    ? {
+        OR: [
+          { title: { contains: q, mode: 'insensitive' } },
+          { intro: { contains: q, mode: 'insensitive' } },
+        ],
+      }
+    : undefined;
+
+  return fetchPage(
+    params,
+    () => prisma.campaign.count({ where }),
+    ({ skip, take }) =>
+      prisma.campaign.findMany({
+        where,
+        orderBy: [
+          ...(sort ? campaignOrderBy[sort.key](sort.dir) : [{ updatedAt: 'desc' as const }]),
+          { id: 'asc' },
+        ],
+        include: { _count: { select: { jobs: true } } },
+        skip,
+        take,
+      })
+  );
+}
+
+/** A campaign with every assigned job (any status), for the edit page. */
+export async function getCampaign(id: string) {
+  await requireView('campaigns');
+  if (!isUuid(id)) return null;
+  return prisma.campaign.findUnique({
+    where: { id },
+    include: {
+      jobs: {
+        orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
+        select: { id: true, title: true, status: true },
+      },
+    },
+  });
+}
+
+// ─── Jobs ────────────────────────────────────────────────────────────────────
+
 const jobListInclude = {
   city: { select: { name: true } },
   jobType: { select: { name: true } },
@@ -384,9 +451,10 @@ export type SelectOption = { value: string; label: string };
  */
 export async function getJobFormOptions(currentCategoryId?: string) {
   await requireAdmin();
-  const [cities, jobTypes, categories] = await Promise.all([
+  const [cities, jobTypes, campaigns, categories] = await Promise.all([
     prisma.city.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true, state: true } }),
     prisma.jobType.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true } }),
+    prisma.campaign.findMany({ orderBy: { title: 'asc' }, select: { id: true, title: true } }),
     prisma.jobCategory.findMany({
       where: currentCategoryId
         ? { OR: [{ isActive: true }, { id: currentCategoryId }] }
@@ -402,6 +470,7 @@ export async function getJobFormOptions(currentCategoryId?: string) {
       label: c.state ? `${c.name}, ${c.state}` : c.name,
     })),
     jobTypes: jobTypes.map((t): SelectOption => ({ value: t.id, label: t.name })),
+    campaigns: campaigns.map((c): SelectOption => ({ value: c.id, label: c.title })),
     categories: categories.map((c): SelectOption => ({
       value: c.id,
       label: c.isActive ? categoryDisplayName(c) : `${categoryDisplayName(c)} (hidden)`,

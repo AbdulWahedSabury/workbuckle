@@ -80,6 +80,15 @@ export const jobTypeSchema = z.object({
   slug,
 });
 
+// ─── Campaigns ───────────────────────────────────────────────────────────────
+
+export const campaignSchema = z.object({
+  title: z.string().trim().min(1, 'Title is required.').max(200),
+  img: optionalImageUrl,
+  imageAlt: optionalText(255),
+  intro: z.string().trim().min(1, 'Intro is required.').max(5000),
+});
+
 // ─── Jobs ────────────────────────────────────────────────────────────────────
 
 export const JOB_STATUSES = ['draft', 'published', 'closed'] as const;
@@ -112,6 +121,15 @@ export const jobSchema = z.object({
   cityId: relationId('city'),
   jobTypeId: relationId('job type'),
   jobCategoryId: relationId('category'),
+  // Optional: blank ("No campaign") → null.
+  campaignId: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => (v ? v : null))
+    .refine((v) => v === null || z.string().uuid().safeParse(v).success, {
+      message: 'Choose a campaign.',
+    }),
   description: richText('Description'),
   responsibilities: richText('Responsibilities'),
   requirements: richText('Requirements'),

@@ -12,7 +12,7 @@ import {
 type JobsQuery = JobsListParams & {
   /** True while the server is rendering results for a new query. */
   isPending: boolean;
-  /** True when search, location, type or category narrows the list. */
+  /** True when search, location, type, category or campaign narrows the list. */
   hasFilters: boolean;
   setSearch: (search: string) => void;
   /** City slug; '' for every city. */
@@ -20,6 +20,8 @@ type JobsQuery = JobsListParams & {
   setType: (type: string) => void;
   /** Category slug; '' for every category. */
   setCategory: (category: string) => void;
+  /** Campaign id; '' for every campaign. */
+  setCampaign: (campaign: string) => void;
   setPage: (page: number) => void;
   clearFilters: () => void;
   /** URL for these params with `page` swapped, for real <a href>s. */
@@ -81,6 +83,9 @@ export function JobsQueryProvider({
     },
     setCategory(category) {
       if (category !== params.category) navigate({ ...params, category, page: 1 });
+    },
+    setCampaign(campaign) {
+      if (campaign !== params.campaign) navigate({ ...params, campaign, page: 1 });
     },
     setPage(page) {
       if (page === params.page) return;

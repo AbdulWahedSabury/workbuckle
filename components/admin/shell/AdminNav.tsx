@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Briefcase, BriefcaseBusiness, LayoutDashboard, MapPin, Settings, ShieldCheck, Tags, Users, type LucideIcon } from "lucide-react";
+import { Briefcase, BriefcaseBusiness, LayoutDashboard, MapPin, Megaphone, Settings, ShieldCheck, Tags, Users, type LucideIcon } from "lucide-react";
 import type { Role } from "@/lib/generated/prisma/enums";
 import { canView, type AdminSection } from "@/lib/auth/roles";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ const NAV_ITEMS: readonly NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, section: "dashboard", exact: true },
   { href: "/admin/jobs", label: "Jobs", icon: BriefcaseBusiness, section: "jobs" },
   { href: "/admin/candidates", label: "Candidates", icon: Users, section: "candidates" },
+  { href: "/admin/campaigns", label: "Campaigns", icon: Megaphone, section: "campaigns" },
   { href: "/admin/categories", label: "Job categories", icon: Tags, section: "categories" },
   { href: "/admin/job-types", label: "Job types", icon: Briefcase, section: "jobTypes" },
   { href: "/admin/cities", label: "Cities", icon: MapPin, section: "cities" },

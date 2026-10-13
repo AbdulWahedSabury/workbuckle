@@ -1,31 +1,49 @@
 "use client";
 
-import { Briefcase, ChevronDown, LayoutGrid, X, type LucideIcon } from "lucide-react";
+import { Briefcase, ChevronDown, LayoutGrid, Megaphone, X, type LucideIcon } from "lucide-react";
 import type { CategoryOption, CityOption, JobTypeOption } from "@/types/job";
 import { useJobsQuery } from "./JobsQueryProvider";
 import LocationChips from "./LocationChips";
 
 /**
  * Filter bar for the /jobs feed: location chips (`?location=`), job type
- * (`?type=`) and category (`?category=`) pickers and, once anything is
- * filtered, a way back to every role.
+ * (`?type=`) and category (`?category=`) pickers, a removable chip for a
+ * campaign (`?campaign=`, set by the home page's campaign cards) and, once
+ * anything is filtered, a way back to every role.
  */
 export default function JobsFilters({
   cities,
   jobTypes,
   categories,
+  campaignTitle,
 }: {
   cities: CityOption[];
   jobTypes: JobTypeOption[];
   categories: CategoryOption[];
+  /** Title of the `?campaign=` filter; null when it names no campaign. */
+  campaignTitle: string | null;
 }) {
-  const { type, setType, category, setCategory, hasFilters, clearFilters } = useJobsQuery();
+  const { type, setType, category, setCategory, campaign, setCampaign, hasFilters, clearFilters } =
+    useJobsQuery();
 
   return (
     <div className="flex flex-col gap-2 rounded-sm-card border border-line bg-white p-2 lg:flex-row lg:items-center">
       <LocationChips cities={cities} className="lg:flex-1" />
 
       <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
+        {campaign && (
+          <button
+            type="button"
+            onClick={() => setCampaign("")}
+            aria-label={`Remove campaign filter: ${campaignTitle ?? "unknown campaign"}`}
+            title="Show jobs from every campaign"
+            className="inline-flex h-12 max-w-full min-w-0 flex-none items-center gap-2 rounded-full bg-ink pr-3 pl-4 text-sm font-semibold text-white transition-colors hover:bg-ink/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none lg:max-w-60"
+          >
+            <Megaphone className="size-4 flex-none text-primary" aria-hidden="true" />
+            <span className="truncate">{campaignTitle ?? "Unknown campaign"}</span>
+            <X className="size-4 flex-none" aria-hidden="true" />
+          </button>
+        )}
         <FilterSelect
           label="Category"
           allLabel="All categories"

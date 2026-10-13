@@ -10,9 +10,9 @@ function allowedOrigins(): string[] {
 }
 
 /** CORS headers for `origin`. Only an exact match is allowed; prefix matching would let e.g. https://site.com.evil.com through. */
-export function getCorsHeaders(origin: string | null) {
+export function getCorsHeaders(origin: string | null, methods = 'POST, OPTIONS') {
   const headers = new Headers({
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': methods,
     'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization',
     'Access-Control-Max-Age': '86400', // Cache preflight for 24 hours
     Vary: 'Origin',

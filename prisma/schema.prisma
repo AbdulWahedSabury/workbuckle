@@ -122,6 +122,23 @@ model JobType {
   @@map("job_types")
 }
 
+// A recruiting campaign: a themed group of jobs (e.g. "Front Office & Guest
+// Experience") with its own image and intro. Jobs join one from the job form.
+model Campaign {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String   @db.VarChar(200)
+  // Supabase Storage URL, a path under /public (/images/…) or an external URL.
+  img       String?  @db.VarChar(2048)
+  intro     String   @db.Text
+  imageAlt  String?  @map("image_alt") @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  jobs      Job[]
+
+  @@index([updatedAt(sort: Desc)])
+  @@map("campaigns")
+}
+
 model Job {
   id               String      @id @default(uuid()) @db.Uuid
   title            String      @db.VarChar(200)
@@ -129,6 +146,7 @@ model Job {
   cityId           String      @map("city_id") @db.Uuid
   jobTypeId        String      @map("type_id") @db.Uuid
   jobCategoryId    String      @map("job_category_id") @db.Uuid
+  campaignId       String?     @map("campaign_id") @db.Uuid
   experience       String      @db.VarChar(120)
   description      String      @db.Text
   responsibilities String      @db.Text
@@ -142,11 +160,14 @@ model Job {
   city             City        @relation(fields: [cityId], references: [id], onDelete: Restrict)
   jobType          JobType     @relation(fields: [jobTypeId], references: [id], onDelete: Restrict)
   jobCategory      JobCategory @relation(fields: [jobCategoryId], references: [id], onDelete: Restrict)
+  // Optional; deleting a campaign leaves its jobs in place, unassigned.
+  campaign         Campaign?   @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   candidates       Candidate[]
 
   @@index([cityId])
   @@index([jobTypeId])
   @@index([jobCategoryId])
+  @@index([campaignId])
   // Public /jobs list: WHERE status = 'published' ORDER BY created_at DESC.
   // Also serves status-only filters/counts (leftmost prefix), so it replaces @@index([status]).
   @@index([status, createdAt(sort: Desc)])

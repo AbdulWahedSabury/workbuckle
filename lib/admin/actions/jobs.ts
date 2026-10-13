@@ -27,15 +27,17 @@ function parse(formData: FormData) {
 
 /** The selects can go stale (another admin deleted a city, …); flag the field instead of a FK error. */
 async function missingRelations(data: JobInput): Promise<ActionState['errors']> {
-  const [city, jobType, category] = await Promise.all([
+  const [city, jobType, category, campaign] = await Promise.all([
     prisma.city.count({ where: { id: data.cityId } }),
     prisma.jobType.count({ where: { id: data.jobTypeId } }),
     prisma.jobCategory.count({ where: { id: data.jobCategoryId } }),
+    data.campaignId ? prisma.campaign.count({ where: { id: data.campaignId } }) : 1,
   ]);
   const errors: NonNullable<ActionState['errors']> = {};
   if (!city) errors.cityId = ['This city no longer exists.'];
   if (!jobType) errors.jobTypeId = ['This job type no longer exists.'];
   if (!category) errors.jobCategoryId = ['This category no longer exists.'];
+  if (!campaign) errors.campaignId = ['This campaign no longer exists.'];
   return Object.keys(errors).length ? errors : undefined;
 }
 
@@ -55,6 +57,7 @@ export async function createJob(
 
   revalidatePath(LIST_PATH);
   revalidatePath('/admin');
+  revalidatePath('/admin/campaigns');
   redirect(LIST_PATH);
 }
 
@@ -82,6 +85,7 @@ export async function updateJob(
 
   revalidatePath(LIST_PATH);
   revalidatePath('/admin');
+  revalidatePath('/admin/campaigns');
   redirect(LIST_PATH);
 }
 
@@ -90,4 +94,5 @@ export async function deleteJob(id: string): Promise<void> {
   await prisma.job.deleteMany({ where: { id } });
   revalidatePath(LIST_PATH);
   revalidatePath('/admin');
+  revalidatePath('/admin/campaigns');
 }
