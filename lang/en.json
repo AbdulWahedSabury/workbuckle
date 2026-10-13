@@ -358,6 +358,12 @@
           }
         }
       },
+      "job_categories": {
+        "eyebrow": "Browse by field",
+        "title": "Explore job categories",
+        "description": "Find open roles in the field you know best.",
+        "count": "{count, plural, one {# open role} other {# open roles}}"
+      },
       "featured_jobs": {
         "title": "Hand-picked roles, updated daily",
         "eyebrow": "Featured jobs",

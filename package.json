@@ -43,6 +43,7 @@
     "sanitize-html": "^2.18.0",
     "sonner": "^2.0.8",
     "tailwind-merge": "^3.7.0",
+    "use-debounce": "^10.1.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {

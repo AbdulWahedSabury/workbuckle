@@ -26,7 +26,7 @@ function isActive(pathname: string, { href, exact }: NavItem) {
 
 /**
  * Admin section links, filtered to what `role` may open. The active item uses
- * the site's dark pill (see JobFilterTabs).
+ * the site's dark pill (see LocationChips).
  */
 export default function AdminNav({ role, onNavigate }: { role: Role; onNavigate?: () => void }) {
   const pathname = usePathname();

@@ -16,9 +16,7 @@ const slide: Variants = {
 
 interface TestimonialCardProps {
   testimonial: Testimonial;
-  /** 1 = came from the right, -1 = from the left. */
   direction: number;
-  /** Called with 1 (next) or -1 (previous) after a horizontal drag. */
   onSwipe: (dir: number) => void;
 }
 

@@ -1,28 +1,41 @@
 "use client";
 
-import type { ChangeEvent, FormEvent } from "react";
-import { useReducedMotion } from "framer-motion";
+import { useState, type FormEvent } from "react";
 import { ArrowRight, Search } from "lucide-react";
+import { useDebouncedCallback } from "use-debounce";
 import RevealSection from "@/components/motion/RevealSection";
 import FadeUp from "@/components/motion/FadeUp";
 import HeroBackground from "../motion/HeroBackground";
-
-export interface JobsSearchHeroProps {
-  searchValue: string;
-  onSearchChange: (value: string) => void;
-  onSearchSubmit: (event: FormEvent<HTMLFormElement>) => void;
-}
+import { MAX_SEARCH_LENGTH } from "@/lib/jobs/jobs-params";
+import { useJobsQuery } from "./JobsQueryProvider";
 
 const HERO_BG = "/images/hero/hospitality.png";
 
-export default function JobsSearchHero({
-  searchValue,
-  onSearchChange,
-  onSearchSubmit,
-}: JobsSearchHeroProps) {
-  const reduceMotion = useReducedMotion();
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onSearchChange(event.target.value);
+// Typing only updates the URL (and so queries the database) after this pause.
+const DEBOUNCE_MS = 300;
+
+/**
+ * Hero with the search box bound to `?search=`. Typing updates the URL after
+ * a short pause; submitting applies it immediately.
+ */
+export default function JobsSearchHero() {
+  const { search, setSearch } = useJobsQuery();
+  const [value, setValue] = useState(search);
+
+  // Adopt URL changes made elsewhere (back/forward, a shared link) without an
+  // effect. Our own updates arrive as `value.trim()`; skipping those keeps a
+  // trailing space the user is still typing.
+  const [syncedSearch, setSyncedSearch] = useState(search);
+  if (search !== syncedSearch) {
+    setSyncedSearch(search);
+    if (search !== value.trim()) setValue(search);
+  }
+
+  const debouncedSearch = useDebouncedCallback(setSearch, DEBOUNCE_MS);
+
+  const onSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    debouncedSearch.flush();
   };
 
   return (
@@ -53,8 +66,13 @@ export default function JobsSearchHero({
               <span className="sr-only">Search jobs</span>
               <input
                 type="search"
-                value={searchValue}
-                onChange={handleInputChange}
+                autoComplete="off"
+                maxLength={MAX_SEARCH_LENGTH}
+                value={value}
+                onChange={(event) => {
+                  setValue(event.target.value);
+                  debouncedSearch(event.target.value);
+                }}
                 placeholder="Search job title, company or keyword"
                 className="w-full min-w-0 bg-transparent text-sm text-white placeholder:text-white/50 focus:outline-none sm:text-base"
               />

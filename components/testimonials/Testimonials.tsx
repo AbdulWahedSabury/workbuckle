@@ -25,7 +25,7 @@ export default function Testimonials() {
 
     const interval = setInterval(() => {
       paginate(1);
-    }, 5000); // Adjust duration (in ms) as needed
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [index, isPaused]);

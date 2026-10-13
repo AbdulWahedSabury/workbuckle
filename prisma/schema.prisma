@@ -147,7 +147,11 @@ model Job {
   @@index([cityId])
   @@index([jobTypeId])
   @@index([jobCategoryId])
-  @@index([status])
+  // Public /jobs list: WHERE status = 'published' ORDER BY created_at DESC.
+  // Also serves status-only filters/counts (leftmost prefix), so it replaces @@index([status]).
+  @@index([status, createdAt(sort: Desc)])
+  // Admin jobs list default order (newest edit first).
+  @@index([updatedAt(sort: Desc)])
   @@map("jobs")
 }
 

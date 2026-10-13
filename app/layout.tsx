@@ -22,15 +22,12 @@ const poppins = Poppins({
   variable: "--next-font-poppins",
 });
 
-// Self-hosted: next/font/google fails to resolve Roboto's font files on Vercel's Turbopack build.
-// Latin-subset variable font from Google Fonts (covers en + de).
 const roboto = localFont({
   src: "./fonts/roboto-latin-variable.woff2",
   weight: "400 500",
   variable: "--next-font-roboto",
 });
 
-// Settings are refreshed when admin settings are saved (revalidatePath('/', 'layout') in lib/admin/actions/settings.ts).
 export async function generateMetadata(): Promise<Metadata> {
   const setting = await getSiteSetting();
   return {
@@ -49,7 +46,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Same cached query as generateMetadata, so this costs no extra round trip.
   const setting = await getSiteSetting();
 
   return (

@@ -2,8 +2,8 @@
 
 import { useId, useState } from "react";
 import { LoaderCircle, Search, X } from "lucide-react";
+import { useDebouncedCallback } from "use-debounce";
 import { cn } from "@/lib/utils";
-import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 import { useListQuery } from "./ListQueryProvider";
 
 const DEBOUNCE_MS = 300;

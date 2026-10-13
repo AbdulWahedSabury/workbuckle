@@ -139,7 +139,7 @@ export type PageInfo = {
  * returns the matching offset for the query.
  */
 export function paginate(
-  { page, pageSize }: Pick<ListParams, 'page' | 'pageSize'>,
+  { page, pageSize }: { page: number; pageSize: number },
   total: number
 ): PageInfo & { skip: number; take: number } {
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
@@ -156,6 +156,25 @@ export function paginate(
 
 /** A page of rows plus where it sits in the full result. */
 export type Paginated<T> = PageInfo & { rows: T[] };
+
+/**
+ * Runs the page query (`skip`/`take`) and the count concurrently, so a list
+ * costs one database round trip instead of two. The rows are fetched before
+ * the total is known, so a page past the end (a stale link, rows deleted
+ * since) is clamped like `paginate` and re-fetched once for the last page.
+ */
+export async function fetchPage<T>(
+  { page, pageSize }: { page: number; pageSize: number },
+  count: () => Promise<number>,
+  findRows: (window: { skip: number; take: number }) => Promise<T[]>
+): Promise<Paginated<T>> {
+  const [rows, total] = await Promise.all([
+    findRows({ skip: (page - 1) * pageSize, take: pageSize }),
+    count(),
+  ]);
+  const { skip, take, ...info } = paginate({ page, pageSize }, total);
+  return { ...info, rows: info.page === page ? rows : await findRows({ skip, take }) };
+}
 
 /**
  * Page numbers to show, with 'gap' for elided runs. Always includes the

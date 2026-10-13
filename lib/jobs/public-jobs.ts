@@ -1,12 +1,20 @@
 import 'server-only';
 import { cache } from 'react';
 import type { Prisma } from '@/lib/generated/prisma/client';
+import { fetchPage, type Paginated } from '@/lib/admin/list-params';
+import { JOBS_PAGE_SIZE, type JobsListParams } from '@/lib/jobs/jobs-params';
 import { prisma } from '@/lib/prisma';
 import { sanitizeRichText } from '@/lib/rich-text';
 import { isUuid } from '@/lib/utils';
 import type { JobStatus } from '@/schemas/AdminSchemas';
 import { defaultLocale } from '@/types/locale';
-import type { PublicJob, PublicJobSummary } from '@/types/job';
+import type {
+  CategoryOption,
+  CityOption,
+  JobTypeOption,
+  PublicJob,
+  PublicJobSummary,
+} from '@/types/job';
 
 /** Only published jobs are visible on the site; drafts and closed jobs stay in the panel. */
 const PUBLIC_STATUS: JobStatus = 'published';
@@ -52,31 +60,108 @@ function toSummary(row: SummaryRow, locale: string): PublicJobSummary {
   };
 }
 
-/** Published jobs matching `search` (title, city, type or category), newest first. */
-export async function listPublishedJobs({
+// Served by the (status, createdAt) index in schema.prisma; id breaks ties so
+// rows never shift between pages.
+const publicOrderBy = [
+  { createdAt: 'desc' },
+  { id: 'asc' },
+] satisfies Prisma.JobOrderByWithRelationInput[];
+
+/**
+ * Published jobs narrowed by the list filters. Text matching is
+ * case-insensitive (ILIKE); the search looks at title, city, type and category.
+ */
+function publicJobsWhere({
   search,
-  locale,
-}: {
-  search: string;
-  locale: string;
-}): Promise<PublicJobSummary[]> {
+  location,
+  type,
+  category,
+}: Pick<JobsListParams, 'search' | 'location' | 'type' | 'category'>): Prisma.JobWhereInput {
   const contains = { contains: search, mode: 'insensitive' } as const;
-  const rows = await prisma.job.findMany({
-    where: {
-      status: PUBLIC_STATUS,
-      ...(search && {
-        OR: [
-          { title: contains },
-          { city: { name: contains } },
-          { jobType: { name: contains } },
-          { jobCategory: { translations: { some: { name: contains } } } },
-        ],
-      }),
+  return {
+    status: PUBLIC_STATUS,
+    ...(location && { city: { slug: location } }),
+    ...(type && { jobType: { slug: type } }),
+    ...(category && { jobCategory: { slug: category } }),
+    ...(search && {
+      OR: [
+        { title: contains },
+        { city: { name: contains } },
+        { jobType: { name: contains } },
+        { jobCategory: { translations: { some: { name: contains } } } },
+      ],
+    }),
+  };
+}
+
+/** One page of published jobs, newest first; the page's rows and its total are fetched concurrently. */
+export async function listPublishedJobsPage(
+  params: JobsListParams,
+  locale: string,
+  pageSize: number = JOBS_PAGE_SIZE
+): Promise<Paginated<PublicJobSummary>> {
+  const where = publicJobsWhere(params);
+  const { rows, ...info } = await fetchPage(
+    { page: params.page, pageSize },
+    () => prisma.job.count({ where }),
+    ({ skip, take }) =>
+      prisma.job.findMany({ where, orderBy: publicOrderBy, select: summarySelect, skip, take })
+  );
+  return { ...info, rows: rows.map((row) => toSummary(row, locale)) };
+}
+
+/**
+ * Cities with at least one published job, A–Z, for the location filter. Each
+ * count applies the other active filters (search, type, category) but not the
+ * location itself, so a chip says how many roles picking it would show.
+ */
+export async function listPublicCities(
+  params: Pick<JobsListParams, 'search' | 'type' | 'category'>
+): Promise<CityOption[]> {
+  const cities = await prisma.city.findMany({
+    where: { jobs: { some: { status: PUBLIC_STATUS } } },
+    select: {
+      name: true,
+      slug: true,
+      _count: { select: { jobs: { where: publicJobsWhere({ ...params, location: '' }) } } },
     },
-    orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
-    select: summarySelect,
+    orderBy: { name: 'asc' },
   });
-  return rows.map((row) => toSummary(row, locale));
+  return cities.map(({ name, slug, _count }) => ({ name, slug, count: _count.jobs }));
+}
+
+/** Job types with at least one published job, A–Z, for the type filter. */
+export async function listPublicJobTypes(): Promise<JobTypeOption[]> {
+  return prisma.jobType.findMany({
+    where: { jobs: { some: { status: PUBLIC_STATUS } } },
+    select: { name: true, slug: true },
+    orderBy: { name: 'asc' },
+  });
+}
+
+/**
+ * Active categories with at least one published job, in the admin's order,
+ * for the home page's category grid and the /jobs category filter. Names are
+ * in `locale`; counts are all published jobs in the category.
+ */
+export async function listPublicCategories(locale: string): Promise<CategoryOption[]> {
+  const published = { status: PUBLIC_STATUS } satisfies Prisma.JobWhereInput;
+  const categories = await prisma.jobCategory.findMany({
+    where: { isActive: true, jobs: { some: published } },
+    select: {
+      slug: true,
+      imageUrl: true,
+      translations: { select: { locale: true, name: true } },
+      _count: { select: { jobs: { where: published } } },
+    },
+    orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+  });
+  return categories.map(({ slug, imageUrl, translations, _count }) => ({
+    name: categoryName(translations, locale),
+    slug,
+    imageUrl,
+    count: _count.jobs,
+  }));
 }
 
 /**

@@ -1,4 +1,4 @@
-/** A published job as the public list shows it (JSON from GET /api/jobs). */
+/** A published job as the public lists show it. */
 export interface PublicJobSummary {
   id: string;
   title: string;
@@ -24,11 +24,26 @@ export interface PublicJob extends PublicJobSummary {
   categoryImage: string | null;
 }
 
-export type JobFilter = "All" | "Limassol" | "Larnaca" | "Nicosia" | "Paphos";
+/** A job type in the /jobs type filter. */
+export interface JobTypeOption {
+  name: string;
+  slug: string;
+}
 
-/** Location tabs match the job's city name, ignoring case, spaces and hyphens. */
-export function matchesFilter(job: PublicJobSummary, filter: JobFilter): boolean {
-  if (filter === "All") return true;
-  const normalize = (value: string) => value.toLowerCase().replace(/[- ]/g, "_");
-  return normalize(job.city) === normalize(filter);
+/** A city in the location filter, with how many published jobs it would show. */
+export interface CityOption {
+  name: string;
+  slug: string;
+  count: number;
+}
+
+/** A job category on the home page grid and in the /jobs category filter. */
+export interface CategoryOption {
+  /** Name in the requested locale. */
+  name: string;
+  slug: string;
+  /** Category image (a photo or icon) from Supabase Storage; null when none was uploaded. */
+  imageUrl: string | null;
+  /** Published jobs in this category. */
+  count: number;
 }

@@ -2,7 +2,7 @@ import 'server-only';
 import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin, requireView } from '@/lib/admin/auth';
-import { paginate, type ListParams, type Paginated, type SortDir } from '@/lib/admin/list-params';
+import { fetchPage, paginate, type ListParams, type Paginated, type SortDir } from '@/lib/admin/list-params';
 import type { Prisma } from '@/lib/generated/prisma/client';
 import { SITE_SETTING_ID } from '@/lib/site-settings';
 import { isUuid } from '@/lib/utils';
@@ -352,19 +352,21 @@ export async function listJobs(params: ListParams<JobSortKey>): Promise<Paginate
       }
     : undefined;
 
-  const total = await prisma.job.count({ where });
-  const { skip, take, ...info } = paginate(params, total);
-  const rows = await prisma.job.findMany({
-    where,
-    orderBy: [
-      ...(sort ? jobOrderBy[sort.key](sort.dir) : [{ updatedAt: 'desc' as const }]),
-      { id: 'asc' },
-    ],
-    include: jobListInclude,
-    skip,
-    take,
-  });
-  return { ...info, rows };
+  return fetchPage(
+    params,
+    () => prisma.job.count({ where }),
+    ({ skip, take }) =>
+      prisma.job.findMany({
+        where,
+        orderBy: [
+          ...(sort ? jobOrderBy[sort.key](sort.dir) : [{ updatedAt: 'desc' as const }]),
+          { id: 'asc' },
+        ],
+        include: jobListInclude,
+        skip,
+        take,
+      })
+  );
 }
 
 export async function getJob(id: string) {

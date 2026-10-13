@@ -3,46 +3,32 @@
 import { AnimatePresence, motion } from "framer-motion";
 
 import JobRow from "@/components/jobs/JobRow";
-import { JobsLoadingState } from "@/components/jobs/JobsLoadingState";
 import { JobsEmptyState } from "@/components/jobs/JobsEmptyState";
-import type { JobFilter, PublicJobSummary } from "@/types/job";
+import type { PublicJobSummary } from "@/types/job";
+import { useJobsQuery } from "./JobsQueryProvider";
 
 export interface JobsFeedListProps {
   jobs: PublicJobSummary[];
-  filter: JobFilter;
-  isPending: boolean;
-  isError: boolean;
-  isFetching: boolean;
+  isError?: boolean;
 }
 
-/** Animated job list with loading, error, and empty states. */
-export default function JobsFeedList({
-  jobs,
-  filter,
-  isPending,
-  isError,
-  isFetching,
-}: JobsFeedListProps) {
+/**
+ * Animated job list with error and empty states. While a new query loads the
+ * current rows stay up, dimmed, until the server sends the next ones.
+ */
+export default function JobsFeedList({ jobs, isError = false }: JobsFeedListProps) {
+  const { isPending, hasFilters, clearFilters } = useJobsQuery();
+
   return (
     <motion.ul
       layout
-      aria-busy={isFetching}
+      aria-busy={isPending}
       className={`mt-8 flex flex-col gap-4 transition-opacity duration-300 ${
-        isFetching && !isPending ? "opacity-60" : "opacity-100"
+        isPending ? "pointer-events-none opacity-60" : "opacity-100"
       }`}
     >
       <AnimatePresence mode="popLayout" initial={false}>
-        {isPending ? (
-          <motion.li
-            key="loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="w-full list-none"
-          >
-            <JobsLoadingState />
-          </motion.li>
-        ) : isError ? (
+        {isError ? (
           <motion.li
             key="error"
             role="alert"
@@ -73,9 +59,9 @@ export default function JobsFeedList({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="list-none rounded-sm-card border border-line p-10 text-center"
+            className="list-none"
           >
-            <JobsEmptyState filterName={filter} />
+            <JobsEmptyState onClear={hasFilters ? clearFilters : undefined} />
           </motion.li>
         )}
       </AnimatePresence>
