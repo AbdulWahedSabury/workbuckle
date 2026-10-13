@@ -7,6 +7,7 @@ import { categoryNameField } from "@/schemas/AdminSchemas";
 import { defaultLocale, locales } from "@/types/locale";
 import { CheckboxField, FormMessage, TextField } from "./fields";
 import { SubmitButton } from "./buttons";
+import IconPickerField from "./IconPickerField";
 import ImageUploadField from "./ImageUploadField";
 import { fieldsetClass, legendClass, secondaryLinkClass } from "./styles";
 
@@ -15,6 +16,7 @@ const LOCALE_LABELS: Record<string, string> = { en: "English", de: "German" };
 export type CategoryFormValues = {
   slug: string;
   imageUrl: string | null;
+  icon: string | null;
   isActive: boolean;
   sortOrder: number;
   names: Partial<Record<string, string>>;
@@ -69,6 +71,21 @@ export default function CategoryForm({
           hint="Used in URLs. Leave blank to generate it from the English name."
           defaultValue={v ? v.slug : category?.slug}
           error={errors.slug}
+        />
+        <IconPickerField
+          name="icon"
+          label="Icon"
+          hint={
+            <>
+              Shown on the home page category cards. Browse every icon at{" "}
+              <a href="https://lucide.dev/icons" target="_blank" rel="noreferrer" className="underline">
+                lucide.dev/icons
+              </a>
+              .
+            </>
+          }
+          defaultValue={v ? v.icon : category?.icon}
+          error={errors.icon}
         />
         <ImageUploadField
           name="imageFile"

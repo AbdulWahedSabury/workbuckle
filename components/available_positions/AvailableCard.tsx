@@ -3,24 +3,12 @@
 import Image from "next/image";
 import { ImageOff } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
+import { canOptimizeImage } from "@/lib/images";
 import type { CampaignPayload } from "@/types/campaign";
 import ArrowButton from "../ui/ArrowButton";
 
 /** Job titles shown per card; the rest are one click away on /jobs. */
 const MAX_LISTED_JOBS = 3;
-
-const STORAGE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-  ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/`
-  : null;
-
-/**
- * True for images the Next image optimizer may load: /public paths and our
- * Supabase bucket (see images.remotePatterns in next.config.ts). Other hosts
- * an admin typed in are served as-is rather than failing.
- */
-function canOptimize(src: string): boolean {
-  return (src.startsWith("/") && !src.startsWith("//")) || (STORAGE_URL !== null && src.startsWith(STORAGE_URL));
-}
 
 const cardVariants: Variants = {
   hidden: { opacity: 0, y: 16 },
@@ -76,7 +64,7 @@ export default function AvailableCard({
             alt={campaign.image_alt ?? ""}
             fill
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-            unoptimized={!canOptimize(campaign.img)}
+            unoptimized={!canOptimizeImage(campaign.img)}
             className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
           />
         ) : (

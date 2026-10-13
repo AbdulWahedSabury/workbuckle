@@ -45,7 +45,7 @@ export async function createCategory(
 
   const { values, result } = parse(formData);
   if (!result.success) return validationError(result.error, values);
-  const { slug, isActive, sortOrder } = result.data;
+  const { slug, icon, isActive, sortOrder } = result.data;
 
   const upload = await uploadImage(formData, 'imageFile', IMAGE_FOLDER);
   if (!upload.ok) return { errors: { imageUrl: [upload.error] }, values };
@@ -56,6 +56,7 @@ export async function createCategory(
         slug,
         imageUrl: upload.image?.imageUrl ?? null,
         imagePath: upload.image?.imagePath ?? null,
+        icon,
         isActive,
         sortOrder,
         translations: { create: translationRows(result.data) },
@@ -82,7 +83,7 @@ export async function updateCategory(
 
   const { values, result } = parse(formData);
   if (!result.success) return validationError(result.error, values);
-  const { slug, imageUrl, isActive, sortOrder } = result.data;
+  const { slug, imageUrl, icon, isActive, sortOrder } = result.data;
   const rows = translationRows(result.data);
 
   const upload = await uploadImage(formData, 'imageFile', IMAGE_FOLDER);
@@ -96,7 +97,7 @@ export async function updateCategory(
     await prisma.$transaction([
       prisma.jobCategory.update({
         where: { id },
-        data: { slug, ...image, isActive, sortOrder },
+        data: { slug, ...image, icon, isActive, sortOrder },
       }),
       ...rows.map(({ locale, name }) =>
         prisma.jobCategoryTranslation.upsert({

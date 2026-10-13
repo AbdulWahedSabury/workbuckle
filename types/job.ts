@@ -44,6 +44,8 @@ export interface CategoryOption {
   slug: string;
   /** Category image (a photo or icon) from Supabase Storage; null when none was uploaded. */
   imageUrl: string | null;
+  /** Lucide icon name (e.g. "code-xml"); null when none was picked. */
+  icon: string | null;
   /** Published jobs in this category. */
   count: number;
 }

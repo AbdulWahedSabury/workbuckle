@@ -1,12 +1,3 @@
-export interface Company {
-  name: string;
-  logo: string;
-  location: string;
-  starts: string;
-  openings: number;
-  url: string;
-}
-
 export interface Testimonial {
   name: string;
   role: string;

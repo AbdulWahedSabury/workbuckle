@@ -50,9 +50,21 @@ const checkbox = z.preprocess((v) => v === 'on' || v === 'true', z.boolean());
 /** Form field name for a category's name in a given locale, e.g. "name_de". */
 export const categoryNameField = (locale: string) => `name_${locale}`;
 
+/** Lucide icon name in kebab-case, e.g. "code-xml"; empty → null. */
+const optionalIconName = z
+  .string()
+  .trim()
+  .max(64)
+  .refine((v) => v === '' || SLUG_RE.test(v), {
+    message: 'Pick an icon from the list (lowercase name like "code-xml").',
+  })
+  .optional()
+  .transform((v) => (v ? v : null));
+
 export const jobCategorySchema = z.object({
   slug,
   imageUrl: optionalImageUrl,
+  icon: optionalIconName,
   isActive: checkbox,
   sortOrder: z.coerce.number().int().min(0).max(100_000).default(0),
   ...Object.fromEntries(

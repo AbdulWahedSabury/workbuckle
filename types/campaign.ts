@@ -18,3 +18,10 @@ export interface CampaignPayload {
   /** Published jobs in the campaign, newest first. */
   "jobs-list-title": CampaignJobTitle[];
 }
+
+/** The campaign a filtered /jobs page is about: shown in its hero. */
+export interface CampaignSummary {
+  title: string;
+  intro: string;
+  img: string | null;
+}

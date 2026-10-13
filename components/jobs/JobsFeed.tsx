@@ -5,7 +5,7 @@ import JobsFeedList from "@/components/jobs/JobsFeedList";
 import JobsFilters from "@/components/jobs/JobsFilters";
 import { JobsLoadingState } from "@/components/jobs/JobsLoadingState";
 import JobsPagination from "@/components/jobs/JobsPagination";
-import { getCampaignTitle } from "@/lib/campaigns/public-campaigns";
+import { getCampaignSummary } from "@/lib/campaigns/public-campaigns";
 import type { JobsListParams } from "@/lib/jobs/jobs-params";
 import {
   listPublicCategories,
@@ -26,13 +26,15 @@ export default async function JobsFeed({ params }: { params: JobsListParams }) {
   let categories: CategoryOption[] = [];
   let campaignTitle: string | null = null;
   try {
-    [result, cities, jobTypes, categories, campaignTitle] = await Promise.all([
+    let campaign;
+    [result, cities, jobTypes, categories, campaign] = await Promise.all([
       listPublishedJobsPage(params, locale),
       listPublicCities(params),
       listPublicJobTypes(),
       listPublicCategories(locale),
-      params.campaign ? getCampaignTitle(params.campaign) : null,
+      params.campaign ? getCampaignSummary(params.campaign) : null,
     ]);
+    campaignTitle = campaign?.title ?? null;
   } catch (error) {
     console.error("Failed to list jobs:", error);
   }

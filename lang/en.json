@@ -25,8 +25,7 @@
     "terms": "Terms and Conditions",
     "privacy": "Privacy Policy",
     "menu": "Menu",
-    "categories": "categories",
-    "companies": "Companies"
+    "categories": "categories"
   },
   "pages": {
     "contact": {
@@ -184,36 +183,6 @@
           }
         ]
       },
-      "companies": {
-        "eyebrow": "Our Partners",
-        "title": "Featured Employers & Locations",
-        "list": [
-          {
-            "name": "Luxury Beachfront Resort & Spa",
-            "logo": "/images/companies/logo.png",
-            "location": "Limassol, Cyprus",
-            "starts": "5-Star Hotel",
-            "openings": "Beachfront | Award-Winning Fine Dining",
-            "url": "https://www.fourseasons.com.cy/"
-          },
-          {
-            "name": "Exclusive Marina & Boutique Hotel",
-            "logo": "/images/companies/logo.png",
-            "location": "Limassol, Cyprus",
-            "starts": "5-Star Hotel",
-            "openings": "High-End Guest Services | International Team | Career Progression",
-            "url": "https://www.fourseasons.com.cy/"
-          },
-          {
-            "name": "Premier City Center & Luxury Hotel",
-            "logo": "/images/companies/logo.png",
-            "location": "Nicosia, Cyprus",
-            "starts": "5-Star Hotel",
-            "openings": "Year-Round Employment | Executive Guest Operations",
-            "url": "https://www.fourseasons.com.cy/"
-          }
-        ]
-      },
       "how_to_apply": {
         "submit_cv": {
           "title": "Submit Your CV",
@@ -257,7 +226,8 @@
         "eyebrow": "Browse by field",
         "title": "Explore job categories",
         "description": "Find open roles in the field you know best.",
-        "count": "{count, plural, one {# open role} other {# open roles}}"
+        "count": "{count, plural, one {# open role} other {# open roles}}",
+        "cta" : "Explore jobs"
       },
       "featured_jobs": {
         "title": "Hand-picked roles, updated daily",

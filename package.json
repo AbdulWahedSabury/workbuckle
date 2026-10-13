@@ -12,6 +12,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "admin:create": "tsx scripts/create-admin.ts",
+    "seed:fake": "tsx scripts/seed-fake.ts",
     "settings:update": "tsx scripts/update-site-settings.ts"
   },
   "dependencies": {

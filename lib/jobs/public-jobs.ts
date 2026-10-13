@@ -153,15 +153,17 @@ export async function listPublicCategories(locale: string): Promise<CategoryOpti
     select: {
       slug: true,
       imageUrl: true,
+      icon: true,
       translations: { select: { locale: true, name: true } },
       _count: { select: { jobs: { where: published } } },
     },
     orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
   });
-  return categories.map(({ slug, imageUrl, translations, _count }) => ({
+  return categories.map(({ slug, imageUrl, icon, translations, _count }) => ({
     name: categoryName(translations, locale),
     slug,
     imageUrl,
+    icon,
     count: _count.jobs,
   }));
 }

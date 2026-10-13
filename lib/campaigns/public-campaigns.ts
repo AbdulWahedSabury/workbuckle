@@ -1,9 +1,10 @@
 import 'server-only';
+import { cache } from 'react';
 import type { Prisma } from '@/lib/generated/prisma/client';
 import { prisma } from '@/lib/prisma';
 import { isUuid } from '@/lib/utils';
 import type { JobStatus } from '@/schemas/AdminSchemas';
-import type { CampaignPayload } from '@/types/campaign';
+import type { CampaignPayload, CampaignSummary } from '@/types/campaign';
 
 /** Same rule as the public job pages: drafts and closed jobs never leave the panel. */
 const PUBLIC_STATUS: JobStatus = 'published';
@@ -52,9 +53,16 @@ export async function getPublicCampaign(id: string): Promise<CampaignPayload | n
   return row ? toCampaignPayload(row) : null;
 }
 
-/** A campaign's title, for the /jobs campaign filter chip; null if unknown. */
-export async function getCampaignTitle(id: string): Promise<string | null> {
+/**
+ * What /jobs?campaign=<id> shows about the campaign: its hero (image, title,
+ * intro), the page title and the filter chip. Null if the id is malformed or
+ * unknown. Cached per request, so the page, its metadata and the feed share
+ * one query.
+ */
+export const getCampaignSummary = cache(async (id: string): Promise<CampaignSummary | null> => {
   if (!isUuid(id)) return null;
-  const row = await prisma.campaign.findUnique({ where: { id }, select: { title: true } });
-  return row?.title ?? null;
-}
+  return prisma.campaign.findUnique({
+    where: { id },
+    select: { title: true, intro: true, img: true },
+  });
+});

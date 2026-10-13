@@ -7,6 +7,7 @@ import RevealSection from "@/components/motion/RevealSection";
 import FadeUp from "@/components/motion/FadeUp";
 import HeroBackground from "../motion/HeroBackground";
 import { MAX_SEARCH_LENGTH } from "@/lib/jobs/jobs-params";
+import type { CampaignSummary } from "@/types/campaign";
 import { useJobsQuery } from "./JobsQueryProvider";
 
 const HERO_BG = "/images/hero/hospitality.png";
@@ -16,9 +17,10 @@ const DEBOUNCE_MS = 300;
 
 /**
  * Hero with the search box bound to `?search=`. Typing updates the URL after
- * a short pause; submitting applies it immediately.
+ * a short pause; submitting applies it immediately. Reached from a campaign
+ * card (`?campaign=`), it shows that campaign's image, title and intro.
  */
-export default function JobsSearchHero() {
+export default function JobsSearchHero({ campaign }: { campaign?: CampaignSummary | null }) {
   const { search, setSearch } = useJobsQuery();
   const [value, setValue] = useState(search);
 
@@ -40,17 +42,28 @@ export default function JobsSearchHero() {
 
   return (
     <RevealSection className="relative bg-ink isolate overflow-hidden px-4 pb-16 pt-16 sm:px-6 sm:pb-24 sm:pt-24 lg:pb-32 lg:pt-32">
-      <HeroBackground src={HERO_BG} />
+      <HeroBackground src={campaign?.img || HERO_BG} />
       <div className="container-site mx-auto max-w-7xl">
         <FadeUp className="mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-ink/40 px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-primary backdrop-blur-md sm:px-4 sm:py-1.5 sm:text-[13px]">
             <span className="size-1.5 rounded-full bg-primary" />
-            Jobs List
+            {campaign ? "Campaign" : "Jobs List"}
           </span>
           <h1 className="mt-5 text-balance text-3xl font-bold leading-[1.1] tracking-tight text-white drop-shadow-[0_2px_24px_rgb(0_0_0/0.5)] sm:mt-6 sm:text-5xl lg:text-6xl">
-            Explore our diverse range of{" "}
-            <span className="text-primary">career opportunities</span>
+            {campaign ? (
+              campaign.title
+            ) : (
+              <>
+                Explore our diverse range of{" "}
+                <span className="text-primary">career opportunities</span>
+              </>
+            )}
           </h1>
+          {campaign && (
+            <p className="mx-auto mt-5 max-w-2xl text-pretty text-base leading-relaxed text-white/80 drop-shadow-[0_2px_16px_rgb(0_0_0/0.5)] sm:mt-6 sm:text-lg">
+              {campaign.intro}
+            </p>
+          )}
         </FadeUp>
         <FadeUp className="mx-auto mt-8 max-w-2xl sm:mt-10">
           <form

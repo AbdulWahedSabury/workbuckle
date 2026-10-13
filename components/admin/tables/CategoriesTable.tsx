@@ -12,6 +12,7 @@ import { DataTable, type Column } from "@/components/admin/data-table";
 import { DeleteButton } from "@/components/admin/buttons";
 import { viewerCanEdit } from "@/lib/admin/auth";
 import EmptyState from "@/components/admin/EmptyState";
+import CategoryIcon from "@/components/job_categories/CategoryIcon";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { iconButtonClass } from "@/components/admin/styles";
 import { cn } from "@/lib/utils";
@@ -29,7 +30,11 @@ const columns: Column<CategoryRow, CategorySortKey>[] = [
     sortKey: "name",
     cell: (category) => (
       <div className="flex items-center gap-3">
-        {category.imageUrl ? (
+        {category.icon ? (
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
+            <CategoryIcon icon={category.icon} className="size-5" />
+          </span>
+        ) : category.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- arbitrary admin-entered hosts
           <img
             src={category.imageUrl}

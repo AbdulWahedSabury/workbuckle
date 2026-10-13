@@ -1,4 +1,3 @@
-import Companies from "@/components/companies/Companies";
 import CtaBanner from "@/components/ui/CtaBanner";
 import HeroSection from "@/components/hero/HeroSection";
 import JobBoard from "@/components/jobs/JobBoard";
@@ -16,11 +15,10 @@ export default function HomePage({ searchParams }: PageProps<"/">) {
       <HeroSection />
       <AvailablePositions />
       <JobCategories />
-      <WhyCyprus />
-      <Companies />
-      <HowToApply />
-      <RelocationBenefits />
       <JobBoard searchParams={searchParams} />
+      <RelocationBenefits />
+      <WhyCyprus />
+      <HowToApply />
       <Testimonials />
       <Faq />
       <CtaBanner />
