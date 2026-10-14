@@ -13,12 +13,14 @@ export function formValues(formData: FormData): Record<string, string> {
   return values;
 }
 
+export const FIX_FIELDS_MESSAGE = 'Please fix the highlighted fields.';
+
 export function validationError(
   error: z.ZodError,
   values: Record<string, string>
 ): ActionState {
   return {
-    message: 'Please fix the highlighted fields.',
+    message: FIX_FIELDS_MESSAGE,
     errors: error.flatten().fieldErrors as ActionState['errors'],
     values,
   };

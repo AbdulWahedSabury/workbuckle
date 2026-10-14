@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
 import { setFlash } from '@/lib/admin/flash-server';
 import type { ActionState } from '@/lib/admin/action-state';
-import { formValues, isNotFound, validationError } from '@/lib/admin/form';
+import { FIX_FIELDS_MESSAGE, formValues, isNotFound, validationError } from '@/lib/admin/form';
 import { sanitizeRichText } from '@/lib/rich-text';
 import { JOB_RICH_TEXT_FIELDS, jobSchema } from '@/schemas/AdminSchemas';
 import type { z } from 'zod';
@@ -14,6 +14,13 @@ import type { z } from 'zod';
 const LIST_PATH = '/admin/jobs';
 
 type JobInput = z.infer<typeof jobSchema>;
+
+/** The job list, the dashboard counts and the campaigns' job counts. */
+function revalidateJobs() {
+  revalidatePath(LIST_PATH);
+  revalidatePath('/admin');
+  revalidatePath('/admin/campaigns');
+}
 
 function parse(formData: FormData) {
   const values = formValues(formData);
@@ -58,13 +65,11 @@ export async function createJob(
   if (!result.success) return validationError(result.error, values);
 
   const errors = await missingRelations(result.data);
-  if (errors) return { message: 'Please fix the highlighted fields.', errors, values };
+  if (errors) return { message: FIX_FIELDS_MESSAGE, errors, values };
 
   await prisma.job.create({ data: result.data });
 
-  revalidatePath(LIST_PATH);
-  revalidatePath('/admin');
-  revalidatePath('/admin/campaigns');
+  revalidateJobs();
   await setFlash(createdJobMessage(result.data));
   redirect(LIST_PATH);
 }
@@ -80,7 +85,7 @@ export async function updateJob(
   if (!result.success) return validationError(result.error, values);
 
   const errors = await missingRelations(result.data);
-  if (errors) return { message: 'Please fix the highlighted fields.', errors, values };
+  if (errors) return { message: FIX_FIELDS_MESSAGE, errors, values };
 
   try {
     await prisma.job.update({ where: { id }, data: result.data });
@@ -91,9 +96,7 @@ export async function updateJob(
     throw error;
   }
 
-  revalidatePath(LIST_PATH);
-  revalidatePath('/admin');
-  revalidatePath('/admin/campaigns');
+  revalidateJobs();
   await setFlash(`Job "${result.data.title}" updated.`);
   redirect(LIST_PATH);
 }
@@ -101,7 +104,5 @@ export async function updateJob(
 export async function deleteJob(id: string): Promise<void> {
   await requireAdmin();
   await prisma.job.deleteMany({ where: { id } });
-  revalidatePath(LIST_PATH);
-  revalidatePath('/admin');
-  revalidatePath('/admin/campaigns');
+  revalidateJobs();
 }

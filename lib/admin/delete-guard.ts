@@ -1,3 +1,4 @@
+import 'server-only';
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@/lib/generated/prisma/client';
 import type { DeleteResult } from '@/lib/admin/action-state';

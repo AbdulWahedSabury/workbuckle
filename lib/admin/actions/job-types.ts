@@ -15,10 +15,11 @@ import {
   validationError,
 } from '@/lib/admin/form';
 import { jobTypeSchema } from '@/schemas/AdminSchemas';
+import type { z } from 'zod';
 
 const LIST_PATH = '/admin/job-types';
 
-type JobTypeInput = { name: string; slug: string };
+type JobTypeInput = z.infer<typeof jobTypeSchema>;
 
 function parse(formData: FormData) {
   const values = formValues(formData);

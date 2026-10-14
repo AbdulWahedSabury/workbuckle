@@ -3,11 +3,10 @@ import { cache } from 'react';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin, requireView } from '@/lib/admin/auth';
 import { fetchPage, paginate, type ListParams, type Paginated, type SortDir } from '@/lib/admin/list-params';
-import type { Prisma } from '@/lib/generated/prisma/client';
+import type { Faq, Prisma } from '@/lib/generated/prisma/client';
 import { SITE_SETTING_ID } from '@/lib/site-settings';
 import { isUuid } from '@/lib/utils';
 import { defaultLocale } from '@/types/locale';
-
 
 export async function getAdminCounts() {
   await requireView('dashboard');
@@ -197,20 +196,23 @@ export async function listCategories(
     return { ...info, rows: all.slice(skip, skip + take) };
   }
 
-  const total = await prisma.jobCategory.count({ where });
-  const { skip, take, ...info } = paginate(params, total);
-  const rows = await prisma.jobCategory.findMany({
-    where,
-    orderBy: [
-      ...(sort ? categoryOrderBy[sort.key](sort.dir) : [{ sortOrder: 'asc' as const }, { createdAt: 'asc' as const }]),
-      // Stable tie-break, so rows don't hop between pages across requests.
-      { id: 'asc' },
-    ],
-    include: categoryListInclude,
-    skip,
-    take,
-  });
-  return { ...info, rows };
+  const orderBy: Prisma.JobCategoryOrderByWithRelationInput[] = [
+    ...(sort ? categoryOrderBy[sort.key](sort.dir) : [{ sortOrder: 'asc' as const }, { createdAt: 'asc' as const }]),
+    // Stable tie-break, so rows don't hop between pages across requests.
+    { id: 'asc' },
+  ];
+  return fetchPage(
+    params,
+    () => prisma.jobCategory.count({ where }),
+    ({ skip, take }) =>
+      prisma.jobCategory.findMany({
+        where,
+        orderBy,
+        include: categoryListInclude,
+        skip,
+        take,
+      })
+  );
 }
 
 export async function getCategory(id: string) {
@@ -233,11 +235,11 @@ const cityOrderBy: Record<CitySortKey, (dir: SortDir) => Prisma.CityOrderByWithR
   updatedAt: (dir) => [{ updatedAt: dir }],
 };
 
-/** One page of cities matching `q` by name or region. Default order is by name. */
 export type CityWithCount = Prisma.CityGetPayload<{
   include: { _count: { select: { jobs: true } } };
 }>;
 
+/** One page of cities matching `q` by name or region. Default order is by name. */
 export async function listCities(params: ListParams<CitySortKey>): Promise<Paginated<CityWithCount>> {
   await requireView('cities');
   const { q, sort } = params;
@@ -250,17 +252,19 @@ export async function listCities(params: ListParams<CitySortKey>): Promise<Pagin
       }
     : undefined;
 
-  const total = await prisma.city.count({ where });
-  const { skip, take, ...info } = paginate(params, total);
-  const rows = await prisma.city.findMany({
-    where,
-    // `id` last keeps ties in a stable order, so rows don't hop between pages.
-    orderBy: [...(sort ? cityOrderBy[sort.key](sort.dir) : [{ name: 'asc' as const }]), { id: 'asc' }],
-    include: { _count: { select: { jobs: true } } },
-    skip,
-    take,
-  });
-  return { ...info, rows };
+  return fetchPage(
+    params,
+    () => prisma.city.count({ where }),
+    ({ skip, take }) =>
+      prisma.city.findMany({
+        where,
+        // `id` last keeps ties in a stable order, so rows don't hop between pages.
+        orderBy: [...(sort ? cityOrderBy[sort.key](sort.dir) : [{ name: 'asc' as const }]), { id: 'asc' }],
+        include: { _count: { select: { jobs: true } } },
+        skip,
+        take,
+      })
+  );
 }
 
 export async function getCity(id: string) {
@@ -301,16 +305,18 @@ export async function listJobTypes(
       }
     : undefined;
 
-  const total = await prisma.jobType.count({ where });
-  const { skip, take, ...info } = paginate(params, total);
-  const rows = await prisma.jobType.findMany({
-    where,
-    orderBy: [...(sort ? jobTypeOrderBy[sort.key](sort.dir) : [{ name: 'asc' as const }]), { id: 'asc' }],
-    include: { _count: { select: { jobs: true } } },
-    skip,
-    take,
-  });
-  return { ...info, rows };
+  return fetchPage(
+    params,
+    () => prisma.jobType.count({ where }),
+    ({ skip, take }) =>
+      prisma.jobType.findMany({
+        where,
+        orderBy: [...(sort ? jobTypeOrderBy[sort.key](sort.dir) : [{ name: 'asc' as const }]), { id: 'asc' }],
+        include: { _count: { select: { jobs: true } } },
+        skip,
+        take,
+      })
+  );
 }
 
 export async function getJobType(id: string) {
@@ -321,7 +327,7 @@ export async function getJobType(id: string) {
 
 // ─── FAQs ────────────────────────────────────────────────────────────────────
 
-export type FaqRow = Prisma.FaqGetPayload<object>;
+export type FaqRow = Faq;
 
 export const FAQ_SORT_KEYS = ['question', 'sortOrder', 'status', 'updatedAt'] as const;
 export type FaqSortKey = (typeof FAQ_SORT_KEYS)[number];
@@ -350,18 +356,20 @@ export async function listFaqs(params: ListParams<FaqSortKey>): Promise<Paginate
       }
     : undefined;
 
-  const total = await prisma.faq.count({ where });
-  const { skip, take, ...info } = paginate(params, total);
-  const rows = await prisma.faq.findMany({
-    where,
-    orderBy: [
-      ...(sort ? faqOrderBy[sort.key](sort.dir) : [{ sortOrder: 'asc' as const }, { createdAt: 'asc' as const }]),
-      { id: 'asc' },
-    ],
-    skip,
-    take,
-  });
-  return { ...info, rows };
+  return fetchPage(
+    params,
+    () => prisma.faq.count({ where }),
+    ({ skip, take }) =>
+      prisma.faq.findMany({
+        where,
+        orderBy: [
+          ...(sort ? faqOrderBy[sort.key](sort.dir) : [{ sortOrder: 'asc' as const }, { createdAt: 'asc' as const }]),
+          { id: 'asc' },
+        ],
+        skip,
+        take,
+      })
+  );
 }
 
 export async function getFaq(id: string) {
@@ -571,19 +579,21 @@ export async function listCandidates(
       : {}),
   };
 
-  const total = await prisma.candidate.count({ where });
-  const { skip, take, ...info } = paginate(params, total);
-  const rows = await prisma.candidate.findMany({
-    where,
-    orderBy: [
-      ...(sort ? candidateOrderBy[sort.key](sort.dir) : [{ createdAt: 'desc' as const }]),
-      { id: 'asc' },
-    ],
-    include: candidateListInclude,
-    skip,
-    take,
-  });
-  return { ...info, rows };
+  return fetchPage(
+    params,
+    () => prisma.candidate.count({ where }),
+    ({ skip, take }) =>
+      prisma.candidate.findMany({
+        where,
+        orderBy: [
+          ...(sort ? candidateOrderBy[sort.key](sort.dir) : [{ createdAt: 'desc' as const }]),
+          { id: 'asc' },
+        ],
+        include: candidateListInclude,
+        skip,
+        take,
+      })
+  );
 }
 
 /** Jobs a candidate can be attached to, newest first. */
@@ -644,16 +654,18 @@ export async function listUsers(params: ListParams<UserSortKey>): Promise<Pagina
       }
     : undefined;
 
-  const total = await prisma.user.count({ where });
-  const { skip, take, ...info } = paginate(params, total);
-  const rows = await prisma.user.findMany({
-    where,
-    orderBy: [...(sort ? userOrderBy[sort.key](sort.dir) : [{ email: 'asc' as const }]), { id: 'asc' }],
-    select: userListSelect,
-    skip,
-    take,
-  });
-  return { ...info, rows };
+  return fetchPage(
+    params,
+    () => prisma.user.count({ where }),
+    ({ skip, take }) =>
+      prisma.user.findMany({
+        where,
+        orderBy: [...(sort ? userOrderBy[sort.key](sort.dir) : [{ email: 'asc' as const }]), { id: 'asc' }],
+        select: userListSelect,
+        skip,
+        take,
+      })
+  );
 }
 
 export async function getUser(id: string) {

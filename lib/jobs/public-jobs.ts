@@ -26,14 +26,13 @@ const summarySelect = {
   experience: true,
   city: { select: { name: true, state: true } },
   jobType: { select: { name: true, slug: true } },
-  jobCategory: { 
-    select: { 
+  jobCategory: {
+    select: {
       imageUrl: true,
-      translations: { select: { locale: true, name: true } } 
-    } 
+      translations: { select: { locale: true, name: true } },
+    },
   },
 } satisfies Prisma.JobSelect;
-
 
 type SummaryRow = Prisma.JobGetPayload<{ select: typeof summarySelect }>;
 
@@ -194,7 +193,6 @@ export const getPublishedJob = cache(async (id: string, locale: string): Promise
     responsibilities: sanitizeRichText(row.responsibilities),
     requirements: sanitizeRichText(row.requirements),
     benefits: sanitizeRichText(row.benefits),
-    // Correctly fetches imageUrl from your model's jobCategory relation definition
-    categoryImage: row.jobCategory?.imageUrl ?? null, 
+    categoryImage: row.jobCategory.imageUrl,
   };
 });

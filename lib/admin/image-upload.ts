@@ -68,7 +68,7 @@ export async function uploadImage(
     });
 
     if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
+      const errData: { message?: string; error?: string } = await res.json().catch(() => ({}));
       console.error('Supabase Storage REST upload failed:', res.status, errData);
       return {
         ok: false,

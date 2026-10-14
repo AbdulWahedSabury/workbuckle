@@ -1,4 +1,4 @@
-/* Contact details: replace the placeholders with your real ones. Single source of truth. */
+/* Contact details shown on the contact and legal pages. Single source of truth. */
 export const CONTACT = {
   facebook: "https://www.facebook.com/mavromatisemployment",
   instagram:

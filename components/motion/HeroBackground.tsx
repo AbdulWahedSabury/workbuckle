@@ -5,7 +5,7 @@ import Image from "next/image";
 import { canOptimizeImage } from "@/lib/images";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
-const DEFAULT_HERO_IMAGE = "/images/default-hero.jpg"; 
+const DEFAULT_HERO_IMAGE = "/images/hero/hospitality.png"; 
 
 // 1. Updated type definition to explicitly allow 'null'
 export default function HeroBackground({ src }: { src?: string | null }) {

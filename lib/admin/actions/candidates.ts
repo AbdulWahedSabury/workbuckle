@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
 import { setFlash } from '@/lib/admin/flash-server';
 import type { ActionState, DeleteResult } from '@/lib/admin/action-state';
-import { formValues, isNotFound, validationError } from '@/lib/admin/form';
+import { FIX_FIELDS_MESSAGE, formValues, isNotFound, validationError } from '@/lib/admin/form';
 import { removeCv, uploadCv } from '@/lib/cv-storage';
 import { candidateSchema, candidateStatusSchema, cvFileSchema } from '@/schemas/AdminSchemas';
 
@@ -24,7 +24,7 @@ export async function createCandidate(
 
   if (!result.success || !cv.success) {
     const state = result.success
-      ? { message: 'Please fix the highlighted fields.', values }
+      ? { message: FIX_FIELDS_MESSAGE, values }
       : validationError(result.error, values);
     if (!cv.success) state.errors = { ...state.errors, cv: [cv.error.issues[0].message] };
     return state;
