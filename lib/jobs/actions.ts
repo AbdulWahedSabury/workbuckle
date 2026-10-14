@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { createAdminNotification } from '@/lib/admin/actions/notifications';
 import { formValues } from '@/lib/admin/form';
 import { removeCv, uploadCv } from '@/lib/cv-storage';
 import { prisma } from '@/lib/prisma';
@@ -36,7 +37,7 @@ export async function submitApplication(
 
   const job = await prisma.job.findFirst({
     where: { id: jobId, status: 'published' },
-    select: { id: true },
+    select: { id: true, title: true },
   });
   if (!job) return { ok: false, message: JOB_UNAVAILABLE };
 
@@ -56,16 +57,27 @@ export async function submitApplication(
     return { ok: false, message: 'We could not upload your CV. Please try again.' };
   }
 
+  let candidateId: string;
   try {
-    await prisma.candidate.create({
+    ({ id: candidateId } = await prisma.candidate.create({
       data: { ...fields.data, jobId, status: 'pending', cvUrl: upload.url, cvPath: upload.path },
-    });
+      select: { id: true },
+    }));
   } catch (error) {
     // Don't leave an orphaned file behind when the row didn't save.
     await removeCv(upload.path);
     console.error('Saving application failed:', error);
     return { ok: false, message: 'Something went wrong. Please try again.' };
   }
+
+  // Alerts the admin panel (sound + toast). Best effort: the application is
+  // already saved, so a failure here is logged, not shown to the candidate.
+  await createAdminNotification({
+    title: 'New job application',
+    message: `${fields.data.firstName} ${fields.data.lastName} applied for ${job.title}.`,
+    type: 'SUCCESS',
+    link: `/admin/candidates/${candidateId}`,
+  });
 
   revalidatePath('/admin/candidates');
   revalidatePath('/admin/jobs');

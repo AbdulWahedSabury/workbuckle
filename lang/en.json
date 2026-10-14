@@ -479,10 +479,6 @@
         "apply": {
           "question": "How do I apply for a job?",
           "answer": "Browse open roles on our jobs page, select a listing, and follow the guided application flow. You'll be able to track the status of every application from your dashboard."
-        },
-        "post": {
-          "question": "How do I post a job listing?",
-          "answer": "Create an employer account, then use the \"Post a job\" flow to publish your listing. You'll be able to review applicants and manage the listing from your employer dashboard."
         }
       }
     },

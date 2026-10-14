@@ -231,3 +231,27 @@ enum Role {
   EMPLOYER
   VIEWER
 }
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+// Panel-wide alerts (e.g. a new job application). Polled by
+// app/api/admin/notifications/stream and shown in the admin bell + toasts.
+model AdminNotification {
+  id        String           @id @default(uuid()) @db.Uuid
+  title     String           @db.VarChar(200)
+  message   String           @db.Text
+  type      NotificationType @default(INFO)
+  // Admin path to open from the toast/bell, e.g. /admin/candidates/<id>.
+  link      String?          @db.VarChar(2048)
+  isRead    Boolean          @default(false) @map("is_read")
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  // The stream reads WHERE is_read = false ORDER BY created_at DESC.
+  @@index([isRead, createdAt(sort: Desc)])
+  @@map("admin_notifications")
+}

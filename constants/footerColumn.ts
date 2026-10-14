@@ -5,7 +5,6 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
       title: "For candidates",
       links: [
           { label: "jobs", href: "/jobs" },
-          { label: "categories", href: "/categories" },
       ],
   },
   {

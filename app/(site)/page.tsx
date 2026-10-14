@@ -13,11 +13,11 @@ export default function HomePage({ searchParams }: PageProps<"/">) {
   return (
     <>
       <HeroSection />
+      <WhyCyprus />
       <AvailablePositions />
       <JobCategories />
       <JobBoard searchParams={searchParams} />
       <RelocationBenefits />
-      <WhyCyprus />
       <HowToApply />
       <Testimonials />
       <Faq />

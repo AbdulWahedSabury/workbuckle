@@ -3,7 +3,7 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import Accordion from "@/components/ui/Accordion";
 
 /** Ids of the entries in `sections.faq.items` (lang/*.json), in display order. */
-const FAQ_IDS = ["security", "support", "apply", "post"] as const;
+const FAQ_IDS = ["security", "support", "apply"] as const;
 
 export default function Faq() {
   const t = useTranslations("sections.faq");

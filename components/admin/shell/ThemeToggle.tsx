@@ -24,9 +24,8 @@ export default function ThemeToggle({ className }: { className?: string }) {
 
   return (
     <fieldset className={cn("min-w-0", className)}>
-      <legend className="mb-2 px-4 text-xs font-semibold tracking-wider text-gray-2 uppercase">
-        Theme
-      </legend>
+      {/* The icons and labels speak for themselves; the legend is for screen readers. */}
+      <legend className="sr-only">Theme</legend>
       <div className="grid grid-cols-3 gap-1 rounded-full bg-gray-3 p-1">
         {OPTIONS.map(({ value, label, icon: Icon }) => {
           const checked = theme === value;
