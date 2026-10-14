@@ -13,7 +13,6 @@ import Accent from "../ui/Accent";
 import CtaButton from "@/components/ui/CtaButton";
 import { HERO_IMAGES } from "@/constants/hero";
 import HeroVideo from "./HeroVideo";
-import ImageRing from "./ImageRing";
 
 
 const EASE = [0.22, 1, 0.36, 1] as const;

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
+import { setFlash } from '@/lib/admin/flash-server';
 import { deleteUnlessUsedByJobs } from '@/lib/admin/delete-guard';
 import type { ActionState, DeleteResult } from '@/lib/admin/action-state';
 import {
@@ -68,6 +69,7 @@ export async function createJobType(
   }
 
   revalidatePath(LIST_PATH);
+  await setFlash(`Job type "${result.data.name}" created.`);
   redirect(LIST_PATH);
 }
 
@@ -97,6 +99,7 @@ export async function updateJobType(
   }
 
   revalidatePath(LIST_PATH);
+  await setFlash(`Job type "${result.data.name}" updated.`);
   redirect(LIST_PATH);
 }
 

@@ -24,9 +24,6 @@ export default function AdminSidebar({
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex h-20 shrink-0 items-center gap-2 border-b border-line px-5 font-heading text-lg font-semibold text-ink">
         <Logo href="/admin" />
-        <span className="shrink-0 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold tracking-wider uppercase">
-          Admin
-        </span>
         {headerAction && <div className="ml-auto shrink-0">{headerAction}</div>}
       </div>
 

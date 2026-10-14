@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
+import { setFlash } from '@/lib/admin/flash-server';
 import type { ActionState, DeleteResult } from '@/lib/admin/action-state';
 import { formValues, isNotFound, isUniqueViolation, validationError } from '@/lib/admin/form';
 import { hashPassword } from '@/lib/auth/password';
@@ -36,6 +37,7 @@ export async function createUser(_prev: ActionState, formData: FormData): Promis
   }
 
   revalidatePath(LIST_PATH);
+  await setFlash(`User ${data.email} created.`);
   redirect(LIST_PATH);
 }
 
@@ -73,6 +75,7 @@ export async function updateUser(
   }
 
   revalidatePath(LIST_PATH);
+  await setFlash(`User ${data.email} updated.`);
   redirect(LIST_PATH);
 }
 

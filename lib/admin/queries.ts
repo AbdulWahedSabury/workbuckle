@@ -319,6 +319,57 @@ export async function getJobType(id: string) {
   return prisma.jobType.findUnique({ where: { id } });
 }
 
+// ─── FAQs ────────────────────────────────────────────────────────────────────
+
+export type FaqRow = Prisma.FaqGetPayload<object>;
+
+export const FAQ_SORT_KEYS = ['question', 'sortOrder', 'status', 'updatedAt'] as const;
+export type FaqSortKey = (typeof FAQ_SORT_KEYS)[number];
+
+const faqOrderBy: Record<FaqSortKey, (dir: SortDir) => Prisma.FaqOrderByWithRelationInput[]> = {
+  question: (dir) => [{ question: dir }],
+  sortOrder: (dir) => [{ sortOrder: dir }, { createdAt: 'asc' }],
+  // asc = visible first.
+  status: (dir) => [{ isActive: dir === 'asc' ? 'desc' : 'asc' }, { sortOrder: 'asc' }],
+  updatedAt: (dir) => [{ updatedAt: dir }],
+};
+
+/**
+ * One page of FAQs matching `q` by question or answer. Default order is the
+ * public site's: sortOrder, then creation time.
+ */
+export async function listFaqs(params: ListParams<FaqSortKey>): Promise<Paginated<FaqRow>> {
+  await requireView('faqs');
+  const { q, sort } = params;
+  const where: Prisma.FaqWhereInput | undefined = q
+    ? {
+        OR: [
+          { question: { contains: q, mode: 'insensitive' } },
+          { answer: { contains: q, mode: 'insensitive' } },
+        ],
+      }
+    : undefined;
+
+  const total = await prisma.faq.count({ where });
+  const { skip, take, ...info } = paginate(params, total);
+  const rows = await prisma.faq.findMany({
+    where,
+    orderBy: [
+      ...(sort ? faqOrderBy[sort.key](sort.dir) : [{ sortOrder: 'asc' as const }, { createdAt: 'asc' as const }]),
+      { id: 'asc' },
+    ],
+    skip,
+    take,
+  });
+  return { ...info, rows };
+}
+
+export async function getFaq(id: string) {
+  await requireView('faqs');
+  if (!isUuid(id)) return null;
+  return prisma.faq.findUnique({ where: { id } });
+}
+
 // ─── Campaigns ───────────────────────────────────────────────────────────────
 
 export type CampaignWithCount = Prisma.CampaignGetPayload<{

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
+import { setFlash } from '@/lib/admin/flash-server';
 import type { ActionState, DeleteResult } from '@/lib/admin/action-state';
 import { deleteUnlessUsedByJobs } from '@/lib/admin/delete-guard';
 import {
@@ -28,6 +29,11 @@ function parse(formData: FormData) {
     slug: values.slug?.trim() || slugify(values[categoryNameField(defaultLocale)] ?? ''),
   };
   return { values, result: jobCategorySchema.safeParse(input) };
+}
+
+/** The default-locale name, which the schema requires. */
+function defaultName(data: Record<string, unknown>): string {
+  return String(data[categoryNameField(defaultLocale)] ?? '');
 }
 
 function translationRows(data: Record<string, unknown>) {
@@ -71,6 +77,7 @@ export async function createCategory(
   }
 
   revalidatePath(LIST_PATH);
+  await setFlash(`Category "${defaultName(result.data)}" created.`);
   redirect(LIST_PATH);
 }
 
@@ -125,6 +132,7 @@ export async function updateCategory(
   await removeImage(previous?.imagePath);
 
   revalidatePath(LIST_PATH);
+  await setFlash(`Category "${defaultName(result.data)}" updated.`);
   redirect(LIST_PATH);
 }
 
@@ -148,12 +156,22 @@ export async function toggleCategoryActive(id: string): Promise<void> {
   await requireAdmin();
   const category = await prisma.jobCategory.findUnique({
     where: { id },
-    select: { isActive: true },
+    select: {
+      isActive: true,
+      translations: { where: { locale: defaultLocale }, select: { name: true } },
+    },
   });
-  if (!category) return;
+  if (!category) {
+    await setFlash('This category no longer exists.', 'error');
+    return;
+  }
   await prisma.jobCategory.update({
     where: { id },
     data: { isActive: !category.isActive },
   });
+  const name = category.translations[0]?.name ?? 'Category';
+  await setFlash(
+    category.isActive ? `"${name}" is now hidden on the site.` : `"${name}" is now visible on the site.`
+  );
   revalidatePath(LIST_PATH);
 }

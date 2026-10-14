@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
+import { setFlash } from '@/lib/admin/flash-server';
 import type { ActionState } from '@/lib/admin/action-state';
 import { formValues, isNotFound, validationError } from '@/lib/admin/form';
 import { imagePathFromUrl, removeImage, uploadImage } from '@/lib/admin/image-upload';
@@ -49,6 +50,7 @@ export async function createCampaign(
   }
 
   revalidatePath(LIST_PATH);
+  await setFlash(`Campaign "${prepared.data.title}" created.`);
   redirect(LIST_PATH);
 }
 
@@ -82,6 +84,7 @@ export async function updateCampaign(
 
   revalidatePath(LIST_PATH);
   revalidatePath('/admin/jobs');
+  await setFlash(`Campaign "${data.title}" updated.`);
   redirect(LIST_PATH);
 }
 

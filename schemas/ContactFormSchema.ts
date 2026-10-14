@@ -20,3 +20,16 @@ export function getContactFormSchema<T extends (key: string) => string>(t: T) {
 }
 
 export type ContactFormType = z.infer<ReturnType<typeof getContactFormSchema>>;
+
+/**
+ * Anti-spam fields sent alongside the form data. They sit outside the schema
+ * above (zod strips unknown keys), so react-hook-form never sees them.
+ * - HONEYPOT_FIELD: hidden input humans never see; bots that fill every field fill it.
+ *   The name must not look like anything browser autofill knows (website, url,
+ *   company, name, address...), or real visitors get silently dropped as bots.
+ * - ELAPSED_FIELD: ms between the form mounting and submit, measured on the
+ *   client's own clock so clock skew against the server doesn't matter.
+ */
+export const HONEYPOT_FIELD = 'contact_me_by_fax_only';
+export const ELAPSED_FIELD = 'form_elapsed_ms';
+export const MIN_SUBMIT_MS = 3000;

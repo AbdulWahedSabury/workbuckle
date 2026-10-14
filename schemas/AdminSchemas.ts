@@ -92,6 +92,15 @@ export const jobTypeSchema = z.object({
   slug,
 });
 
+// ─── FAQs ────────────────────────────────────────────────────────────────────
+
+export const faqSchema = z.object({
+  question: z.string().trim().min(1, 'Question is required.').max(300),
+  answer: z.string().trim().min(1, 'Answer is required.').max(5000),
+  isActive: checkbox,
+  sortOrder: z.coerce.number().int().min(0).max(100_000).default(0),
+});
+
 // ─── Campaigns ───────────────────────────────────────────────────────────────
 
 export const campaignSchema = z.object({

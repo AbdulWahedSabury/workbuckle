@@ -1,23 +1,56 @@
-import { useTranslations } from "next-intl";
+import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 import SectionHeader from "@/components/ui/SectionHeader";
-import Accordion from "@/components/ui/Accordion";
+import Accordion, { type AccordionItem } from "@/components/ui/Accordion";
+import { listPublicFaqs } from "@/lib/faqs/public-faqs";
 
-/** Ids of the entries in `sections.faq.items` (lang/*.json), in display order. */
-const FAQ_IDS = ["security", "support", "apply"] as const;
-
+/** FAQ section; the questions are managed in the admin panel (/admin/faqs). */
 export default function Faq() {
-  const t = useTranslations("sections.faq");
-  const items = FAQ_IDS.map((id) => ({
-    id,
-    question: t(`items.${id}.question`),
-    answer: t(`items.${id}.answer`),
-  }));
+  return (
+    <Suspense fallback={<FaqFallback />}>
+      <FaqContent />
+    </Suspense>
+  );
+}
 
+async function FaqContent() {
+  let items: AccordionItem[] = [];
+  try {
+    items = await listPublicFaqs();
+  } catch (error) {
+    console.error("Failed to list FAQs:", error);
+  }
+
+  if (items.length === 0) return null;
+
+  return (
+    <FaqSection>
+      <Accordion items={items} defaultOpenId={items[0].id} className="mx-auto max-w-3xl" />
+    </FaqSection>
+  );
+}
+
+function FaqFallback() {
+  return (
+    <FaqSection>
+      <div aria-hidden="true" className="mx-auto max-w-3xl">
+        {Array.from({ length: 3 }, (_, index) => (
+          <div key={index} className="border-b border-line py-5">
+            <div className="h-7 w-2/3 animate-pulse rounded-full bg-gray-3" />
+          </div>
+        ))}
+      </div>
+    </FaqSection>
+  );
+}
+
+async function FaqSection({ children }: { children: React.ReactNode }) {
+  const t = await getTranslations("sections.faq");
   return (
     <section className="section-spacing">
       <div className="container-site">
         <SectionHeader eyebrow={t("title")} title={t("description")} align="center" />
-        <Accordion items={items} defaultOpenId={FAQ_IDS[0]} className="mx-auto max-w-3xl" />
+        {children}
       </div>
     </section>
   );

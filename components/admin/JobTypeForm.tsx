@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { initialActionState, type ActionState } from "@/lib/admin/action-state";
 import { FormMessage, TextField } from "./fields";
+import { useActionErrorToast } from "./useActionErrorToast";
 import { SubmitButton } from "./buttons";
 import { fieldsetClass, secondaryLinkClass } from "./styles";
 
@@ -22,6 +23,7 @@ export default function JobTypeForm({
   submitLabel: string;
 }) {
   const [state, formAction] = useActionState(action, initialActionState);
+  useActionErrorToast(state);
   // After a failed submit, show what was typed rather than the saved values.
   const v = state.values;
   const errors = state.errors ?? {};

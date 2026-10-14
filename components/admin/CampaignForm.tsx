@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { initialActionState, type ActionState } from "@/lib/admin/action-state";
 import { FormMessage, TextAreaField, TextField } from "./fields";
+import { useActionErrorToast } from "./useActionErrorToast";
 import { SubmitButton } from "./buttons";
 import ImageUploadField from "./ImageUploadField";
 import { fieldsetClass, legendClass, secondaryLinkClass } from "./styles";
@@ -25,6 +26,7 @@ export default function CampaignForm({
   submitLabel: string;
 }) {
   const [state, formAction] = useActionState(action, initialActionState);
+  useActionErrorToast(state);
   // After a failed submit, show what was typed rather than the saved values.
   const v = state.values;
   const errors = state.errors ?? {};

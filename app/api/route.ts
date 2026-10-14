@@ -1,6 +1,11 @@
 import { getTranslations } from "next-intl/server";
 import { NextResponse } from "next/server";
-import { getContactFormSchema } from "@/schemas/ContactFormSchema";
+import {
+  ELAPSED_FIELD,
+  HONEYPOT_FIELD,
+  MIN_SUBMIT_MS,
+  getContactFormSchema,
+} from "@/schemas/ContactFormSchema";
 import { getCorsHeaders } from "@/utils/cors";
 import mailer from "@/utils/mailer";
 
@@ -30,6 +35,28 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { success: false, message: "Invalid request body" },
       { status: 400, headers },
+    );
+  }
+
+  // Anti-spam, checked before validation so bots learn nothing from field errors.
+  const fields = (body && typeof body === "object" ? body : {}) as Record<string, unknown>;
+
+  // Honeypot filled: answer exactly like a real success so the bot moves on.
+  const honeypot = fields[HONEYPOT_FIELD];
+  if (typeof honeypot === "string" && honeypot.trim() !== "") {
+    console.warn("Contact form: honeypot triggered, submission dropped");
+    return NextResponse.json({ success: true, message: "Message sent successfully" }, { headers });
+  }
+
+  // Too fast (or missing, as with scripts posting straight to /api). A real
+  // error, not a fake success: a fast human gets told to retry, and by then
+  // enough time has passed.
+  const elapsed = Number(fields[ELAPSED_FIELD]);
+  if (!Number.isFinite(elapsed) || elapsed < MIN_SUBMIT_MS) {
+    console.warn(`Contact form: submitted too fast (${String(fields[ELAPSED_FIELD])}ms), rejected`);
+    return NextResponse.json(
+      { success: false, message: "Submission rejected" },
+      { status: 422, headers },
     );
   }
 

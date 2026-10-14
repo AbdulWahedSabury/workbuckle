@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
+import { setFlash } from '@/lib/admin/flash-server';
 import type { ActionState, DeleteResult } from '@/lib/admin/action-state';
 import { formValues, isNotFound, validationError } from '@/lib/admin/form';
 import { removeCv, uploadCv } from '@/lib/cv-storage';
@@ -58,6 +59,7 @@ export async function createCandidate(
   revalidatePath(LIST_PATH);
   revalidatePath('/admin/jobs');
   revalidatePath('/admin');
+  await setFlash(`Candidate ${result.data.firstName} ${result.data.lastName} added.`);
   redirect(LIST_PATH);
 }
 

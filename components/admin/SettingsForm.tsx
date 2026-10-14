@@ -5,6 +5,7 @@ import { initialActionState } from "@/lib/admin/action-state";
 import { updateSiteSettings } from "@/lib/admin/actions/settings";
 import type { RawApiSettings } from "@/types/setting";
 import { CheckboxField, FormMessage, TextAreaField, TextField } from "./fields";
+import { useActionErrorToast } from "./useActionErrorToast";
 import { SubmitButton } from "./buttons";
 import ImageUploadField from "./ImageUploadField";
 import { fieldsetClass, legendClass } from "./styles";
@@ -21,6 +22,7 @@ export default function SettingsForm({
     updateSiteSettings,
     initialActionState
   );
+  useActionErrorToast(state);
   // After a failed submit, show what was typed rather than the saved values.
   const v = state.values;
   const errors = state.errors ?? {};

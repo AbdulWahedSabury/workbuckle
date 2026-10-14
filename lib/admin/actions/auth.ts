@@ -4,6 +4,7 @@ import { AuthError } from 'next-auth';
 import { signIn, signOut } from '@/auth';
 import { ADMIN_LOGIN_PATH } from '@/auth.config';
 import type { ActionState } from '@/lib/admin/action-state';
+import { clearFlash, setFlash } from '@/lib/admin/flash-server';
 
 /**
  * Auth.js passes `callbackUrl` as an absolute URL. Keep only its path, and
@@ -25,6 +26,8 @@ export async function adminSignIn(
   formData: FormData
 ): Promise<ActionState> {
   const email = String(formData.get('email') ?? '');
+  // Queued up front: a successful signIn() ends in a redirect, not a return.
+  await setFlash('Signed in.');
   try {
     await signIn('credentials', {
       email,
@@ -34,6 +37,7 @@ export async function adminSignIn(
   } catch (error) {
     // A successful sign-in throws Next's redirect; only Auth.js errors are failures.
     if (error instanceof AuthError) {
+      await clearFlash();
       return {
         message:
           error.type === 'CredentialsSignin'
@@ -48,5 +52,6 @@ export async function adminSignIn(
 }
 
 export async function adminSignOut(): Promise<void> {
+  await setFlash('Signed out.');
   await signOut({ redirectTo: ADMIN_LOGIN_PATH });
 }

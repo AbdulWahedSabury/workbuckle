@@ -4,10 +4,12 @@ import { useActionState } from "react";
 import { initialActionState } from "@/lib/admin/action-state";
 import { adminSignIn } from "@/lib/admin/actions/auth";
 import { FormMessage, TextField } from "./fields";
+import { useActionErrorToast } from "./useActionErrorToast";
 import { SubmitButton } from "./buttons";
 
 export default function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
   const [state, formAction] = useActionState(adminSignIn, initialActionState);
+  useActionErrorToast(state);
 
   return (
     <form action={formAction} className="flex flex-col gap-5">

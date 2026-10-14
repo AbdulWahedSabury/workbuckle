@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
+import { setFlash } from '@/lib/admin/flash-server';
 import type { ActionState } from '@/lib/admin/action-state';
 import { formValues, validationError } from '@/lib/admin/form';
 import { imagePathFromUrl, removeImage, uploadImage } from '@/lib/admin/image-upload';
@@ -46,5 +47,6 @@ export async function updateSiteSettings(
 
   // Settings can be read anywhere on the site, so refresh every route.
   revalidatePath('/', 'layout');
-  return { message: 'Settings saved.' };
+  await setFlash('Settings saved.');
+  return {};
 }

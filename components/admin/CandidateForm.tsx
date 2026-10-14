@@ -5,6 +5,7 @@ import Link from "next/link";
 import { initialActionState, type ActionState } from "@/lib/admin/action-state";
 import { CANDIDATE_STATUSES } from "@/schemas/AdminSchemas";
 import { FormMessage, SelectField, TextAreaField, TextField } from "./fields";
+import { useActionErrorToast } from "./useActionErrorToast";
 import { SubmitButton } from "./buttons";
 import { fieldsetClass, secondaryLinkClass } from "./styles";
 
@@ -23,6 +24,7 @@ export default function CandidateForm({
   submitLabel: string;
 }) {
   const [state, formAction] = useActionState(action, initialActionState);
+  useActionErrorToast(state);
   // After a failed submit, show what was typed. File inputs can't be refilled.
   const v = state.values;
   const errors = state.errors ?? {};

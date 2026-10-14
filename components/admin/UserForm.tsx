@@ -7,6 +7,7 @@ import { ROLE_OPTIONS } from "@/lib/auth/roles";
 import type { Role } from "@/lib/generated/prisma/enums";
 import { PASSWORD_MIN_LENGTH } from "@/schemas/AdminSchemas";
 import { FormMessage, SelectField, TextField } from "./fields";
+import { useActionErrorToast } from "./useActionErrorToast";
 import { SubmitButton } from "./buttons";
 import { fieldsetClass, legendClass, secondaryLinkClass } from "./styles";
 
@@ -35,6 +36,7 @@ export default function UserForm({
   submitLabel: string;
 }) {
   const [state, formAction] = useActionState(action, initialActionState);
+  useActionErrorToast(state);
   // After a failed submit, show what was typed rather than the saved values.
   const v = state.values;
   const errors = state.errors ?? {};

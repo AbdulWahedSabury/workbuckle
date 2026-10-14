@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
+import { setFlash } from '@/lib/admin/flash-server';
 import type { ActionState } from '@/lib/admin/action-state';
 import { formValues, isNotFound, validationError } from '@/lib/admin/form';
 import { sanitizeRichText } from '@/lib/rich-text';
@@ -41,6 +42,12 @@ async function missingRelations(data: JobInput): Promise<ActionState['errors']> 
   return Object.keys(errors).length ? errors : undefined;
 }
 
+function createdJobMessage({ title, status }: JobInput): string {
+  if (status === 'published') return `Job "${title}" published.`;
+  if (status === 'draft') return `Job "${title}" saved as a draft.`;
+  return `Job "${title}" created.`;
+}
+
 export async function createJob(
   _prev: ActionState,
   formData: FormData
@@ -58,6 +65,7 @@ export async function createJob(
   revalidatePath(LIST_PATH);
   revalidatePath('/admin');
   revalidatePath('/admin/campaigns');
+  await setFlash(createdJobMessage(result.data));
   redirect(LIST_PATH);
 }
 
@@ -86,6 +94,7 @@ export async function updateJob(
   revalidatePath(LIST_PATH);
   revalidatePath('/admin');
   revalidatePath('/admin/campaigns');
+  await setFlash(`Job "${result.data.title}" updated.`);
   redirect(LIST_PATH);
 }
 

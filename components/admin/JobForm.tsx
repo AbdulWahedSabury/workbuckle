@@ -6,6 +6,7 @@ import { initialActionState, type ActionState } from "@/lib/admin/action-state";
 import type { SelectOption } from "@/lib/admin/queries";
 import { JOB_STATUSES, type JobStatus } from "@/schemas/AdminSchemas";
 import { FormMessage, SelectField, TextField } from "./fields";
+import { useActionErrorToast } from "./useActionErrorToast";
 import { SubmitButton } from "./buttons";
 import RichTextEditor from "./RichTextEditor";
 import SearchableSelectField from "./SearchableSelectField";
@@ -89,6 +90,7 @@ export default function JobForm({
   submitLabel: string;
 }) {
   const [state, formAction] = useActionState(action, initialActionState);
+  useActionErrorToast(state);
   // After a failed submit, show what was typed rather than the saved values.
   const v = state.values;
   const errors = state.errors ?? {};

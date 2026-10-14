@@ -61,7 +61,7 @@ export default function Accordion({ items, defaultOpenId, className = "" }: Acco
               transition={{ duration: 0.3, ease: "easeInOut" }}
               className="overflow-hidden"
             >
-              <p className="pb-5">{answer}</p>
+              <p className="pb-5 whitespace-pre-line">{answer}</p>
             </motion.div>
           </div>
         );

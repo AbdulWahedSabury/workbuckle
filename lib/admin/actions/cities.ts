@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
+import { setFlash } from '@/lib/admin/flash-server';
 import type { ActionState, DeleteResult } from '@/lib/admin/action-state';
 import { deleteUnlessUsedByJobs } from '@/lib/admin/delete-guard';
 import {
@@ -43,6 +44,7 @@ export async function createCity(
   }
 
   revalidatePath(LIST_PATH);
+  await setFlash(`City "${result.data.name}" created.`);
   redirect(LIST_PATH);
 }
 
@@ -69,6 +71,7 @@ export async function updateCity(
   }
 
   revalidatePath(LIST_PATH);
+  await setFlash(`City "${result.data.name}" updated.`);
   redirect(LIST_PATH);
 }
 

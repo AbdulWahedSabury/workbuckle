@@ -7,6 +7,7 @@ import {
   ArrowUpRight,
   Briefcase,
   BriefcaseBusiness,
+  CircleHelp,
   Globe,
   LayoutDashboard,
   MapPin,
@@ -44,6 +45,10 @@ const NAV_GROUPS: readonly NavGroup[] = [
       { href: "/admin/job-types", label: "Job types", icon: Briefcase, section: "jobTypes" },
       { href: "/admin/cities", label: "Cities", icon: MapPin, section: "cities" },
     ],
+  },
+  {
+    label: "Content",
+    items: [{ href: "/admin/faqs", label: "FAQs", icon: CircleHelp, section: "faqs" }],
   },
   {
     label: "System",

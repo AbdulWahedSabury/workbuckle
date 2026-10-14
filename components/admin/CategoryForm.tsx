@@ -6,6 +6,7 @@ import { initialActionState, type ActionState } from "@/lib/admin/action-state";
 import { categoryNameField } from "@/schemas/AdminSchemas";
 import { defaultLocale, locales } from "@/types/locale";
 import { CheckboxField, FormMessage, TextField } from "./fields";
+import { useActionErrorToast } from "./useActionErrorToast";
 import { SubmitButton } from "./buttons";
 import IconPickerField from "./IconPickerField";
 import ImageUploadField from "./ImageUploadField";
@@ -32,6 +33,7 @@ export default function CategoryForm({
   submitLabel: string;
 }) {
   const [state, formAction] = useActionState(action, initialActionState);
+  useActionErrorToast(state);
   const v = state.values;
   const errors = state.errors ?? {};
   const imageUrl = v ? v.existingImageUrl : category?.imageUrl;
