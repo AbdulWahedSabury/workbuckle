@@ -46,6 +46,7 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       className={`h-full ${inter.variable} ${poppins.variable} ${roboto.variable}`}
     >
+    <meta name="google-site-verification" content="HGanejQfBGbru1FKAc43c9w3lZ5v1tSgOEV96BFmOZI" />
       <body className="antialiased" 
       suppressHydrationWarning>
         <QueryProvider>
