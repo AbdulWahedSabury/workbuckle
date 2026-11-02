@@ -9,7 +9,6 @@ export function organizationSchema(setting: Setting) {
     name: setting.name,
     ...(setting.about && { description: setting.about }),
     ...(setting.logo && { logo: setting.logo }),
-    ...(setting.email && { email: setting.email }),
     ...(setting.phone && { telephone: setting.phone }),
     ...(sameAs.length > 0 && { sameAs }),
   };

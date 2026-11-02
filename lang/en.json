@@ -45,7 +45,8 @@
       "info": {
         "title": "We’re here to assist you",
         "phone": "Talk to us directly",
-        "email": "Get in touch via email",
+        "email": "Send us a message",
+        "email_link": "Use our contact form",
         "address": "Our office location",
         "social": "Follow us for updates"
       }

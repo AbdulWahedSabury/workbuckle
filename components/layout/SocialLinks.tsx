@@ -1,10 +1,10 @@
 "use client";
 
 import type { ComponentType, SVGProps } from "react";
-import { Mail, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
 
 import { MotionLink } from "@/components/motion/MotionLink";
-import { mailHref, telHref } from "@/lib/contact";
+import { telHref } from "@/lib/contact";
 import { snappySpring } from "@/lib/motion";
 import { useSiteSetting } from "@/providers/SiteSettingProvider";
 import type { Setting } from "@/types/setting";
@@ -49,7 +49,6 @@ function contactLinks(setting: Setting): ContactLink[] {
     !!setting.facebook && { label: "Facebook", value: "Facebook", href: setting.facebook, icon: FacebookIcon, external: true },
     !!setting.instagram && { label: "Instagram", value: "Instagram", href: setting.instagram, icon: InstagramIcon, external: true },
     !!setting.phone && { label: "Call us", value: setting.phone, href: telHref(setting.phone), icon: Phone },
-    !!setting.email && { label: "Email us", value: setting.email, href: mailHref(setting.email), icon: Mail },
   ];
   return links.filter((link) => link !== false);
 }
@@ -61,7 +60,7 @@ function contactLinks(setting: Setting): ContactLink[] {
 interface SocialLinksProps {
   /**
    * "icons": round icon buttons with a label tooltip (compact, e.g. header).
-   * "contact": pills that also show the phone number and email (e.g. footer).
+   * "contact": pills that show available social and phone links (e.g. footer).
    * "social": only the social network links, as solid dark circles (contact page).
    */
   variant?: "icons" | "contact" | "social";

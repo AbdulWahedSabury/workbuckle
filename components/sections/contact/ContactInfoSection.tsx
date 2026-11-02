@@ -17,6 +17,10 @@ export default function ContactInfoSection() {
             <ContactInfoCard key={id} icon={icon} title={t(id)}>
               {id === "social" ? (
                 <SocialLinks variant="social" />
+              ) : id === "email" ? (
+                <a href="#contact-form" className="transition-colors duration-300 hover:text-primary">
+                  {t("email_link")}
+                </a>
               ) : href ? (
                 <a href={href} className="transition-colors duration-300 hover:text-primary">
                   {value}

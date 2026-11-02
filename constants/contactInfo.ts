@@ -1,5 +1,5 @@
 import { MailOpen, MapPin, Megaphone, PhoneCall, type LucideIcon } from "lucide-react";
-import { CONTACT, mailHref, telHref } from "@/lib/contact";
+import { CONTACT, telHref } from "@/lib/contact";
 
 export interface ContactInfoItem {
   /** Key under `pages.contact.info` in lang/*.json that holds the card title. */
@@ -13,7 +13,7 @@ export interface ContactInfoItem {
 
 export const CONTACT_INFO_ITEMS: ContactInfoItem[] = [
   { id: "phone", icon: PhoneCall, value: CONTACT.phone, href: telHref(CONTACT.phone) },
-  { id: "email", icon: MailOpen, value: CONTACT.email, href: mailHref(CONTACT.email) },
+  { id: "email", icon: MailOpen },
   { id: "address", icon: MapPin, value: CONTACT.address },
   { id: "social", icon: Megaphone },
 ];

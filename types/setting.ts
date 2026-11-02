@@ -9,7 +9,6 @@ export type RawApiSettings = Omit<SiteSetting, "id" | "createdAt" | "updatedAt">
 /** App-wide settings shape: snake_case, never null (missing values are ""). */
 export interface Setting {
   name: string;
-  email: string;
   phone: string;
   facebook: string;
   instagram: string;

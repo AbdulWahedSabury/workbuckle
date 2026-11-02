@@ -29,7 +29,6 @@ export const getPublicSiteSettings = cache(async (): Promise<RawApiSettings | nu
 export function toSetting(raw: RawApiSettings | null): Setting {
   return {
     name: raw?.siteName || DEFAULT_SITE_NAME,
-    email: raw?.contactEmail ?? '',
     phone: raw?.contactPhone ?? '',
     facebook: raw?.facebookUrl ?? '',
     instagram: raw?.instagramUrl ?? '',

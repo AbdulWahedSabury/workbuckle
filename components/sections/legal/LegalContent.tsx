@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { CONTACT, mailHref, telHref } from "@/lib/contact";
+import { CONTACT, telHref } from "@/lib/contact";
 
 /** A section in `<namespace>.sections` (lang/*.json). `list` sets how its `items` render; a section with id "contact" also shows the contact details. */
 export type LegalSection = { id: string; list?: "ul" | "ol" };
@@ -10,7 +10,6 @@ export default function LegalContent({ namespace, sections }: { namespace: strin
   const t = useTranslations(namespace);
 
   const contactRows = [
-    { label: t("sections.contact.email"), value: CONTACT.email, href: mailHref(CONTACT.email) },
     { label: t("sections.contact.phone"), value: CONTACT.phone, href: telHref(CONTACT.phone) },
     { label: t("sections.contact.address"), value: CONTACT.address },
   ];
@@ -68,7 +67,7 @@ export default function LegalContent({ namespace, sections }: { namespace: strin
                   )}
 
                   {id === "contact" && (
-                    <dl className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <dl className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
                       {contactRows.map((row) => (
                         <div key={row.label} className="rounded-sm-card bg-white p-5">
                           <dt className="mb-1 text-xs font-semibold tracking-wider text-gray-2 uppercase">
