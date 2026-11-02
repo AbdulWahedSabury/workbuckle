@@ -42,13 +42,8 @@ export async function createCandidate(
   }
 
   try {
-    await prisma.$transaction(async (tx) => {
-      await tx.candidate.create({
-        data: { ...result.data, cvUrl: upload.url, cvPath: upload.path },
-      });
-      if (result.data.status === 'success') {
-        await tx.job.update({ where: { id: result.data.jobId }, data: { status: 'closed' } });
-      }
+    await prisma.candidate.create({
+      data: { ...result.data, cvUrl: upload.url, cvPath: upload.path },
     });
   } catch (error) {
     // Don't leave an orphaned file behind when the row didn't save.
@@ -63,7 +58,7 @@ export async function createCandidate(
   redirect(LIST_PATH);
 }
 
-/** Moves a candidate between pending / rejected / success. */
+/** Moves a candidate through the recruiting pipeline. */
 export async function updateCandidateStatus(
   id: string,
   status: string
@@ -74,16 +69,9 @@ export async function updateCandidateStatus(
   if (!parsed.success) return { error: 'Invalid status.' };
 
   try {
-    await prisma.$transaction(async (tx) => {
-      const candidate = await tx.candidate.update({
-        where: { id },
-        data: { status: parsed.data },
-        select: { jobId: true },
-      });
-      // Hiring someone fills the position.
-      if (parsed.data === 'success') {
-        await tx.job.update({ where: { id: candidate.jobId }, data: { status: 'closed' } });
-      }
+    await prisma.candidate.update({
+      where: { id },
+      data: { status: parsed.data },
     });
   } catch (error) {
     if (isNotFound(error)) return { error: 'This candidate no longer exists.' };

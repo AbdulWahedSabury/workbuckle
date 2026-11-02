@@ -14,8 +14,9 @@ export const metadata: Metadata = { title: "Candidate profile" };
 
 const STATUS_BADGE: Record<string, { tone: StatusTone; label: string }> = {
   pending: { tone: "neutral", label: "Pending" },
-  success: { tone: "success", label: "Success" },
-  rejected: { tone: "danger", label: "Rejected" },
+  Review: { tone: "brand", label: "Review" },
+  "Short list": { tone: "success", label: "Short list" },
+  submitted: { tone: "neutral", label: "Submitted" },
 };
 
 function Detail({ label, children }: { label: string; children: React.ReactNode }) {

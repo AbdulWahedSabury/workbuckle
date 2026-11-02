@@ -7,8 +7,9 @@ import { CANDIDATE_STATUSES } from "@/schemas/AdminSchemas";
 
 const LABELS: Record<string, string> = {
   pending: "Pending",
-  rejected: "Rejected",
-  success: "Success",
+  Review: "Review",
+  "Short list": "Short list",
+  submitted: "Submitted",
 };
 
 /** Inline status editor for the candidates table. */

@@ -7,6 +7,7 @@ import type { Faq, Prisma } from '@/lib/generated/prisma/client';
 import { SITE_SETTING_ID } from '@/lib/site-settings';
 import { isUuid } from '@/lib/utils';
 import { defaultLocale } from '@/types/locale';
+import { CANDIDATE_STATUSES, type CandidateStatus } from '@/schemas/AdminSchemas';
 
 export async function getAdminCounts() {
   await requireView('dashboard');
@@ -79,7 +80,12 @@ export const getCandidateInsights = cache(async (days = 14) => {
     return { date, count: perDay.get(date) ?? 0 };
   });
 
-  const statusCounts = { pending: 0, success: 0, rejected: 0 } as Record<string, number>;
+  const statusCounts: Record<string, number> = {
+    pending: 0,
+    Review: 0,
+    "Short list": 0,
+    submitted: 0,
+  };
   for (const row of byStatus) statusCounts[row.status] = row._count._all;
 
   return { statusCounts, activity, thisWeek, lastWeek, latest, topJobs };
@@ -451,7 +457,9 @@ const jobListInclude = {
   _count: { select: { candidates: true } },
 } satisfies Prisma.JobInclude;
 
-export type JobListRow = Prisma.JobGetPayload<{ include: typeof jobListInclude }>;
+export type JobListRow = Prisma.JobGetPayload<{ include: typeof jobListInclude }> & {
+  candidateStatusCounts: Record<CandidateStatus, number>;
+};
 
 export const JOB_SORT_KEYS = ['title', 'city', 'type', 'status', 'updatedAt'] as const;
 export type JobSortKey = (typeof JOB_SORT_KEYS)[number];
@@ -478,7 +486,7 @@ export async function listJobs(params: ListParams<JobSortKey>): Promise<Paginate
       }
     : undefined;
 
-  return fetchPage(
+  const page = await fetchPage(
     params,
     () => prisma.job.count({ where }),
     ({ skip, take }) =>
@@ -493,6 +501,36 @@ export async function listJobs(params: ListParams<JobSortKey>): Promise<Paginate
         take,
       })
   );
+
+  const rows = page.rows;
+  const counts = rows.length
+    ? await prisma.candidate.groupBy({
+        by: ['jobId', 'status'],
+        where: { jobId: { in: rows.map((job) => job.id) } },
+        _count: { _all: true },
+      })
+    : [];
+  const countsByJob = new Map<string, Record<CandidateStatus, number>>();
+  for (const job of rows) {
+    countsByJob.set(
+      job.id,
+      Object.fromEntries(CANDIDATE_STATUSES.map((status) => [status, 0])) as Record<CandidateStatus, number>
+    );
+  }
+  for (const row of counts) {
+    const jobCounts = countsByJob.get(row.jobId);
+    if (jobCounts && CANDIDATE_STATUSES.includes(row.status as CandidateStatus)) {
+      jobCounts[row.status as CandidateStatus] = row._count._all;
+    }
+  }
+
+  return {
+    ...page,
+    rows: rows.map((job) => ({
+      ...job,
+      candidateStatusCounts: countsByJob.get(job.id)!,
+    })),
+  };
 }
 
 export async function getJob(id: string) {
@@ -561,12 +599,14 @@ const candidateOrderBy: Record<
 /** One page of candidates matching `q` by name, email or job title. Default order is newest first. */
 export async function listCandidates(
   params: ListParams<CandidateSortKey>,
-  jobId?: string
+  jobId?: string,
+  status?: CandidateStatus
 ): Promise<Paginated<CandidateListRow>> {
   await requireView('candidates');
   const { q, sort } = params;
   const where: Prisma.CandidateWhereInput = {
     ...(jobId ? { jobId } : {}),
+    ...(status ? { status } : {}),
     ...(q
       ? {
           OR: [

@@ -29,8 +29,9 @@ import { canEdit, canView, roleLabel } from "@/lib/auth/roles";
 
 const CANDIDATE_BADGE: Record<string, { tone: StatusTone; label: string }> = {
   pending: { tone: "neutral", label: "Pending" },
-  success: { tone: "success", label: "Success" },
-  rejected: { tone: "danger", label: "Rejected" },
+  Review: { tone: "brand", label: "Review" },
+  "Short list": { tone: "success", label: "Short list" },
+  submitted: { tone: "neutral", label: "Submitted" },
 };
 
 const JOB_BADGE: Record<string, { tone: StatusTone; label: string }> = {
@@ -253,8 +254,9 @@ async function CandidatePipeline() {
         totalLabel="applicants"
         items={[
           { key: "pending", label: "Pending review", count: statusCounts.pending, color: "bg-amber-400", href },
-          { key: "success", label: "Successful", count: statusCounts.success, color: "bg-emerald-500", href },
-          { key: "rejected", label: "Rejected", count: statusCounts.rejected, color: "bg-red-500", href },
+          { key: "Review", label: "Review", count: statusCounts.Review, color: "bg-blue-500", href },
+          { key: "Short list", label: "Short list", count: statusCounts["Short list"], color: "bg-violet-500", href },
+          { key: "submitted", label: "Submitted", count: statusCounts.submitted, color: "bg-emerald-500", href },
         ]}
       />
       {statusCounts.pending > 0 && (

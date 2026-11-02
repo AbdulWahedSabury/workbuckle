@@ -186,7 +186,7 @@ export const siteSettingSchema = z.object({
 
 // ─── Candidates ──────────────────────────────────────────────────────────────
 
-export const CANDIDATE_STATUSES = ['pending', 'rejected', 'success'] as const;
+export const CANDIDATE_STATUSES = ['pending', 'Review', 'Short list', 'submitted'] as const;
 export type CandidateStatus = (typeof CANDIDATE_STATUSES)[number];
 
 export const CV_MAX_BYTES = 10 * 1024 * 1024;

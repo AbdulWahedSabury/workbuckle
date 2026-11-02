@@ -8,6 +8,7 @@ import {
   type CandidateListRow,
   type CandidateSortKey,
 } from "@/lib/admin/queries";
+import type { CandidateStatus } from "@/schemas/AdminSchemas";
 import { DataTable, type Column } from "@/components/admin/data-table";
 import AdminOnly from "@/components/admin/AdminOnly";
 import { DeleteButton } from "@/components/admin/buttons";
@@ -19,8 +20,9 @@ import { formatDate } from "./format";
 
 const STATUS_BADGE: Record<string, { tone: StatusTone; label: string }> = {
   pending: { tone: "neutral", label: "Pending" },
-  success: { tone: "success", label: "Success" },
-  rejected: { tone: "danger", label: "Rejected" },
+  Review: { tone: "brand", label: "Review" },
+  "Short list": { tone: "success", label: "Short list" },
+  submitted: { tone: "neutral", label: "Submitted" },
 };
 
 const fullName = (c: CandidateListRow) => `${c.firstName} ${c.lastName}`;
@@ -148,13 +150,16 @@ const columns: Column<CandidateListRow, CandidateSortKey>[] = [
 export default async function CandidatesTable({
   searchParams,
   jobId,
+  status,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
   /** Only show candidates who applied for this job. */
   jobId?: string;
+  /** Only show candidates in this recruiting stage. */
+  status?: CandidateStatus;
 }) {
   const params = parseListParams(await searchParams, CANDIDATE_SORT_KEYS);
-  const { rows, ...pageInfo } = await listCandidates(params, jobId);
+  const { rows, ...pageInfo } = await listCandidates(params, jobId, status);
 
   return (
     <DataTable

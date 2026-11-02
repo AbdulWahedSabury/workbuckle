@@ -9,6 +9,7 @@ import { DeleteButton } from "@/components/admin/buttons";
 import EmptyState from "@/components/admin/EmptyState";
 import StatusBadge, { type StatusTone } from "@/components/admin/StatusBadge";
 import { iconButtonClass } from "@/components/admin/styles";
+import type { CandidateStatus } from "@/schemas/AdminSchemas";
 import { formatDate } from "./format";
 
 export const STATUS_BADGE: Record<string, { tone: StatusTone; label: string }> = {
@@ -53,6 +54,46 @@ const columns: Column<JobListRow, JobSortKey>[] = [
     },
   },
   {
+    id: "candidates",
+    header: "Candidates by status",
+    cell: (job) => (
+      <div
+        role="group"
+        aria-label={`Candidates by status for ${job.title}`}
+        className="grid w-64 grid-cols-2 gap-1.5"
+      >
+        <CandidateCountLink
+          jobId={job.id}
+          status="pending"
+          label="Pending"
+          tone="neutral"
+          count={job.candidateStatusCounts.pending}
+        />
+        <CandidateCountLink
+          jobId={job.id}
+          status="Review"
+          label="Review"
+          tone="brand"
+          count={job.candidateStatusCounts.Review}
+        />
+        <CandidateCountLink
+          jobId={job.id}
+          status="Short list"
+          label="Short list"
+          tone="success"
+          count={job.candidateStatusCounts["Short list"]}
+        />
+        <CandidateCountLink
+          jobId={job.id}
+          status="submitted"
+          label="Submitted"
+          tone="neutral"
+          count={job.candidateStatusCounts.submitted}
+        />
+      </div>
+    ),
+  },
+  {
     id: "updatedAt",
     header: "Updated",
     sortKey: "updatedAt",
@@ -73,16 +114,11 @@ const columns: Column<JobListRow, JobSortKey>[] = [
       <div className="flex justify-end gap-1">
         <Link
           href={`/admin/candidates?job=${job.id}`}
-          aria-label={`View ${job._count.candidates} candidates for ${job.title}`}
-          title={`Candidates (${job._count.candidates})`}
-          className={`${iconButtonClass} relative`}
+          aria-label={`View candidates for ${job.title}`}
+          title="View candidates"
+          className={iconButtonClass}
         >
           <Users aria-hidden="true" />
-          {job._count.candidates > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] leading-4 font-bold text-gray-100">
-              {job._count.candidates}
-            </span>
-          )}
         </Link>
         <AdminOnly>
           <Link
@@ -112,6 +148,42 @@ const columns: Column<JobListRow, JobSortKey>[] = [
     ),
   },
 ];
+
+function CandidateCountLink({
+  jobId,
+  status,
+  label,
+  tone,
+  count,
+}: {
+  jobId: string;
+  status: CandidateStatus;
+  label: string;
+  tone: StatusTone;
+  count: number;
+}) {
+  return (
+    <Link
+      href={`/admin/candidates?job=${encodeURIComponent(jobId)}&status=${encodeURIComponent(status)}`}
+      aria-label={`View ${count} ${status} candidates`}
+      title={`View ${label} candidates`}
+      className="group flex min-w-0 items-center justify-between gap-2 rounded-lg border border-line bg-white px-2.5 py-1.5 text-xs transition-colors hover:border-primary/40 hover:bg-gray-3 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+    >
+      <span className="flex min-w-0 items-center gap-1.5">
+        <span
+          aria-hidden="true"
+          className={`size-1.5 shrink-0 rounded-full ${
+            tone === "brand" ? "bg-primary" : tone === "success" ? "bg-emerald-500" : "bg-gray-2/50"
+          }`}
+        />
+        <span className="truncate text-gray-2 transition-colors group-hover:text-ink">{label}</span>
+      </span>
+      <span className="min-w-6 rounded-md bg-gray-3 px-1.5 py-0.5 text-center font-semibold tabular-nums text-ink">
+        {count}
+      </span>
+    </Link>
+  );
+}
 
 export default async function JobsTable({
   searchParams,
