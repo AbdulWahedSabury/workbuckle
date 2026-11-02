@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Link2, Loader2 } from "lucide-react";
 
 import FormTextField from "./FormTextField";
 import FormTextAreaField from "./FormTextAreaField";
@@ -67,6 +67,16 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
             ))}
           </div>
         ))}
+
+        <FormTextField
+          name="linkedin"
+          label="LinkedIn Profile (optional)"
+          type="url"
+          placeholder="https://www.linkedin.com/in/your-profile"
+          icon={Link2}
+          value={formData.linkedin}
+          onChange={(value) => updateField("linkedin", value)}
+        />
 
         <ResumeDropzone
           label="Resume / CV"

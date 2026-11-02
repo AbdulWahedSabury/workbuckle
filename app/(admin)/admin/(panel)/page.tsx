@@ -202,43 +202,34 @@ async function DashboardMetrics() {
 
 async function ApplicationsActivity() {
   await connection();
-  const { activity, thisWeek, lastWeek } = await getCandidateInsights();
-  const total = activity.reduce((sum, d) => sum + d.count, 0);
-  const change = lastWeek ? Math.round(((thisWeek - lastWeek) / lastWeek) * 100) : null;
+  const { activity, periodCounts } = await getCandidateInsights();
 
   return (
     <Panel
       id="activity"
       title="Applications"
-      description="New candidates per day, last 14 days"
+      description="Candidate totals across common periods, with a daily trend for the last 14 days."
       action={{ href: "/admin/candidates", label: "All candidates" }}
       className="lg:col-span-2"
     >
-      <div className="mb-6 flex flex-wrap gap-x-8 gap-y-3">
-        <Figure label="Last 14 days" value={total} />
-        <Figure label="This week" value={thisWeek} />
-        <Figure
-          label="vs. previous week"
-          value={change === null ? "—" : `${change > 0 ? "+" : ""}${change}%`}
-          tone={change === null || change === 0 ? undefined : change > 0 ? "up" : "down"}
-        />
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <Figure label="Today" value={periodCounts.today} />
+        <Figure label="Last 7 days" value={periodCounts.last7Days} />
+        <Figure label="Last 30 days" value={periodCounts.last30Days} />
+        <Figure label="Last 3 months" value={periodCounts.last3Months} />
+        <Figure label="Last 6 months" value={periodCounts.last6Months} />
+        <Figure label="Last year" value={periodCounts.lastYear} />
       </div>
       <ActivityChart days={activity} />
     </Panel>
   );
 }
 
-function Figure({ label, value, tone }: { label: string; value: number | string; tone?: "up" | "down" }) {
+function Figure({ label, value }: { label: string; value: number | string }) {
   return (
-    <div>
+    <div className="rounded-xl border border-line bg-gray-3/40 px-3 py-2.5">
       <p className="text-xs text-gray-2">{label}</p>
-      <p
-        className={`font-heading text-xl font-semibold tabular-nums ${
-          tone === "up" ? "text-emerald-800" : tone === "down" ? "text-red-700" : "text-ink"
-        }`}
-      >
-        {value}
-      </p>
+      <p className="mt-1 font-heading text-xl font-semibold text-ink tabular-nums">{value}</p>
     </div>
   );
 }

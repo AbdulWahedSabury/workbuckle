@@ -29,6 +29,17 @@ function dayKey(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
+/** Subtract calendar months while keeping the day within the target month. */
+function monthsAgo(date: Date, months: number): Date {
+  const result = new Date(date);
+  const day = result.getUTCDate();
+  result.setUTCDate(1);
+  result.setUTCMonth(result.getUTCMonth() - months);
+  const lastDay = new Date(Date.UTC(result.getUTCFullYear(), result.getUTCMonth() + 1, 0)).getUTCDate();
+  result.setUTCDate(Math.min(day, lastDay));
+  return result;
+}
+
 export type ActivityDay = { date: string; count: number };
 
 /**
@@ -44,12 +55,33 @@ export const getCandidateInsights = cache(async (days = 14) => {
   const since = new Date(todayStart.getTime() - (days - 1) * DAY_MS);
   const weekAgo = new Date(now.getTime() - 7 * DAY_MS);
   const twoWeeksAgo = new Date(now.getTime() - 14 * DAY_MS);
+  const monthAgo = new Date(now.getTime() - 30 * DAY_MS);
+  const threeMonthsAgo = monthsAgo(now, 3);
+  const sixMonthsAgo = monthsAgo(now, 6);
+  const yearAgo = monthsAgo(now, 12);
 
-  const [byStatus, recentDates, thisWeek, lastWeek, latest, topJobs] = await Promise.all([
+  const [
+    byStatus,
+    recentDates,
+    thisWeek,
+    lastWeek,
+    todayCount,
+    last30DaysCount,
+    last3MonthsCount,
+    last6MonthsCount,
+    lastYearCount,
+    latest,
+    topJobs,
+  ] = await Promise.all([
     prisma.candidate.groupBy({ by: ['status'], _count: { _all: true } }),
     prisma.candidate.findMany({ where: { createdAt: { gte: since } }, select: { createdAt: true } }),
     prisma.candidate.count({ where: { createdAt: { gte: weekAgo } } }),
     prisma.candidate.count({ where: { createdAt: { gte: twoWeeksAgo, lt: weekAgo } } }),
+    prisma.candidate.count({ where: { createdAt: { gte: todayStart } } }),
+    prisma.candidate.count({ where: { createdAt: { gte: monthAgo } } }),
+    prisma.candidate.count({ where: { createdAt: { gte: threeMonthsAgo } } }),
+    prisma.candidate.count({ where: { createdAt: { gte: sixMonthsAgo } } }),
+    prisma.candidate.count({ where: { createdAt: { gte: yearAgo } } }),
     prisma.candidate.findMany({
       orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
       take: 5,
@@ -88,7 +120,16 @@ export const getCandidateInsights = cache(async (days = 14) => {
   };
   for (const row of byStatus) statusCounts[row.status] = row._count._all;
 
-  return { statusCounts, activity, thisWeek, lastWeek, latest, topJobs };
+  const periodCounts = {
+    today: todayCount,
+    last7Days: thisWeek,
+    last30Days: last30DaysCount,
+    last3Months: last3MonthsCount,
+    last6Months: last6MonthsCount,
+    lastYear: lastYearCount,
+  };
+
+  return { statusCounts, activity, thisWeek, lastWeek, periodCounts, latest, topJobs };
 });
 
 /** Jobs per status (draft | published | closed). */
