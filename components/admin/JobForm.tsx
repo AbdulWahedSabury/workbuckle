@@ -16,6 +16,7 @@ export type JobFormValues = {
   title: string;
   salary: string;
   experience: string;
+  clientId: string;
   cityId: string;
   jobTypeId: string;
   jobCategoryId: string;
@@ -29,6 +30,7 @@ export type JobFormValues = {
 
 export type JobFormOptions = {
   cities: SelectOption[];
+  clients: SelectOption[];
   jobTypes: SelectOption[];
   categories: SelectOption[];
   campaigns: SelectOption[];
@@ -165,6 +167,7 @@ export default function JobForm({
 
           <fieldset className={fieldsetClass}>
             <legend className={legendClass}>Classification</legend>
+            <SelectField name="clientId" label="Client" placeholder="Choose a client" required options={options.clients} defaultValue={value("clientId")} error={errors.clientId} hint={emptyHint(options.clients, "clients", "/admin/clients/new")} />
             <SelectField
               name="jobTypeId"
               label="Job type"

@@ -7,6 +7,7 @@ import {
   ArrowUpRight,
   Briefcase,
   BriefcaseBusiness,
+  Building2,
   CircleHelp,
   Globe,
   LayoutDashboard,
@@ -36,6 +37,7 @@ const NAV_GROUPS: readonly NavGroup[] = [
       { href: "/admin/jobs", label: "Jobs", icon: BriefcaseBusiness, section: "jobs" },
       { href: "/admin/candidates", label: "Candidates", icon: Users, section: "candidates" },
       { href: "/admin/campaigns", label: "Campaigns", icon: Megaphone, section: "campaigns" },
+      { href: "/admin/clients", label: "Clients", icon: Building2, section: "clients" },
     ],
   },
   {

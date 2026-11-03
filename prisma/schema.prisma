@@ -140,6 +140,19 @@ model Campaign {
   @@map("campaigns")
 }
 
+model Client {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.VarChar(160)
+  email     String?  @db.VarChar(255)
+  phone     String?  @db.VarChar(40)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  jobs      Job[]
+
+  @@index([name])
+  @@map("clients")
+}
+
 // Question/answer pairs for the public FAQ section (home and contact pages).
 model Faq {
   id        String   @id @default(uuid()) @db.Uuid
@@ -160,6 +173,7 @@ model Job {
   id               String      @id @default(uuid()) @db.Uuid
   title            String      @db.VarChar(200)
   salary           String      @db.VarChar(120)
+  clientId         String      @map("client_id") @db.Uuid
   cityId           String      @map("city_id") @db.Uuid
   jobTypeId        String      @map("type_id") @db.Uuid
   jobCategoryId    String      @map("job_category_id") @db.Uuid
@@ -173,6 +187,7 @@ model Job {
   status           String      @default("draft") @db.VarChar(20)
   createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+  client           Client      @relation(fields: [clientId], references: [id], onDelete: Restrict)
   // Restrict: a city, type or category that jobs still use can't be deleted.
   city             City        @relation(fields: [cityId], references: [id], onDelete: Restrict)
   jobType          JobType     @relation(fields: [jobTypeId], references: [id], onDelete: Restrict)
@@ -184,6 +199,7 @@ model Job {
   @@index([cityId])
   @@index([jobTypeId])
   @@index([jobCategoryId])
+  @@index([clientId])
   @@index([campaignId])
   // Public /jobs list: WHERE status = 'published' ORDER BY created_at DESC.
   // Also serves status-only filters/counts (leftmost prefix), so it replaces @@index([status]).
@@ -204,6 +220,8 @@ model Candidate {
   cvUrl       String   @map("cv_url") @db.VarChar(2048)
   cvPath      String?  @map("cv_path") @db.VarChar(1024)
   coverLetter String?  @map("cover_letter") @db.Text
+  screeningNotes String? @map("screening_notes") @db.Text
+  clientProfileEmailSentAt DateTime? @map("client_profile_email_sent_at") @db.Timestamptz(3)
   // pending | Review | Short list | submitted — validated in schemas/AdminSchemas.ts.
   status      String   @default("pending") @db.VarChar(20)
   jobId       String   @map("job_id") @db.Uuid

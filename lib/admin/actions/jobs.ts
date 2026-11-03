@@ -35,13 +35,15 @@ function parse(formData: FormData) {
 
 /** The selects can go stale (another admin deleted a city, …); flag the field instead of a FK error. */
 async function missingRelations(data: JobInput): Promise<ActionState['errors']> {
-  const [city, jobType, category, campaign] = await Promise.all([
+  const [client, city, jobType, category, campaign] = await Promise.all([
+    prisma.client.count({ where: { id: data.clientId } }),
     prisma.city.count({ where: { id: data.cityId } }),
     prisma.jobType.count({ where: { id: data.jobTypeId } }),
     prisma.jobCategory.count({ where: { id: data.jobCategoryId } }),
     data.campaignId ? prisma.campaign.count({ where: { id: data.campaignId } }) : 1,
   ]);
   const errors: NonNullable<ActionState['errors']> = {};
+  if (!client) errors.clientId = ['This client no longer exists.'];
   if (!city) errors.cityId = ['This city no longer exists.'];
   if (!jobType) errors.jobTypeId = ['This job type no longer exists.'];
   if (!category) errors.jobCategoryId = ['This category no longer exists.'];

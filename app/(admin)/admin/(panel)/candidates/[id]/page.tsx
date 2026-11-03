@@ -6,6 +6,8 @@ import AdminOnly from "@/components/admin/AdminOnly";
 import PageHeader from "@/components/admin/PageHeader";
 import StatusBadge, { type StatusTone } from "@/components/admin/StatusBadge";
 import CandidateStatusSelect from "@/components/admin/CandidateStatusSelect";
+import CandidateScreeningNotesForm from "@/components/admin/CandidateScreeningNotesForm";
+import RetryCandidateProfileEmailButton from "@/components/admin/RetryCandidateProfileEmailButton";
 import { cardClass, primaryButtonClass, secondaryLinkClass } from "@/components/admin/styles";
 import { formatDate } from "@/components/admin/tables/format";
 import { getCandidate } from "@/lib/admin/queries";
@@ -103,6 +105,12 @@ export default async function CandidateProfilePage({
           ) : (
             <p className="text-sm text-gray-2/60">No cover letter provided.</p>
           )}
+
+          <div className="border-t border-line pt-5">
+            <AdminOnly>
+              <CandidateScreeningNotesForm candidateId={candidate.id} initialNotes={candidate.screeningNotes} />
+            </AdminOnly>
+          </div>
         </section>
 
         <aside className={`${cardClass} flex h-fit flex-col gap-5 p-5 sm:p-6`}>
@@ -133,6 +141,22 @@ export default async function CandidateProfilePage({
             <Detail label="Applied">
               <time dateTime={candidate.createdAt.toISOString()}>{formatDate(candidate.createdAt)}</time>
             </Detail>
+            {candidate.status === "submitted" && (
+              <Detail label="Client email">
+                {candidate.clientProfileEmailSentAt ? (
+                  <time dateTime={candidate.clientProfileEmailSentAt.toISOString()}>
+                    Sent {formatDate(candidate.clientProfileEmailSentAt)}
+                  </time>
+                ) : (
+                  <AdminOnly fallback={<span className="text-gray-2">Not sent</span>}>
+                    <div className="flex flex-col items-start gap-2">
+                      <span className="text-amber-700">Not sent yet</span>
+                      <RetryCandidateProfileEmailButton candidateId={candidate.id} />
+                    </div>
+                  </AdminOnly>
+                )}
+              </Detail>
+            )}
           </dl>
         </aside>
       </div>

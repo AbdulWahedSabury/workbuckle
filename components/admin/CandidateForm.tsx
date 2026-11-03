@@ -89,6 +89,14 @@ export default function CandidateForm({
           defaultValue={v?.coverLetter}
           error={errors.coverLetter}
         />
+        <TextAreaField
+          name="screeningNotes"
+          label="Pre-screening interview notes"
+          rows={6}
+          defaultValue={v?.screeningNotes}
+          error={errors.screeningNotes}
+          hint="These notes are attached to the client profile email when this candidate is submitted."
+        />
         <SelectField
           name="status"
           label="Status"

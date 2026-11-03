@@ -20,7 +20,6 @@ import HeroBackground from "@/components/motion/HeroBackground";
 import { jobTypeKey } from "@/lib/jobs/job-type";
 import { getPublishedJob } from "@/lib/jobs/public-jobs";
 
-const COMPANY_NAME = "Mavromatis Employment Bureau";
 
 // Keyed by jobTypeKey(slug); other job types use the default.
 const SCHEDULE_STYLES: Record<string, string> = {
@@ -65,7 +64,7 @@ export async function generateMetadata({ params }: PageProps<"/jobs/[id]">): Pro
 
   return {
     title: job.title,
-    description: `${job.title} in ${job.location} at ${COMPANY_NAME}. Apply through Work Buckle.`,
+    description: `${job.title} in ${job.location} at ${job.client}. Apply through Work Buckle.`,
   };
 }
 
@@ -130,7 +129,7 @@ export default async function JobDetailPage({ params }: PageProps<"/jobs/[id]">)
                   {job.title}
                 </h1>
                 <p className="mt-2 text-sm text-white/60 sm:text-base">
-                  {COMPANY_NAME}
+                  {job.client}
                 </p>
                 <ul
                   className="mt-5 flex flex-wrap gap-2 text-xs font-semibold sm:text-sm"

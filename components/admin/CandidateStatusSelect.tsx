@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useRef, useTransition } from "react";
 import { toast } from "sonner";
 import { updateCandidateStatus } from "@/lib/admin/actions/candidates";
 import { CANDIDATE_STATUSES } from "@/schemas/AdminSchemas";
@@ -23,6 +23,7 @@ export default function CandidateStatusSelect({
   name: string;
 }) {
   const [pending, startTransition] = useTransition();
+  const requestInFlight = useRef(false);
 
   return (
     <select
@@ -30,11 +31,19 @@ export default function CandidateStatusSelect({
       value={status}
       disabled={pending}
       onChange={(e) => {
+        if (requestInFlight.current) return;
         const next = e.target.value;
+        requestInFlight.current = true;
         startTransition(async () => {
-          const result = await updateCandidateStatus(id, next);
-          if (result.error) toast.error(result.error);
-          else toast.success(`Marked as ${LABELS[next]?.toLowerCase() ?? next}.`);
+          try {
+            const result = await updateCandidateStatus(id, next);
+            if (result.error) toast.error(result.error);
+            else toast.success(`Marked as ${LABELS[next]?.toLowerCase() ?? next}.`);
+          } catch {
+            toast.error("Could not update the candidate status. Please try again.");
+          } finally {
+            requestInFlight.current = false;
+          }
         });
       }}
       className="h-9 cursor-pointer rounded-full border border-line bg-white px-3 text-xs font-semibold text-ink outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"

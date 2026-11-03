@@ -19,6 +19,7 @@ export const STATUS_BADGE: Record<string, { tone: StatusTone; label: string }> =
 };
 
 const columns: Column<JobListRow, JobSortKey>[] = [
+  { id: "client", header: "Client", sortKey: "client", hideBelow: "md", cell: (job) => job.client.name },
   {
     id: "title",
     header: "Title",

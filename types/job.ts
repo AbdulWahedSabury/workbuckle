@@ -4,6 +4,8 @@ export interface PublicJobSummary {
   title: string;
   salary: string;
   experience: string;
+  /** Client name associated with the job. */
+  client: string;
   city: string;
   /** Job type name, e.g. "Full-time". */
   jobType: string;

@@ -110,6 +110,22 @@ export const campaignSchema = z.object({
   intro: z.string().trim().min(1, 'Intro is required.').max(5000),
 });
 
+// ── Clients ─────────────────────────────────────────────────────────────────────────────────────
+
+export const clientSchema = z.object({
+  name: z.string().trim().min(1, 'Client name is required.').max(160),
+  email: z
+    .string()
+    .trim()
+    .max(255)
+    .refine((v) => v === '' || z.string().email().safeParse(v).success, {
+      message: 'Enter a valid email address.',
+    })
+    .optional()
+    .transform((v) => (v ? v : null)),
+  phone: optionalText(40),
+});
+
 // ─── Jobs ────────────────────────────────────────────────────────────────────
 
 export const JOB_STATUSES = ['draft', 'published', 'closed'] as const;
@@ -139,6 +155,7 @@ export const jobSchema = z.object({
   title: z.string().trim().min(1, 'Title is required.').max(200),
   salary: z.string().trim().min(1, 'Salary is required.').max(120),
   experience: z.string().trim().min(1, 'Experience is required.').max(120),
+  clientId: relationId('client'),
   cityId: relationId('city'),
   jobTypeId: relationId('job type'),
   jobCategoryId: relationId('category'),
@@ -208,6 +225,7 @@ export const candidateSchema = z.object({
     .optional()
     .transform((v) => (v ? v : null)),
   coverLetter: optionalText(10_000),
+  screeningNotes: optionalText(10_000),
   jobId: relationId('job'),
   status: z
     .enum(CANDIDATE_STATUSES, { errorMap: () => ({ message: 'Choose a status.' }) })
@@ -215,6 +233,7 @@ export const candidateSchema = z.object({
 });
 
 export const candidateStatusSchema = z.enum(CANDIDATE_STATUSES);
+export const candidateScreeningNotesSchema = z.string().trim().max(10_000, 'Screening notes are too long.');
 
 /** The public apply form: the visitor's own details. The job and status are set by the server. */
 export const applicationSchema = candidateSchema.pick({

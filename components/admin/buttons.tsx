@@ -9,10 +9,10 @@ import { cn } from "@/lib/utils";
 import ConfirmDialog from "./ConfirmDialog";
 import { iconButtonClass, primaryButtonClass } from "./styles";
 
-export function SubmitButton({ children }: { children: React.ReactNode }) {
+export function SubmitButton({ children, disabled = false }: { children: React.ReactNode; disabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" disabled={pending} className={primaryButtonClass}>
+    <button type="submit" disabled={pending || disabled} className={primaryButtonClass}>
       {pending && <LoaderCircle className="animate-spin" aria-hidden="true" />}
       {children}
     </button>

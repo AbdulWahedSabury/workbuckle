@@ -24,6 +24,7 @@ const summarySelect = {
   title: true,
   salary: true,
   experience: true,
+  client: { select: { name: true } },
   city: { select: { name: true, state: true } },
   jobType: { select: { name: true, slug: true } },
   jobCategory: {
@@ -52,6 +53,7 @@ function toSummary(row: SummaryRow, locale: string): PublicJobSummary {
     title: row.title,
     salary: row.salary,
     experience: row.experience,
+    client: row.client.name,
     city: row.city.name,
     jobType: row.jobType.name,
     jobTypeSlug: row.jobType.slug,

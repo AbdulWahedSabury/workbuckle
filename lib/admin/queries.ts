@@ -320,6 +320,36 @@ export async function getCity(id: string) {
   return prisma.city.findUnique({ where: { id } });
 }
 
+export type ClientWithCount = Prisma.ClientGetPayload<{ include: { _count: { select: { jobs: true } } } }>;
+export const CLIENT_SORT_KEYS = ['name', 'email', 'phone', 'jobs', 'updatedAt'] as const;
+export type ClientSortKey = (typeof CLIENT_SORT_KEYS)[number];
+const clientOrderBy: Record<ClientSortKey, (dir: SortDir) => Prisma.ClientOrderByWithRelationInput[]> = {
+  name: (dir) => [{ name: dir }],
+  email: (dir) => [{ email: { sort: dir, nulls: 'last' } }, { name: 'asc' }],
+  phone: (dir) => [{ phone: { sort: dir, nulls: 'last' } }, { name: 'asc' }],
+  jobs: (dir) => [{ jobs: { _count: dir } }, { name: 'asc' }],
+  updatedAt: (dir) => [{ updatedAt: dir }],
+};
+export async function listClients(params: ListParams<ClientSortKey>): Promise<Paginated<ClientWithCount>> {
+  await requireView('clients');
+  const { q, sort } = params;
+  const where: Prisma.ClientWhereInput | undefined = q ? { OR: [
+    { name: { contains: q, mode: 'insensitive' } },
+    { email: { contains: q, mode: 'insensitive' } },
+    { phone: { contains: q, mode: 'insensitive' } },
+  ] } : undefined;
+  return fetchPage(params, () => prisma.client.count({ where }), ({ skip, take }) => prisma.client.findMany({
+    where,
+    orderBy: [...(sort ? clientOrderBy[sort.key](sort.dir) : [{ name: 'asc' as const }]), { id: 'asc' }],
+    include: { _count: { select: { jobs: true } } }, skip, take,
+  }));
+}
+export async function getClient(id: string) {
+  await requireView('clients');
+  if (!isUuid(id)) return null;
+  return prisma.client.findUnique({ where: { id } });
+}
+
 export type JobTypeWithCount = Prisma.JobTypeGetPayload<{
   include: { _count: { select: { jobs: true } } };
 }>;
@@ -493,6 +523,7 @@ export async function getCampaign(id: string) {
 // ─── Jobs ────────────────────────────────────────────────────────────────────
 
 const jobListInclude = {
+  client: { select: { name: true } },
   city: { select: { name: true } },
   jobType: { select: { name: true } },
   _count: { select: { candidates: true } },
@@ -502,11 +533,12 @@ export type JobListRow = Prisma.JobGetPayload<{ include: typeof jobListInclude }
   candidateStatusCounts: Record<CandidateStatus, number>;
 };
 
-export const JOB_SORT_KEYS = ['title', 'city', 'type', 'status', 'updatedAt'] as const;
+export const JOB_SORT_KEYS = ['title', 'client', 'city', 'type', 'status', 'updatedAt'] as const;
 export type JobSortKey = (typeof JOB_SORT_KEYS)[number];
 
 const jobOrderBy: Record<JobSortKey, (dir: SortDir) => Prisma.JobOrderByWithRelationInput[]> = {
   title: (dir) => [{ title: dir }],
+  client: (dir) => [{ client: { name: dir } }, { title: 'asc' }],
   city: (dir) => [{ city: { name: dir } }, { title: 'asc' }],
   type: (dir) => [{ jobType: { name: dir } }, { title: 'asc' }],
   status: (dir) => [{ status: dir }, { updatedAt: 'desc' }],
@@ -521,6 +553,7 @@ export async function listJobs(params: ListParams<JobSortKey>): Promise<Paginate
     ? {
         OR: [
           { title: { contains: q, mode: 'insensitive' } },
+          { client: { name: { contains: q, mode: 'insensitive' } } },
           { city: { name: { contains: q, mode: 'insensitive' } } },
           { jobType: { name: { contains: q, mode: 'insensitive' } } },
         ],
@@ -589,7 +622,7 @@ export type SelectOption = { value: string; label: string };
  */
 export async function getJobFormOptions(currentCategoryId?: string) {
   await requireAdmin();
-  const [cities, jobTypes, campaigns, categories] = await Promise.all([
+  const [cities, jobTypes, campaigns, categories, clients] = await Promise.all([
     prisma.city.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true, state: true } }),
     prisma.jobType.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true } }),
     prisma.campaign.findMany({ orderBy: { title: 'asc' }, select: { id: true, title: true } }),
@@ -600,6 +633,7 @@ export async function getJobFormOptions(currentCategoryId?: string) {
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
       include: { translations: true },
     }),
+    prisma.client.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true } }),
   ]);
 
   return {
@@ -609,6 +643,7 @@ export async function getJobFormOptions(currentCategoryId?: string) {
     })),
     jobTypes: jobTypes.map((t): SelectOption => ({ value: t.id, label: t.name })),
     campaigns: campaigns.map((c): SelectOption => ({ value: c.id, label: c.title })),
+    clients: clients.map((c): SelectOption => ({ value: c.id, label: c.name })),
     categories: categories.map((c): SelectOption => ({
       value: c.id,
       label: c.isActive ? categoryDisplayName(c) : `${categoryDisplayName(c)} (hidden)`,

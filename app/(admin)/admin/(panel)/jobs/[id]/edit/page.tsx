@@ -24,6 +24,7 @@ export default async function EditJobPage({ params }: PageProps<"/admin/jobs/[id
           title: job.title,
           salary: job.salary,
           experience: job.experience,
+          clientId: job.clientId,
           cityId: job.cityId,
           jobTypeId: job.jobTypeId,
           jobCategoryId: job.jobCategoryId,

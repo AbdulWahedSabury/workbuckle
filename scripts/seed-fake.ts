@@ -9,7 +9,7 @@
 import 'dotenv/config';
 import { prisma } from '@/lib/prisma';
 
-const KIND = { city: '01', jobType: '02', category: '03', campaign: '04', job: '05' } as const;
+const KIND = { city: '01', jobType: '02', category: '03', campaign: '04', job: '05', client: '06' } as const;
 
 /** A stable uuid for the n-th fake row of a kind, e.g. 5eed0000-0000-4000-8000-030000000002. */
 function fakeId(kind: keyof typeof KIND, n: number): string {
@@ -163,6 +163,13 @@ async function seed() {
     await prisma.campaign.upsert({ where: { id }, create: { id, ...campaign }, update: campaign });
   }
 
+  const clientId = fakeId('client', 1);
+  await prisma.client.upsert({
+    where: { id: clientId },
+    create: { id: clientId, name: 'Sample Hospitality Group', email: 'hr@example.test', phone: '+357 00 000000' },
+    update: { name: 'Sample Hospitality Group', email: 'hr@example.test', phone: '+357 00 000000' },
+  });
+
   const now = Date.now();
   for (const [i, job] of JOBS.entries()) {
     const id = fakeId('job', i + 1);
@@ -170,6 +177,7 @@ async function seed() {
       title: job.title,
       salary: job.salary,
       experience: job.experience,
+      clientId,
       status: job.status ?? 'published',
       cityId: cityIds.get(job.city)!,
       jobTypeId: typeIds.get(job.type)!,
@@ -196,6 +204,7 @@ async function clean() {
   // Jobs first: cities, types and categories can't be deleted while jobs use them.
   // Candidates who applied to a fake job go with it.
   const jobs = await prisma.job.deleteMany({ where: { id: { in: ids('job', JOBS.length) } } });
+  const clients = await prisma.client.deleteMany({ where: { id: { in: ids('client', 1) }, jobs: { none: {} } } });
   const campaigns = await prisma.campaign.deleteMany({ where: { id: { in: ids('campaign', CAMPAIGNS.length) } } });
   // A fake city/type/category that a real job now uses is kept.
   const unused = { jobs: { none: {} } };
@@ -209,7 +218,7 @@ async function clean() {
 
   console.log(
     `Removed ${jobs.count} jobs, ${campaigns.count} campaigns, ${categories.count} categories, ` +
-      `${cities.count} cities and ${types.count} job types.`
+      `${cities.count} cities, ${types.count} job types and ${clients.count} clients.`
   );
 }
 
