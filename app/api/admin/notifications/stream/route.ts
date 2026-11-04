@@ -29,6 +29,14 @@ export async function GET(request: NextRequest) {
       let lastPayload = '';
       while (!request.signal.aborted) {
         try {
+          // A long-lived connection outlasts the check above, so removing
+          // someone's access has to end their stream too.
+          const current = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { role: true },
+          });
+          if (!current || !canView(current.role, 'candidates')) break;
+
           const unread = await prisma.adminNotification.findMany({
             where: { isRead: false },
             orderBy: { createdAt: 'desc' },

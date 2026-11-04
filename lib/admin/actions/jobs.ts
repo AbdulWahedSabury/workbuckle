@@ -7,7 +7,9 @@ import { requireAdmin } from '@/lib/admin/auth';
 import { setFlash } from '@/lib/admin/flash-server';
 import type { ActionState } from '@/lib/admin/action-state';
 import { FIX_FIELDS_MESSAGE, formValues, isNotFound, validationError } from '@/lib/admin/form';
+import { cvObjectPath, removeCvs } from '@/lib/cv-storage';
 import { sanitizeRichText } from '@/lib/rich-text';
+import { isUuid } from '@/lib/utils';
 import { JOB_RICH_TEXT_FIELDS, jobSchema } from '@/schemas/AdminSchemas';
 import type { z } from 'zod';
 
@@ -105,6 +107,16 @@ export async function updateJob(
 
 export async function deleteJob(id: string): Promise<void> {
   await requireAdmin();
+  if (!isUuid(id)) return;
+
+  // Candidates cascade with the job; their CVs are in storage, so remove them
+  // too or nothing would point at those files any more.
+  const candidates = await prisma.candidate.findMany({
+    where: { jobId: id },
+    select: { cvPath: true, cvUrl: true },
+  });
   await prisma.job.deleteMany({ where: { id } });
+  await removeCvs(candidates.map(cvObjectPath).filter((path) => path !== null));
+
   revalidateJobs();
 }

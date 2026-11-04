@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
 import { setFlash } from '@/lib/admin/flash-server';
 import { deleteUnlessUsedByJobs } from '@/lib/admin/delete-guard';
+import { isUuid } from '@/lib/utils';
 import type { ActionState, DeleteResult } from '@/lib/admin/action-state';
 import {
   formValues,
@@ -106,6 +107,7 @@ export async function updateJobType(
 
 export async function deleteJobType(id: string): Promise<DeleteResult> {
   await requireAdmin();
+  if (!isUuid(id)) return { error: 'This job type no longer exists.' };
   const result = await deleteUnlessUsedByJobs('job type', { jobTypeId: id }, (tx) =>
     tx.jobType.deleteMany({ where: { id } })
   );

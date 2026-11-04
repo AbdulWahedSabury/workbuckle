@@ -6,8 +6,11 @@ import {
   MIN_SUBMIT_MS,
   getContactFormSchema,
 } from "@/schemas/ContactFormSchema";
+import { clientIp, createRateLimiter } from "@/lib/rate-limit";
 import { getCorsHeaders } from "@/utils/cors";
 import mailer from "@/utils/mailer";
+
+const allowContactMessage = createRateLimiter(5, 15 * 60 * 1000);
 
 /** Visitor input goes into the email's HTML, so it must not be able to inject markup. */
 function escapeHtml(value: string): string {
@@ -132,6 +135,13 @@ export async function OPTIONS(req: Request) {
 export async function POST(req: Request) {
   const headers = getCorsHeaders(req.headers.get("origin"));
 
+  if (!allowContactMessage(clientIp(req.headers))) {
+    return NextResponse.json(
+      { success: false, message: "Too many requests" },
+      { status: 429, headers },
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();
@@ -157,7 +167,8 @@ export async function POST(req: Request) {
   // enough time has passed.
   const elapsed = Number(fields[ELAPSED_FIELD]);
   if (!Number.isFinite(elapsed) || elapsed < MIN_SUBMIT_MS) {
-    console.warn(`Contact form: submitted too fast (${String(fields[ELAPSED_FIELD])}ms), rejected`);
+    // The value isn't logged: it's visitor input and could forge log lines.
+    console.warn("Contact form: submitted too fast, rejected");
     return NextResponse.json(
       { success: false, message: "Submission rejected" },
       { status: 422, headers },

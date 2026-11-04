@@ -735,6 +735,12 @@ export async function getCandidate(id: string) {
   });
 }
 
+/** Where a candidate's CV is stored, for the signed-link route. */
+export async function getCandidateCv(id: string) {
+  await requireView('candidates');
+  return prisma.candidate.findUnique({ where: { id }, select: { cvPath: true, cvUrl: true } });
+}
+
 // ─── Users ───────────────────────────────────────────────────────────────────
 
 const userListSelect = {

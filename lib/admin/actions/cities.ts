@@ -7,6 +7,7 @@ import { requireAdmin } from '@/lib/admin/auth';
 import { setFlash } from '@/lib/admin/flash-server';
 import type { ActionState, DeleteResult } from '@/lib/admin/action-state';
 import { deleteUnlessUsedByJobs } from '@/lib/admin/delete-guard';
+import { isUuid } from '@/lib/utils';
 import {
   formValues,
   isNotFound,
@@ -77,6 +78,7 @@ export async function updateCity(
 
 export async function deleteCity(id: string): Promise<DeleteResult> {
   await requireAdmin();
+  if (!isUuid(id)) return { error: 'This city no longer exists.' };
   const result = await deleteUnlessUsedByJobs('city', { cityId: id }, (tx) =>
     tx.city.deleteMany({ where: { id } })
   );

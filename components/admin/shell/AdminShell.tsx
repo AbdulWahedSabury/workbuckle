@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { AdminTheme } from "@/lib/admin/theme";
+import { canEdit } from "@/lib/auth/roles";
 import type { Role } from "@/lib/generated/prisma/enums";
 import AdminNotificationDropdown from "../AdminNotificationDropdown";
 import AdminNotificationsProvider from "../notifications/AdminNotificationsProvider";
@@ -18,7 +19,7 @@ export default function AdminShell({
 }) {
   return (
     <AdminThemeProvider initialTheme={theme} className="min-h-svh bg-gray-3 lg:flex">
-      <AdminNotificationsProvider>
+      <AdminNotificationsProvider canMarkRead={canEdit(user.role)}>
         <a
           href="#admin-main"
           className="sr-only z-50 rounded-full bg-ink px-4 py-2 text-sm text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3"

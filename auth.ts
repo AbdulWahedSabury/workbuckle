@@ -6,11 +6,18 @@ import { authConfig } from '@/auth.config';
 import { isPanelRole } from '@/lib/auth/roles';
 import { getDummyHash, verifyPassword } from '@/lib/auth/password';
 import { prisma } from '@/lib/prisma';
+import { clientIp, createRateLimiter } from '@/lib/rate-limit';
 
 const credentialsSchema = z.object({
   email: z.string().trim().toLowerCase().email().max(255),
   password: z.string().min(1).max(200),
 });
+
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const allowLoginFromIpForEmail = createRateLimiter(5, LOGIN_WINDOW_MS);
+const allowLoginFromIp = createRateLimiter(30, LOGIN_WINDOW_MS);
+// Slows a guessing attack spread over many IPs at one account.
+const allowLoginForEmail = createRateLimiter(20, LOGIN_WINDOW_MS);
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -23,10 +30,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(raw) {
+      async authorize(raw, request) {
         const parsed = credentialsSchema.safeParse(raw);
         if (!parsed.success) return null;
         const { email, password } = parsed.data;
+
+        // Here rather than in adminSignIn, because /api/auth/callback/credentials
+        // reaches this too. Checked before scrypt so a flood can't tie up the CPU.
+        const ip = clientIp(request.headers);
+        const allowed = [
+          allowLoginFromIpForEmail(`${ip}:${email}`),
+          allowLoginFromIp(ip),
+          allowLoginForEmail(email),
+        ].every(Boolean);
+        if (!allowed) return null;
 
         const user = await prisma.user.findUnique({
           where: { email },

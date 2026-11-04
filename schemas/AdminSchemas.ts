@@ -25,7 +25,8 @@ const optionalImageUrl = z
   .string()
   .trim()
   .max(2048)
-  .refine((v) => v === '' || v.startsWith('/') || /^https?:\/\//.test(v), {
+  // `//host` and `/\host` are other sites to a browser, not paths under /public.
+  .refine((v) => v === '' || /^\/(?![/\\])/.test(v) || /^https?:\/\//.test(v), {
     message: 'Enter a full URL (https://…) or a path starting with /.',
   })
   .optional()

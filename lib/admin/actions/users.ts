@@ -9,6 +9,7 @@ import type { ActionState, DeleteResult } from '@/lib/admin/action-state';
 import { formValues, isNotFound, isUniqueViolation, validationError } from '@/lib/admin/form';
 import { hashPassword } from '@/lib/auth/password';
 import { Role } from '@/lib/generated/prisma/enums';
+import { isUuid } from '@/lib/utils';
 import { userCreateSchema, userUpdateSchema } from '@/schemas/AdminSchemas';
 
 const LIST_PATH = '/admin/users';
@@ -81,6 +82,7 @@ export async function updateUser(
 
 export async function deleteUser(id: string): Promise<DeleteResult> {
   const admin = await requireAdmin();
+  if (!isUuid(id)) return { error: 'This user no longer exists.' };
   if (id === admin.id) return { error: "You can't delete your own account." };
 
   // Accounts and sessions cascade with the user.

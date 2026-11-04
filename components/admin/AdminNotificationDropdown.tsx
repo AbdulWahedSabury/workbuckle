@@ -23,7 +23,7 @@ const ICONS: Record<AdminNotificationItem["type"], React.ReactNode> = {
  * the sidebar and the mobile top bar.
  */
 export default function AdminNotificationDropdown({ align = "right" }: { align?: "left" | "right" }) {
-  const { notifications, markAllRead } = useAdminNotifications();
+  const { notifications, canMarkRead, markAllRead } = useAdminNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const count = notifications.length;
   const close = () => setIsOpen(false);
@@ -58,7 +58,7 @@ export default function AdminNotificationDropdown({ align = "right" }: { align?:
           >
             <div className="flex items-center justify-between border-b border-line p-4">
               <h3 className="text-sm font-semibold text-ink">Notifications</h3>
-              {count > 0 && (
+              {canMarkRead && count > 0 && (
                 <button
                   type="button"
                   onClick={() => {

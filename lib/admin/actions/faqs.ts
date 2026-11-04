@@ -7,6 +7,7 @@ import { requireAdmin } from '@/lib/admin/auth';
 import { setFlash } from '@/lib/admin/flash-server';
 import type { ActionState } from '@/lib/admin/action-state';
 import { formValues, isNotFound, validationError } from '@/lib/admin/form';
+import { isUuid } from '@/lib/utils';
 import { faqSchema } from '@/schemas/AdminSchemas';
 
 const LIST_PATH = '/admin/faqs';
@@ -75,6 +76,7 @@ export async function toggleFaqActive(id: string): Promise<void> {
 
 export async function deleteFaq(id: string): Promise<void> {
   await requireAdmin();
+  if (!isUuid(id)) return;
   // deleteMany: already gone (e.g. deleted in another tab) is not an error.
   await prisma.faq.deleteMany({ where: { id } });
   revalidateFaqs();

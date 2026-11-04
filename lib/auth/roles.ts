@@ -49,7 +49,8 @@ export function roleLabel(role: Role): string {
 }
 
 export function isRole(value: unknown): value is Role {
-  return typeof value === 'string' && value in Role;
+  // Not `value in Role`: that also accepts inherited names like "toString".
+  return Object.values<unknown>(Role).includes(value);
 }
 
 /** Can sign in to /admin at all. */

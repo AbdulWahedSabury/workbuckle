@@ -7,7 +7,7 @@ import { requireAdmin } from '@/lib/admin/auth';
 import { setFlash } from '@/lib/admin/flash-server';
 import type { ActionState, DeleteResult } from '@/lib/admin/action-state';
 import { FIX_FIELDS_MESSAGE, formValues, isNotFound, validationError } from '@/lib/admin/form';
-import { removeCv, uploadCv } from '@/lib/cv-storage';
+import { InvalidCvFileError, removeCv, uploadCv } from '@/lib/cv-storage';
 import { candidateSchema, candidateScreeningNotesSchema, candidateStatusSchema, cvFileSchema } from '@/schemas/AdminSchemas';
 import { sendCandidateProfileEmail } from '@/lib/admin/candidate-profile-email';
 
@@ -54,6 +54,7 @@ export async function createCandidate(
   try {
     upload = await uploadCv(cv.data);
   } catch (error) {
+    if (error instanceof InvalidCvFileError) return { errors: { cv: [error.message] }, values };
     console.error('Supabase Storage CV upload failed:', error);
     return { message: 'Could not upload the CV. Please try again.', values };
   }

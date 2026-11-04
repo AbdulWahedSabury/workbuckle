@@ -1,9 +1,9 @@
 import 'server-only';
+import { CV_BUCKET, cvObjectPath } from '@/lib/cv-storage';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { prisma } from '@/lib/prisma';
 import mailer from '@/utils/mailer';
 
-const CV_BUCKET = 'cv-uploads';
 const MAX_CV_BYTES = 10 * 1024 * 1024;
 const SIGNATURE_EMAIL = 'info@mavromatisservices.com';
 
@@ -21,25 +21,13 @@ function safeSubject(value: string) {
 }
 
 async function loadCv(candidate: { cvPath: string | null; cvUrl: string }) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, '');
-  if (!supabaseUrl) throw new Error('CV storage is not configured.');
-  let bytes: Buffer;
-  let filePath: string;
+  const filePath = cvObjectPath(candidate);
+  if (!filePath) throw new Error('The candidate CV is not in the configured storage bucket.');
 
-  if (candidate.cvPath) {
-    filePath = candidate.cvPath;
-    const { data, error } = await getSupabaseAdmin().storage.from(CV_BUCKET).download(filePath);
-    if (error) throw error;
-    if (!data) throw new Error('The candidate CV was not found in storage.');
-    bytes = Buffer.from(await data.arrayBuffer());
-  } else {
-    const publicPrefix = `${supabaseUrl}/storage/v1/object/public/${CV_BUCKET}/`;
-    if (!candidate.cvUrl.startsWith(publicPrefix)) throw new Error('The candidate CV is not in the configured storage bucket.');
-    filePath = decodeURIComponent(candidate.cvUrl.slice(publicPrefix.length));
-    const response = await fetch(candidate.cvUrl, { cache: 'no-store', signal: AbortSignal.timeout(15_000) });
-    if (!response.ok) throw new Error(`Could not download the candidate CV (${response.status}).`);
-    bytes = Buffer.from(await response.arrayBuffer());
-  }
+  const { data, error } = await getSupabaseAdmin().storage.from(CV_BUCKET).download(filePath);
+  if (error) throw error;
+  if (!data) throw new Error('The candidate CV was not found in storage.');
+  const bytes = Buffer.from(await data.arrayBuffer());
 
   if (bytes.byteLength === 0 || bytes.byteLength > MAX_CV_BYTES) {
     throw new Error('The candidate CV is empty or exceeds the 10 MB attachment limit.');

@@ -16,6 +16,7 @@ export type AdminNotificationItem = {
 
 type AdminNotificationsContextValue = {
   notifications: AdminNotificationItem[];
+  canMarkRead: boolean;
   markAllRead: () => Promise<void>;
 };
 
@@ -32,7 +33,13 @@ export function useAdminNotifications() {
  * in AdminShell: the nav renders twice (sidebar + mobile drawer), and a
  * listener there would open two streams and play every alert twice.
  */
-export default function AdminNotificationsProvider({ children }: { children: ReactNode }) {
+export default function AdminNotificationsProvider({
+  canMarkRead,
+  children,
+}: {
+  canMarkRead: boolean;
+  children: ReactNode;
+}) {
   const router = useRouter();
   const [notifications, setNotifications] = useState<AdminNotificationItem[]>([]);
   // Ids already shown. null until the first payload, which only seeds it, so
@@ -88,7 +95,7 @@ export default function AdminNotificationsProvider({ children }: { children: Rea
   };
 
   return (
-    <AdminNotificationsContext value={{ notifications, markAllRead }}>
+    <AdminNotificationsContext value={{ notifications, canMarkRead, markAllRead }}>
       {children}
     </AdminNotificationsContext>
   );

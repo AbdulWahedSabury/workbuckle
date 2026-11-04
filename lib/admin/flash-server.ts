@@ -14,6 +14,8 @@ export async function setFlash(message: string, type: FlashType = 'success'): Pr
     // Only needs to survive one redirect; the toaster deletes it right away.
     maxAge: 60,
     sameSite: 'lax',
+    // Messages can name candidates and users, so never send it over plain HTTP.
+    secure: process.env.NODE_ENV === 'production',
     // Read and cleared by client JS; it only ever holds a toast message.
     httpOnly: false,
   });

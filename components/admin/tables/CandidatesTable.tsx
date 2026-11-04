@@ -119,7 +119,7 @@ const columns: Column<CandidateListRow, CandidateSortKey>[] = [
           <Eye aria-hidden="true" />
         </Link>
         <a
-          href={c.cvUrl}
+          href={`/admin/candidates/${c.id}/cv`}
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`Open CV of ${fullName(c)}`}

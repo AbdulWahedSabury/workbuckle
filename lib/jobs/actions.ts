@@ -1,16 +1,22 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
 import { createAdminNotification } from '@/lib/admin/actions/notifications';
 import { formValues } from '@/lib/admin/form';
-import { removeCv, uploadCv } from '@/lib/cv-storage';
+import { InvalidCvFileError, removeCv, uploadCv } from '@/lib/cv-storage';
 import { prisma } from '@/lib/prisma';
+import { clientIp, createRateLimiter } from '@/lib/rate-limit';
 import { isUuid } from '@/lib/utils';
 import { applicationSchema, cvFileSchema } from '@/schemas/AdminSchemas';
 
 export type ApplicationResult = { ok: true } | { ok: false; message: string };
 
 const JOB_UNAVAILABLE = 'This job is no longer accepting applications.';
+
+// Each attempt can store a 10 MB file and alert the panel. Forms with
+// validation errors don't count, so correcting a typo never uses one up.
+const allowApplication = createRateLimiter(10, 60 * 60 * 1000);
 
 /**
  * Public job application. Anyone can call it, so everything is checked here:
@@ -35,24 +41,29 @@ export async function submitApplication(
     return { ok: false, message: [...new Set(problems)].join(' ') };
   }
 
+  if (!allowApplication(clientIp(await headers()))) {
+    return { ok: false, message: 'Too many applications from your network. Please try again later.' };
+  }
+
   const job = await prisma.job.findFirst({
     where: { id: jobId, status: 'published' },
     select: { id: true, title: true },
   });
   if (!job) return { ok: false, message: JOB_UNAVAILABLE };
 
-  // A double-click or resubmit shouldn't create a second candidate.
+  // A double-click or resubmit shouldn't create a second candidate. Answered
+  // like a success: this form is public, so a distinct message would tell
+  // anyone whether a given email address applied for this job.
   const alreadyApplied = await prisma.candidate.count({
     where: { jobId, email: { equals: fields.data.email, mode: 'insensitive' } },
   });
-  if (alreadyApplied) {
-    return { ok: false, message: "You've already applied for this job with this email address." };
-  }
+  if (alreadyApplied) return { ok: true };
 
   let upload: { path: string; url: string };
   try {
     upload = await uploadCv(cv.data);
   } catch (error) {
+    if (error instanceof InvalidCvFileError) return { ok: false, message: error.message };
     console.error('Supabase Storage CV upload failed:', error);
     return { ok: false, message: 'We could not upload your CV. Please try again.' };
   }

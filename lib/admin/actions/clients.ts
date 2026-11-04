@@ -8,6 +8,7 @@ import { setFlash } from '@/lib/admin/flash-server';
 import type { ActionState, DeleteResult } from '@/lib/admin/action-state';
 import { deleteUnlessUsedByJobs } from '@/lib/admin/delete-guard';
 import { formValues, isNotFound, validationError } from '@/lib/admin/form';
+import { isUuid } from '@/lib/utils';
 import { clientSchema } from '@/schemas/AdminSchemas';
 
 const LIST_PATH = '/admin/clients';
@@ -46,6 +47,7 @@ export async function updateClient(id: string, _prev: ActionState, formData: For
 }
 export async function deleteClient(id: string): Promise<DeleteResult> {
   await requireAdmin();
+  if (!isUuid(id)) return { error: 'This client no longer exists.' };
   const result = await deleteUnlessUsedByJobs('client', { clientId: id }, (tx) =>
     tx.client.deleteMany({ where: { id } })
   );

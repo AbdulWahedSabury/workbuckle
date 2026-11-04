@@ -54,7 +54,7 @@ export default async function CandidateProfilePage({
               <ArrowLeft aria-hidden="true" /> Back
             </Link>
             <a
-              href={candidate.cvUrl}
+              href={`/admin/candidates/${candidate.id}/cv`}
               target="_blank"
               rel="noopener noreferrer"
               className={primaryButtonClass}
