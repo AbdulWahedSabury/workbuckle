@@ -10,7 +10,7 @@ import { fieldsetClass, secondaryLinkClass } from "./styles";
 
 export default function ClientForm({ action, client, submitLabel }: {
   action: (state: ActionState, formData: FormData) => Promise<ActionState>;
-  client?: { name: string; email: string | null; phone: string | null };
+  client?: { name: string; contactName: string | null; email: string | null; phone: string | null };
   submitLabel: string;
 }) {
   const [state, formAction] = useActionState(action, initialActionState);
@@ -22,6 +22,7 @@ export default function ClientForm({ action, client, submitLabel }: {
       <FormMessage message={state.message} />
       <fieldset className={fieldsetClass}>
         <TextField name="name" label="Client name" required defaultValue={values ? values.name : client?.name} error={errors.name} />
+        <TextField name="contactName" label="Contact name" autoComplete="name" hint="The person to talk to at this client." defaultValue={values ? values.contactName : client?.contactName} error={errors.contactName} />
         <TextField name="email" label="Email" type="email" autoComplete="email" defaultValue={values ? values.email : client?.email} error={errors.email} />
         <TextField name="phone" label="Phone" type="tel" autoComplete="tel" defaultValue={values ? values.phone : client?.phone} error={errors.phone} />
       </fieldset>

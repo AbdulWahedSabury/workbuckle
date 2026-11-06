@@ -12,6 +12,7 @@ import { formatDate } from "./format";
 
 const columns: Column<ClientWithCount, ClientSortKey>[] = [
   { id: "name", header: "Name", sortKey: "name", cell: (client) => <span className="font-semibold text-ink">{client.name}</span> },
+  { id: "contactName", header: "Contact", sortKey: "contactName", cell: (client) => client.contactName ? <span className="whitespace-nowrap">{client.contactName}</span> : <span className="text-gray-2/60">—</span> },
   { id: "email", header: "Email", sortKey: "email", cell: (client) => client.email ? <a className="text-primary-dark underline-offset-2 hover:underline" href={`mailto:${client.email}`}>{client.email}</a> : <span className="text-gray-2/60">—</span> },
   { id: "phone", header: "Phone", sortKey: "phone", hideBelow: "md", cell: (client) => client.phone ? <a className="whitespace-nowrap" href={`tel:${client.phone}`}>{client.phone}</a> : <span className="text-gray-2/60">—</span> },
   { id: "jobs", header: "Jobs", sortKey: "jobs", cell: (client) => <Link className="font-semibold text-primary-dark hover:underline" href={`/admin/jobs?q=${encodeURIComponent(client.name)}`}>{client._count.jobs}</Link> },
@@ -23,5 +24,5 @@ export default async function ClientsTable({ searchParams }: { searchParams: Pro
   const params = parseListParams(await searchParams, CLIENT_SORT_KEYS);
   const { rows, ...pageInfo } = await listClients(params);
   const canEdit = await viewerCanEdit();
-  return <DataTable caption="Clients" columns={canEdit ? columns : columns.filter((column) => column.id !== "actions")} rows={rows} getRowKey={(client) => client.id} pagination={{ ...pageInfo, itemLabel: "clients" }} empty={params.q ? <EmptyState icon={SearchX} title={`No clients match “${params.q}”`} description="Try another name, email or phone number." /> : <EmptyState title="No clients yet" description="Add a client before creating a job." />} />;
+  return <DataTable caption="Clients" columns={canEdit ? columns : columns.filter((column) => column.id !== "actions")} rows={rows} getRowKey={(client) => client.id} pagination={{ ...pageInfo, itemLabel: "clients" }} empty={params.q ? <EmptyState icon={SearchX} title={`No clients match “${params.q}”`} description="Try another name, contact, email or phone number." /> : <EmptyState title="No clients yet" description="Add a client before creating a job." />} />;
 }

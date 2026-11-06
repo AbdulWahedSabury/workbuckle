@@ -321,10 +321,11 @@ export async function getCity(id: string) {
 }
 
 export type ClientWithCount = Prisma.ClientGetPayload<{ include: { _count: { select: { jobs: true } } } }>;
-export const CLIENT_SORT_KEYS = ['name', 'email', 'phone', 'jobs', 'updatedAt'] as const;
+export const CLIENT_SORT_KEYS = ['name', 'contactName', 'email', 'phone', 'jobs', 'updatedAt'] as const;
 export type ClientSortKey = (typeof CLIENT_SORT_KEYS)[number];
 const clientOrderBy: Record<ClientSortKey, (dir: SortDir) => Prisma.ClientOrderByWithRelationInput[]> = {
   name: (dir) => [{ name: dir }],
+  contactName: (dir) => [{ contactName: { sort: dir, nulls: 'last' } }, { name: 'asc' }],
   email: (dir) => [{ email: { sort: dir, nulls: 'last' } }, { name: 'asc' }],
   phone: (dir) => [{ phone: { sort: dir, nulls: 'last' } }, { name: 'asc' }],
   jobs: (dir) => [{ jobs: { _count: dir } }, { name: 'asc' }],
@@ -335,6 +336,7 @@ export async function listClients(params: ListParams<ClientSortKey>): Promise<Pa
   const { q, sort } = params;
   const where: Prisma.ClientWhereInput | undefined = q ? { OR: [
     { name: { contains: q, mode: 'insensitive' } },
+    { contactName: { contains: q, mode: 'insensitive' } },
     { email: { contains: q, mode: 'insensitive' } },
     { phone: { contains: q, mode: 'insensitive' } },
   ] } : undefined;

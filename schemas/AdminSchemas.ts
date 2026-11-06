@@ -157,6 +157,7 @@ export const CAMPAIGN_TRANSLATABLE_FIELDS = Object.keys(campaignTranslationSchem
 
 export const clientSchema = z.object({
   name: z.string().trim().min(1, 'Client name is required.').max(160),
+  contactName: optionalText(160),
   email: z
     .string()
     .trim()

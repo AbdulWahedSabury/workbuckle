@@ -12,5 +12,5 @@ export default async function EditClientPage({ params }: PageProps<"/admin/clien
   const { id } = await params;
   const client = await getClient(id);
   if (!client) notFound();
-  return <><PageHeader title="Edit client" description={client.name} /><ClientForm action={updateClient.bind(null, client.id)} client={{ name: client.name, email: client.email, phone: client.phone }} submitLabel="Save changes" /></>;
+  return <><PageHeader title="Edit client" description={client.name} /><ClientForm action={updateClient.bind(null, client.id)} client={{ name: client.name, contactName: client.contactName, email: client.email, phone: client.phone }} submitLabel="Save changes" /></>;
 }

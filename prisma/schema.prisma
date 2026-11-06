@@ -175,13 +175,15 @@ model CampaignTranslation {
 }
 
 model Client {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String   @db.VarChar(160)
-  email     String?  @db.VarChar(255)
-  phone     String?  @db.VarChar(40)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
-  jobs      Job[]
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.VarChar(160)
+  // The person to talk to at the client, e.g. the hotel's HR manager.
+  contactName String?  @map("contact_name") @db.VarChar(160)
+  email       String?  @db.VarChar(255)
+  phone       String?  @db.VarChar(40)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  jobs        Job[]
 
   @@index([name])
   @@map("clients")
