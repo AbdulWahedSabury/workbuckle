@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import {
@@ -57,18 +57,21 @@ const DESCRIPTION_PROSE = [
   "prose-blockquote:px-5 prose-blockquote:py-3 prose-blockquote:font-normal prose-blockquote:not-italic prose-blockquote:text-ink",
 ].join(" ");
 
-export async function generateMetadata({ params }: PageProps<"/jobs/[id]">): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/[locale]/jobs/[id]">): Promise<Metadata> {
   const { id } = await params;
-  const job = await getPublishedJob(id, await getLocale());
-  if (!job) return { title: "Job not found" };
+  const [job, t] = await Promise.all([
+    getPublishedJob(id, await getLocale()),
+    getTranslations("Metadata.pages.job"),
+  ]);
+  if (!job) return { title: t("not_found") };
 
   return {
     title: job.title,
-    description: `${job.title} in ${job.location} at ${job.client}. Apply through Work Buckle.`,
+    description: t("description", { title: job.title, location: job.location, client: job.client }),
   };
 }
 
-export default async function JobDetailPage({ params }: PageProps<"/jobs/[id]">) {
+export default async function JobDetailPage({ params }: PageProps<"/[locale]/jobs/[id]">) {
   const t = await getTranslations("pages.job");
   const { id } = await params;
   const job = await getPublishedJob(id, await getLocale());
@@ -77,19 +80,19 @@ export default async function JobDetailPage({ params }: PageProps<"/jobs/[id]">)
   const applyHref = `/jobs/${job.id}/apply`;
 
   const sections = [
-    { title: "Job description", html: job.description },
-    { title: "Responsibilities", html: job.responsibilities },
-    { title: "Requirements", html: job.requirements },
-    { title: "Benefits", html: job.benefits },
+    { title: t("sections.description"), html: job.description },
+    { title: t("sections.responsibilities"), html: job.responsibilities },
+    { title: t("sections.requirements"), html: job.requirements },
+    { title: t("sections.benefits"), html: job.benefits },
   ].filter((section) => section.html);
 
   const details: { icon: LucideIcon; label: string; value: string }[] = [
-    { icon: MapPin, label: "Location", value: job.location },
-    { icon: CalendarClock, label: "Schedule", value: job.jobType },
-    { icon: Tags, label: "Category", value: job.category },
-    { icon: Banknote, label: "Salary", value: job.salary },
-    { icon: GraduationCap, label: "Experience", value: job.experience },
-    { icon: Clock, label: "Status", value: "Actively hiring" },
+    { icon: MapPin, label: t("details.location"), value: job.location },
+    { icon: CalendarClock, label: t("details.schedule"), value: job.jobType },
+    { icon: Tags, label: t("details.category"), value: job.category },
+    { icon: Banknote, label: t("details.salary"), value: job.salary },
+    { icon: GraduationCap, label: t("details.experience"), value: job.experience },
+    { icon: Clock, label: t("details.status"), value: t("actively_hiring") },
   ];
 
   return (
@@ -129,11 +132,11 @@ export default async function JobDetailPage({ params }: PageProps<"/jobs/[id]">)
                   {job.title}
                 </h1>
                 <p className="mt-2 text-sm text-white/60 sm:text-base">
-                  {job.client}
+                  Workbuckle
                 </p>
                 <ul
                   className="mt-5 flex flex-wrap gap-2 text-xs font-semibold sm:text-sm"
-                  aria-label="Key details"
+                  aria-label={t("key_details")}
                 >
                   <li className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-white">
                     <MapPin className="size-4" aria-hidden="true" /> {job.location}
@@ -144,12 +147,6 @@ export default async function JobDetailPage({ params }: PageProps<"/jobs/[id]">)
                 </ul>
               </div>
             </div>
-            <CtaButton
-              href={applyHref}
-              className="w-full justify-center sm:w-auto"
-            >
-              {t("apply")}
-            </CtaButton>
           </FadeUp>
         </div>
       </RevealSection>
@@ -171,7 +168,7 @@ export default async function JobDetailPage({ params }: PageProps<"/jobs/[id]">)
                 ))
               ) : (
                 <p className="text-sm text-gray-2">
-                  No description has been provided for this role yet.
+                  {t("no_description")}
                 </p>
               )}
             </FadeUp>
@@ -179,7 +176,7 @@ export default async function JobDetailPage({ params }: PageProps<"/jobs/[id]">)
             {/* Sidebar */}
             <FadeUp>
               <aside className="sticky top-24 rounded-card border border-line bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-bold text-ink">Role overview</h2>
+                <h2 className="text-lg font-bold text-ink">{t("overview")}</h2>
 
                 <dl className="mt-5 space-y-4">
                   {details.map(({ icon: Icon, label, value }) => (

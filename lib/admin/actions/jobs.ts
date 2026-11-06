@@ -6,16 +6,23 @@ import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
 import { setFlash } from '@/lib/admin/flash-server';
 import type { ActionState } from '@/lib/admin/action-state';
-import { FIX_FIELDS_MESSAGE, formValues, isNotFound, validationError } from '@/lib/admin/form';
+import { FIX_FIELDS_MESSAGE, formValues, isNotFound } from '@/lib/admin/form';
+import { parseTranslations, type ParsedTranslations } from '@/lib/admin/translations';
 import { cvObjectPath, removeCvs } from '@/lib/cv-storage';
 import { sanitizeRichText } from '@/lib/rich-text';
 import { isUuid } from '@/lib/utils';
-import { JOB_RICH_TEXT_FIELDS, jobSchema } from '@/schemas/AdminSchemas';
+import {
+  isBlankRichText,
+  JOB_RICH_TEXT_FIELDS,
+  jobSchema,
+  jobTranslationSchema,
+} from '@/schemas/AdminSchemas';
 import type { z } from 'zod';
 
 const LIST_PATH = '/admin/jobs';
 
 type JobInput = z.infer<typeof jobSchema>;
+type JobTranslations = ParsedTranslations<z.infer<typeof jobTranslationSchema>>;
 
 /** The job list, the dashboard counts and the campaigns' job counts. */
 function revalidateJobs() {
@@ -32,7 +39,34 @@ function parse(formData: FormData) {
   for (const field of JOB_RICH_TEXT_FIELDS) {
     input[field] = sanitizeRichText(values[field] ?? '');
   }
-  return { values, result: jobSchema.safeParse(input) };
+  return {
+    values,
+    result: jobSchema.safeParse(input),
+    translations: parseTranslations(jobTranslationSchema, values, normalizeTranslation),
+  };
+}
+
+/** Translated rich text is sanitized like the English fields; an empty editor counts as blank. */
+function normalizeTranslation(field: string, value: string): string {
+  if (!(JOB_RICH_TEXT_FIELDS as readonly string[]).includes(field)) return value;
+  const html = sanitizeRichText(value);
+  return isBlankRichText(html) ? '' : html;
+}
+
+/** Field errors from the English fields and the translated ones, in one response. */
+function invalidForm(
+  values: Record<string, string>,
+  result: z.SafeParseReturnType<unknown, JobInput>,
+  translations: JobTranslations
+): ActionState {
+  return {
+    message: FIX_FIELDS_MESSAGE,
+    errors: {
+      ...(result.success ? {} : (result.error.flatten().fieldErrors as ActionState['errors'])),
+      ...(translations.success ? {} : translations.errors),
+    },
+    values,
+  };
 }
 
 /** The selects can go stale (another admin deleted a city, …); flag the field instead of a FK error. */
@@ -65,13 +99,15 @@ export async function createJob(
 ): Promise<ActionState> {
   await requireAdmin();
 
-  const { values, result } = parse(formData);
-  if (!result.success) return validationError(result.error, values);
+  const { values, result, translations } = parse(formData);
+  if (!result.success || !translations.success) return invalidForm(values, result, translations);
 
   const errors = await missingRelations(result.data);
   if (errors) return { message: FIX_FIELDS_MESSAGE, errors, values };
 
-  await prisma.job.create({ data: result.data });
+  await prisma.job.create({
+    data: { ...result.data, translations: { create: translations.rows } },
+  });
 
   revalidateJobs();
   await setFlash(createdJobMessage(result.data));
@@ -85,14 +121,27 @@ export async function updateJob(
 ): Promise<ActionState> {
   await requireAdmin();
 
-  const { values, result } = parse(formData);
-  if (!result.success) return validationError(result.error, values);
+  const { values, result, translations } = parse(formData);
+  if (!result.success || !translations.success) return invalidForm(values, result, translations);
 
   const errors = await missingRelations(result.data);
   if (errors) return { message: FIX_FIELDS_MESSAGE, errors, values };
 
   try {
-    await prisma.job.update({ where: { id }, data: result.data });
+    await prisma.$transaction([
+      prisma.job.update({ where: { id }, data: result.data }),
+      ...translations.rows.map(({ locale, ...text }) =>
+        prisma.jobTranslation.upsert({
+          where: { jobId_locale: { jobId: id, locale } },
+          create: { jobId: id, locale, ...text },
+          update: text,
+        })
+      ),
+      // Every field of a language left blank: show the English text again.
+      prisma.jobTranslation.deleteMany({
+        where: { jobId: id, locale: { in: translations.emptyLocales } },
+      }),
+    ]);
   } catch (error) {
     if (isNotFound(error)) {
       return { message: 'This job no longer exists.', values };

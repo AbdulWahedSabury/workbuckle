@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Menu } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { MotionLink } from "@/components/motion/MotionLink";
 import MobileMenu from "@/components/layout/MobileMenu";
 import Logo from "@/components/ui/Logo";
@@ -12,11 +12,13 @@ import { NAV_LINKS } from "@/constants/menu";
 import { EASE_OUT_QUART } from "@/lib/motion";
 import { useRoot } from "@/hooks/use-root";
 import SocialLinks from "./SocialLinks";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const t = useTranslations("navigation");
+  const h = useTranslations("layout.header");
   const reduceMotion = useReducedMotion();
   const isHome = useRoot();
   const pathname = usePathname();
@@ -58,7 +60,7 @@ export default function Header() {
           <Logo />
         </div>
 
-        <nav className="hidden items-center lg:flex" aria-label="Primary">
+        <nav className="hidden items-center lg:flex" aria-label={h("primary_nav")}>
           {NAV_LINKS.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -89,12 +91,14 @@ export default function Header() {
             <SocialLinks />
           </div>
 
+          <LanguageSwitcher tone={isHome ? "light" : "dark"} className="hidden sm:flex" />
+
           <motion.button
             type="button"
             whileTap={{ scale: 0.95 }}
             onClick={() => setMenuOpen(true)}
             className={`flex size-11 shrink-0 items-center justify-center rounded-full ${isHome? "bg-none" : "bg-primary"}  text-white lg:hidden`}
-            aria-label="Open menu"
+            aria-label={h("open_menu")}
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
           >

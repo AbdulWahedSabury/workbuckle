@@ -1,5 +1,5 @@
 import { Suspense, type ReactNode } from "react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { listPublicCampaigns } from "@/lib/campaigns/public-campaigns";
 import { EMPTY_JOBS_PARAMS, writeJobsParams } from "@/lib/jobs/jobs-params";
 import type { CampaignPayload } from "@/types/campaign";
@@ -22,7 +22,7 @@ export default function AvailablePositions() {
 async function PositionsContent() {
   let campaigns: CampaignPayload[] = [];
   try {
-    campaigns = await listPublicCampaigns();
+    campaigns = await listPublicCampaigns(await getLocale());
   } catch (error) {
     console.error("Failed to list campaigns:", error);
   }

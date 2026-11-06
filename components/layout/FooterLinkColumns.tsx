@@ -1,18 +1,19 @@
 import { FooterColumn } from "@/types/footercolumn";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 interface FooterLinkColumnsProps {
   columns: FooterColumn[];
 }
 
 export default function FooterLinkColumns({ columns }: FooterLinkColumnsProps) {
-    const n = useTranslations('navigation');
+  const n = useTranslations('navigation');
+  const c = useTranslations('layout.footer.columns');
   return (
     <>
       {columns.map((col) => (
         <div key={col.title}>
-          <h3 className="mb-5 text-lg sm:text-xl">{col.title}</h3>
+          <h3 className="mb-5 text-lg sm:text-xl">{c(col.title)}</h3>
           <ul className="flex flex-col gap-3">
             {col.links.map((l) => (
               <li key={l.label}>

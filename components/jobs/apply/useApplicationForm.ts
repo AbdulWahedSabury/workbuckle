@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { submitApplication } from "@/lib/jobs/actions";
-import { EMPTY_APPLICATION_FORM, RESUME_EXTENSIONS, RESUME_MAX_BYTES } from "./applyConfig";
+import { EMPTY_APPLICATION_FORM, RESUME_EXTENSIONS, RESUME_MAX_BYTES, RESUME_MAX_MB } from "./applyConfig";
 import type { ApplicationFormData } from "./types";
 
 const resumeExtension = (file: File) => file.name.split(".").pop()?.toLowerCase() ?? "";
@@ -21,6 +22,7 @@ const buildApplicationPayload = (formData: ApplicationFormData) => {
 
 /** Owns form state, resume validation, and submission of a job application. */
 export function useApplicationForm(jobId: string) {
+  const t = useTranslations("apply.errors");
   const [formData, setFormData] = useState<ApplicationFormData>(EMPTY_APPLICATION_FORM);
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,9 +41,9 @@ export function useApplicationForm(jobId: string) {
     (file: File | null) => {
       const problem =
         file && !RESUME_EXTENSIONS.includes(resumeExtension(file))
-          ? "Please upload your resume as a PDF, DOC or DOCX file."
+          ? t("resume_type")
           : file && file.size > RESUME_MAX_BYTES
-            ? `Your resume must be ${RESUME_MAX_BYTES / (1024 * 1024)} MB or smaller.`
+            ? t("resume_size", { size: RESUME_MAX_MB })
             : null;
       if (problem) {
         setErrorMessage(problem);
@@ -52,7 +54,7 @@ export function useApplicationForm(jobId: string) {
       updateField("resume", file);
       if (file) setErrorMessage(null);
     },
-    [updateField]
+    [t, updateField]
   );
 
   const resetForm = useCallback(() => {
@@ -88,12 +90,12 @@ export function useApplicationForm(jobId: string) {
         else setErrorMessage(result.message);
       } catch {
         // The action itself returns expected failures; a throw means the request didn't get through.
-        setErrorMessage("Could not reach the server. Please check your connection and try again.");
+        setErrorMessage(t("network"));
       } finally {
         setIsSubmitting(false);
       }
     },
-    [formData, jobId, isFormValid, isSubmitting]
+    [formData, jobId, isFormValid, isSubmitting, t]
   );
 
   return {

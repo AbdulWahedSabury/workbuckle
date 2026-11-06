@@ -5,6 +5,8 @@ import FaqForm from "@/components/admin/FaqForm";
 import { updateFaq } from "@/lib/admin/actions/faqs";
 import { requireAdmin } from "@/lib/admin/auth";
 import { getFaq } from "@/lib/admin/queries";
+import { translationFormValues } from "@/lib/admin/translations";
+import { FAQ_TRANSLATABLE_FIELDS } from "@/schemas/AdminSchemas";
 
 export const metadata: Metadata = { title: "Edit FAQ" };
 
@@ -24,6 +26,7 @@ export default async function EditFaqPage({ params }: PageProps<"/admin/faqs/[id
           answer: faq.answer,
           isActive: faq.isActive,
           sortOrder: faq.sortOrder,
+          translations: translationFormValues(faq.translations, FAQ_TRANSLATABLE_FIELDS),
         }}
         submitLabel="Save changes"
       />

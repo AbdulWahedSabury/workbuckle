@@ -7,12 +7,16 @@ import { CheckboxField, FormMessage, TextAreaField, TextField } from "./fields";
 import { useActionErrorToast } from "./useActionErrorToast";
 import { SubmitButton } from "./buttons";
 import { fieldsetClass, legendClass, secondaryLinkClass } from "./styles";
+import { defaultLocale } from "@/types/locale";
+import LocalizedField, { type LocalizedInput } from "./LocalizedField";
 
 export type FaqFormValues = {
   question: string;
   answer: string;
   isActive: boolean;
   sortOrder: number;
+  /** Saved translations keyed by form field name, e.g. { question_el: "…" }. */
+  translations?: Record<string, string>;
 };
 
 export default function FaqForm({
@@ -29,6 +33,9 @@ export default function FaqForm({
   // After a failed submit, show what was typed rather than the saved values.
   const v = state.values;
   const errors = state.errors ?? {};
+  /** What the input shows: the typed value after a failed submit, else the saved English or translation. */
+  const fieldValue = (input: LocalizedInput, english?: string) =>
+    v ? v[input.name] : input.locale === defaultLocale ? english : faq?.translations?.[input.name];
 
   return (
     <form action={formAction} className="flex max-w-2xl flex-col gap-6">
@@ -36,23 +43,38 @@ export default function FaqForm({
 
       <fieldset className={fieldsetClass}>
         <legend className={legendClass}>Content</legend>
-        <TextField
-          name="question"
-          label="Question"
-          placeholder="How do I apply for a job?"
-          required
-          defaultValue={v ? v.question : faq?.question}
-          error={errors.question}
-        />
-        <TextAreaField
-          name="answer"
+        <LocalizedField label="Question" field="question" errors={errors} required>
+          {(input) => (
+            <TextField
+              name={input.name}
+              label={input.label}
+              required={input.required}
+              hideLabel
+              placeholder={input.locale === defaultLocale ? "How do I apply for a job?" : undefined}
+              defaultValue={fieldValue(input, faq?.question)}
+              error={errors[input.name]}
+            />
+          )}
+        </LocalizedField>
+        <LocalizedField
           label="Answer"
-          rows={6}
+          field="answer"
+          errors={errors}
           required
           hint="Plain text. Line breaks are kept on the site."
-          defaultValue={v ? v.answer : faq?.answer}
-          error={errors.answer}
-        />
+        >
+          {(input) => (
+            <TextAreaField
+              name={input.name}
+              label={input.label}
+              required={input.required}
+              hideLabel
+              rows={6}
+              defaultValue={fieldValue(input, faq?.answer)}
+              error={errors[input.name]}
+            />
+          )}
+        </LocalizedField>
       </fieldset>
 
       <fieldset className={fieldsetClass}>

@@ -2,6 +2,7 @@
 
 import type { ComponentType, SVGProps } from "react";
 import { Phone } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { MotionLink } from "@/components/motion/MotionLink";
 import { telHref } from "@/lib/contact";
@@ -44,11 +45,11 @@ type ContactLink = {
 };
 
 /** Links built from the admin site settings; any left blank there are omitted. */
-function contactLinks(setting: Setting): ContactLink[] {
+function contactLinks(setting: Setting, callUsLabel: string): ContactLink[] {
   const links: (ContactLink | false)[] = [
     !!setting.facebook && { label: "Facebook", value: "Facebook", href: setting.facebook, icon: FacebookIcon, external: true },
     !!setting.instagram && { label: "Instagram", value: "Instagram", href: setting.instagram, icon: InstagramIcon, external: true },
-    !!setting.phone && { label: "Call us", value: setting.phone, href: telHref(setting.phone), icon: Phone },
+    !!setting.phone && { label: callUsLabel, value: setting.phone, href: telHref(setting.phone), icon: Phone },
   ];
   return links.filter((link) => link !== false);
 }
@@ -68,7 +69,8 @@ interface SocialLinksProps {
 }
 
 export default function SocialLinks({ variant = "icons", className = "" }: SocialLinksProps) {
-  const socials = contactLinks(useSiteSetting());
+  const t = useTranslations("layout.social");
+  const socials = contactLinks(useSiteSetting(), t("call_us"));
 
   if (variant === "social") {
     return (

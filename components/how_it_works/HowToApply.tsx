@@ -55,8 +55,8 @@ export default function HowToApply() {
     <RevealSection className="py-[60px] md:py-[75px] lg:py-[90px] bg-white overflow-hidden">
       <div className="container-site">
         <SectionHeader
-          eyebrow="How to apply"
-          title="Simple Application Process"
+          eyebrow={t("eyebrow")}
+          title={t("title")}
           description=""
         />
 

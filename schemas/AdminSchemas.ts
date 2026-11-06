@@ -46,6 +46,18 @@ const optionalLinkUrl = z
 /** HTML checkboxes send "on" when checked and nothing when unchecked. */
 const checkbox = z.preprocess((v) => v === 'on' || v === 'true', z.boolean());
 
+// ─── Translations ────────────────────────────────────────────────────────────
+
+/** Languages that get optional translated fields in admin forms (all but English). */
+export const TRANSLATION_LOCALES = locales.filter((locale) => locale !== defaultLocale);
+
+/** Form field name for a translated value, e.g. "title_el". */
+export const translationField = (field: string, locale: string) => `${field}_${locale}`;
+
+/** Form field name in `locale`: the plain name for English ("title"), suffixed otherwise ("title_el"). */
+export const localizedFieldName = (field: string, locale: string) =>
+  locale === defaultLocale ? field : translationField(field, locale);
+
 // ─── Job categories ──────────────────────────────────────────────────────────
 
 /** Form field name for a category's name in a given locale, e.g. "name_de". */
@@ -93,6 +105,15 @@ export const jobTypeSchema = z.object({
   slug,
 });
 
+/** One language's optional job type name (form field name_el, ...). Blank = use English. */
+export const jobTypeTranslationSchema = z.object({
+  name: z.string().trim().max(120, 'Name is too long.'),
+});
+
+export const JOB_TYPE_TRANSLATABLE_FIELDS = Object.keys(jobTypeTranslationSchema.shape) as (keyof z.infer<
+  typeof jobTypeTranslationSchema
+>)[];
+
 // ─── FAQs ────────────────────────────────────────────────────────────────────
 
 export const faqSchema = z.object({
@@ -102,6 +123,16 @@ export const faqSchema = z.object({
   sortOrder: z.coerce.number().int().min(0).max(100_000).default(0),
 });
 
+/** One language's optional FAQ text (form fields question_el, answer_el, ...). */
+export const faqTranslationSchema = z.object({
+  question: z.string().trim().max(300, 'Question is too long.'),
+  answer: z.string().trim().max(5000, 'Answer is too long.'),
+});
+
+export const FAQ_TRANSLATABLE_FIELDS = Object.keys(faqTranslationSchema.shape) as (keyof z.infer<
+  typeof faqTranslationSchema
+>)[];
+
 // ─── Campaigns ───────────────────────────────────────────────────────────────
 
 export const campaignSchema = z.object({
@@ -110,6 +141,17 @@ export const campaignSchema = z.object({
   imageAlt: optionalText(255),
   intro: z.string().trim().min(1, 'Intro is required.').max(5000),
 });
+
+/** One language's optional campaign text (form fields title_el, intro_el, imageAlt_el). Blank = use English. */
+export const campaignTranslationSchema = z.object({
+  title: z.string().trim().max(200, 'Title is too long.'),
+  intro: z.string().trim().max(5000, 'Intro is too long.'),
+  imageAlt: z.string().trim().max(255, 'Image description is too long.'),
+});
+
+export const CAMPAIGN_TRANSLATABLE_FIELDS = Object.keys(campaignTranslationSchema.shape) as (keyof z.infer<
+  typeof campaignTranslationSchema
+>)[];
 
 // ── Clients ─────────────────────────────────────────────────────────────────────────────────────
 
@@ -175,6 +217,24 @@ export const jobSchema = z.object({
   benefits: richText('Benefits'),
   status: z.enum(JOB_STATUSES, { errorMap: () => ({ message: 'Choose a status.' }) }),
 });
+
+/** True when rich-text HTML has no visible text (an empty editor still sends "<p></p>"). */
+export const isBlankRichText = (html: string) => html.replace(/<[^>]*>|&nbsp;/g, '').trim().length === 0;
+
+/** One language's optional job text (form fields title_el, description_el, ...). Blank = use English. */
+export const jobTranslationSchema = z.object({
+  title: z.string().trim().max(200, 'Title is too long.'),
+  salary: z.string().trim().max(120, 'Salary is too long.'),
+  experience: z.string().trim().max(120, 'Experience is too long.'),
+  description: z.string().max(50_000, 'Description is too long.'),
+  responsibilities: z.string().max(50_000, 'Responsibilities is too long.'),
+  requirements: z.string().max(50_000, 'Requirements is too long.'),
+  benefits: z.string().max(50_000, 'Benefits is too long.'),
+});
+
+export const JOB_TRANSLATABLE_FIELDS = Object.keys(jobTranslationSchema.shape) as (keyof z.infer<
+  typeof jobTranslationSchema
+>)[];
 
 // ─── Site settings ───────────────────────────────────────────────────────────
 

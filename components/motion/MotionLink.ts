@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { motion } from "framer-motion";
 
-/** next/link with framer-motion props. Use from Client Components only. */
+/** The locale-aware Link (@/i18n/navigation) with framer-motion props. Use from Client Components only. */
 export const MotionLink = motion.create(Link);

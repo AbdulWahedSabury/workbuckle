@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { ArrowUpRight, Banknote, Clock, GraduationCap, MapPin, Building2 } from "lucide-react";
 import { MotionLink } from "@/components/motion/MotionLink";
 import { jobTypeKey } from "@/lib/jobs/job-type";
@@ -22,7 +23,7 @@ interface JobRowProps {
 }
 
 export default function JobRow({ job }: JobRowProps) {
-
+  const t = useTranslations("jobs.row");
   return (
     <div className="w-full">
       <MotionLink
@@ -66,10 +67,10 @@ export default function JobRow({ job }: JobRowProps) {
 
         <div className="flex items-center justify-between gap-4 lg:justify-end">
           <span className="flex items-center gap-1.5 text-sm lg:hidden text-gray-400">
-            <Clock className="size-4" /> Active
+            <Clock className="size-4" /> {t("active")}
           </span>
           <span className="flex items-center gap-2 font-semibold text-ink">
-            Apply
+            {t("view_details")}
             <motion.span
               variants={{ rest: { x: 0, y: 0, rotate: 0 }, hover: { x: 4, y: -4, rotate: 0 } }}
               transition={snappySpring}

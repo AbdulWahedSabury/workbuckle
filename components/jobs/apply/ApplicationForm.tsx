@@ -7,7 +7,7 @@ import FormTextAreaField from "./FormTextAreaField";
 import ResumeDropzone from "./ResumeDropzone";
 import ApplicationSuccessCard from "./ApplicationSuccessCard";
 import { useApplicationForm } from "./useApplicationForm";
-import { NAME_FIELDS, RESUME_ACCEPT, RESUME_HINT } from "./applyConfig";
+import { NAME_FIELDS, RESUME_ACCEPT, RESUME_MAX_MB } from "./applyConfig";
 import { useTranslations } from "next-intl";
 
 export interface ApplicationFormProps {
@@ -16,6 +16,7 @@ export interface ApplicationFormProps {
 
 export default function ApplicationForm({ jobId }: ApplicationFormProps) {
   const f = useTranslations('form');
+  const t = useTranslations('apply');
 
   const {
     formData,
@@ -38,7 +39,7 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
   return (
     <div className="rounded-card border border-line bg-white p-6 shadow-sm sm:p-8 lg:p-10">
       <h2 className="mb-6 border-b border-line pb-4 text-lg font-bold text-ink sm:text-xl">
-        Personal Details &amp; Resume
+        {t("heading")}
       </h2>
 
       {errorMessage && (
@@ -55,9 +56,9 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
               <FormTextField
                 key={field.name}
                 name={field.name}
-                label={field.label}
+                label={t(`fields.${field.messageKey}.label`)}
                 type={field.type}
-                placeholder={field.placeholder}
+                placeholder={t(`fields.${field.messageKey}.placeholder`)}
                 icon={field.icon}
                 required={field.required}
                 autoComplete={field.autoComplete}
@@ -70,19 +71,19 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
 
         <FormTextField
           name="linkedin"
-          label="LinkedIn Profile (optional)"
+          label={t("fields.linkedin.label")}
           type="url"
-          placeholder="https://www.linkedin.com/in/your-profile"
+          placeholder={t("fields.linkedin.placeholder")}
           icon={Link2}
           value={formData.linkedin}
           onChange={(value) => updateField("linkedin", value)}
         />
 
         <ResumeDropzone
-          label="Resume / CV"
+          label={t("fields.resume.label")}
           resume={formData.resume}
           accept={RESUME_ACCEPT}
-          hint={RESUME_HINT}
+          hint={t("fields.resume.hint", { size: RESUME_MAX_MB })}
           required
           onFileSelect={setResume}
           onClear={() => setResume(null)}
@@ -90,8 +91,8 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
 
         <FormTextAreaField
           name="coverLetter"
-          label="Cover Letter / Message"
-          placeholder="Introduce yourself and highlight relevant experience..."
+          label={t("fields.cover_letter.label")}
+          placeholder={t("fields.cover_letter.placeholder")}
           value={formData.coverLetter}
           onChange={(value) => updateField("coverLetter", value)}
         />

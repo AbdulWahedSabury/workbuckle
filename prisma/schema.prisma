@@ -113,31 +113,65 @@ model City {
 }
 
 model JobType {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String   @unique @db.VarChar(120)
-  slug      String   @unique @db.VarChar(140)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
-  jobs      Job[]
+  id           String               @id @default(uuid()) @db.Uuid
+  name         String               @unique @db.VarChar(120)
+  slug         String               @unique @db.VarChar(140)
+  createdAt    DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+  jobs         Job[]
+  translations JobTypeTranslation[]
 
   @@map("job_types")
+}
+
+// The job type's name in a language other than the default (e.g. Greek).
+// English stays on the job_types row and is used when this is missing.
+model JobTypeTranslation {
+  id        String   @id @default(uuid()) @db.Uuid
+  jobTypeId String   @map("job_type_id") @db.Uuid
+  locale    String   @db.VarChar(10)
+  name      String   @db.VarChar(120)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  jobType   JobType  @relation(fields: [jobTypeId], references: [id], onDelete: Cascade)
+
+  @@unique([jobTypeId, locale])
+  @@map("job_type_translations")
 }
 
 // A recruiting campaign: a themed group of jobs (e.g. "Front Office & Guest
 // Experience") with its own image and intro. Jobs join one from the job form.
 model Campaign {
-  id        String   @id @default(uuid()) @db.Uuid
-  title     String   @db.VarChar(200)
+  id           String                @id @default(uuid()) @db.Uuid
+  title        String                @db.VarChar(200)
   // Supabase Storage URL, a path under /public (/images/…) or an external URL.
-  img       String?  @db.VarChar(2048)
-  intro     String   @db.Text
-  imageAlt  String?  @map("image_alt") @db.VarChar(255)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
-  jobs      Job[]
+  img          String?               @db.VarChar(2048)
+  intro        String                @db.Text
+  imageAlt     String?               @map("image_alt") @db.VarChar(255)
+  createdAt    DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
+  jobs         Job[]
+  translations CampaignTranslation[]
 
   @@index([updatedAt(sort: Desc)])
   @@map("campaigns")
+}
+
+// The campaign's text in a language other than the default (e.g. Greek).
+// English stays on the campaigns row; a blank field here falls back to it.
+model CampaignTranslation {
+  id         String   @id @default(uuid()) @db.Uuid
+  campaignId String   @map("campaign_id") @db.Uuid
+  locale     String   @db.VarChar(10)
+  title      String   @default("") @db.VarChar(200)
+  intro      String   @default("") @db.Text
+  imageAlt   String   @default("") @map("image_alt") @db.VarChar(255)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, locale])
+  @@map("campaign_translations")
 }
 
 model Client {
@@ -155,46 +189,64 @@ model Client {
 
 // Question/answer pairs for the public FAQ section (home and contact pages).
 model Faq {
-  id        String   @id @default(uuid()) @db.Uuid
-  question  String   @db.VarChar(300)
+  id           String           @id @default(uuid()) @db.Uuid
+  question     String           @db.VarChar(300)
   // Plain text; line breaks are kept on the site.
-  answer    String   @db.Text
-  isActive  Boolean  @default(true) @map("is_active")
-  sortOrder Int      @default(0) @map("sort_order")
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  answer       String           @db.Text
+  isActive     Boolean          @default(true) @map("is_active")
+  sortOrder    Int              @default(0) @map("sort_order")
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+  translations FaqTranslation[]
 
   // Public list: WHERE is_active ORDER BY sort_order.
   @@index([isActive, sortOrder])
   @@map("faqs")
 }
 
+// The FAQ in a language other than the default (e.g. Greek). English stays on
+// the faqs row; a blank field here falls back to it on the site.
+model FaqTranslation {
+  id        String   @id @default(uuid()) @db.Uuid
+  faqId     String   @map("faq_id") @db.Uuid
+  locale    String   @db.VarChar(10)
+  question  String   @default("") @db.VarChar(300)
+  answer    String   @default("") @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  faq       Faq      @relation(fields: [faqId], references: [id], onDelete: Cascade)
+
+  @@unique([faqId, locale])
+  @@map("faq_translations")
+}
+
 model Job {
-  id               String      @id @default(uuid()) @db.Uuid
-  title            String      @db.VarChar(200)
-  salary           String      @db.VarChar(120)
-  clientId         String      @map("client_id") @db.Uuid
-  cityId           String      @map("city_id") @db.Uuid
-  jobTypeId        String      @map("type_id") @db.Uuid
-  jobCategoryId    String      @map("job_category_id") @db.Uuid
-  campaignId       String?     @map("campaign_id") @db.Uuid
-  experience       String      @db.VarChar(120)
-  description      String      @db.Text
-  responsibilities String      @db.Text
-  requirements     String      @db.Text
-  benefits         String      @db.Text
+  id               String           @id @default(uuid()) @db.Uuid
+  title            String           @db.VarChar(200)
+  salary           String           @db.VarChar(120)
+  clientId         String           @map("client_id") @db.Uuid
+  cityId           String           @map("city_id") @db.Uuid
+  jobTypeId        String           @map("type_id") @db.Uuid
+  jobCategoryId    String           @map("job_category_id") @db.Uuid
+  campaignId       String?          @map("campaign_id") @db.Uuid
+  experience       String           @db.VarChar(120)
+  description      String           @db.Text
+  responsibilities String           @db.Text
+  requirements     String           @db.Text
+  benefits         String           @db.Text
   // draft | published | closed — validated in schemas/AdminSchemas.ts.
-  status           String      @default("draft") @db.VarChar(20)
-  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
-  client           Client      @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  status           String           @default("draft") @db.VarChar(20)
+  createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+  client           Client           @relation(fields: [clientId], references: [id], onDelete: Restrict)
   // Restrict: a city, type or category that jobs still use can't be deleted.
-  city             City        @relation(fields: [cityId], references: [id], onDelete: Restrict)
-  jobType          JobType     @relation(fields: [jobTypeId], references: [id], onDelete: Restrict)
-  jobCategory      JobCategory @relation(fields: [jobCategoryId], references: [id], onDelete: Restrict)
+  city             City             @relation(fields: [cityId], references: [id], onDelete: Restrict)
+  jobType          JobType          @relation(fields: [jobTypeId], references: [id], onDelete: Restrict)
+  jobCategory      JobCategory      @relation(fields: [jobCategoryId], references: [id], onDelete: Restrict)
   // Optional; deleting a campaign leaves its jobs in place, unassigned.
-  campaign         Campaign?   @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  campaign         Campaign?        @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   candidates       Candidate[]
+  translations     JobTranslation[]
 
   @@index([cityId])
   @@index([jobTypeId])
@@ -209,26 +261,47 @@ model Job {
   @@map("jobs")
 }
 
+// The job's text in a language other than the default (e.g. Greek). English
+// stays on the jobs row; a blank field here falls back to it on the site.
+model JobTranslation {
+  id               String   @id @default(uuid()) @db.Uuid
+  jobId            String   @map("job_id") @db.Uuid
+  locale           String   @db.VarChar(10)
+  title            String   @default("") @db.VarChar(200)
+  salary           String   @default("") @db.VarChar(120)
+  experience       String   @default("") @db.VarChar(120)
+  description      String   @default("") @db.Text
+  responsibilities String   @default("") @db.Text
+  requirements     String   @default("") @db.Text
+  benefits         String   @default("") @db.Text
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  job              Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, locale])
+  @@map("job_translations")
+}
+
 model Candidate {
-  id          String   @id @default(cuid())
-  firstName   String   @map("first_name") @db.VarChar(120)
-  lastName    String   @map("last_name") @db.VarChar(120)
-  phone       String   @db.VarChar(40)
-  email       String   @db.VarChar(255)
-  linkedin    String?  @map("linkedin_url") @db.VarChar(2048)
+  id                       String    @id @default(cuid())
+  firstName                String    @map("first_name") @db.VarChar(120)
+  lastName                 String    @map("last_name") @db.VarChar(120)
+  phone                    String    @db.VarChar(40)
+  email                    String    @db.VarChar(255)
+  linkedin                 String?   @map("linkedin_url") @db.VarChar(2048)
   // Public URL of the CV in Supabase Storage; cvPath is the object key used to remove it.
-  cvUrl       String   @map("cv_url") @db.VarChar(2048)
-  cvPath      String?  @map("cv_path") @db.VarChar(1024)
-  coverLetter String?  @map("cover_letter") @db.Text
-  screeningNotes String? @map("screening_notes") @db.Text
+  cvUrl                    String    @map("cv_url") @db.VarChar(2048)
+  cvPath                   String?   @map("cv_path") @db.VarChar(1024)
+  coverLetter              String?   @map("cover_letter") @db.Text
+  screeningNotes           String?   @map("screening_notes") @db.Text
   clientProfileEmailSentAt DateTime? @map("client_profile_email_sent_at") @db.Timestamptz(3)
   // pending | Review | Short list | submitted — validated in schemas/AdminSchemas.ts.
-  status      String   @default("pending") @db.VarChar(20)
-  jobId       String   @map("job_id") @db.Uuid
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  status                   String    @default("pending") @db.VarChar(20)
+  jobId                    String    @map("job_id") @db.Uuid
+  createdAt                DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   // Cascade keeps deleteJob working; candidates go with their job.
-  job         Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  job                      Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
   @@index([jobId])
   @@index([status])
@@ -249,7 +322,7 @@ model SiteSetting {
   linkedinUrl        String?  @map("linkedin_url") @db.VarChar(2048)
   instagramUrl       String?  @map("instagram_url") @db.VarChar(2048)
   about              String?
-  maintenanceMode   Boolean  @default(false) @map("maintenance_mode")
+  maintenanceMode    Boolean  @default(false) @map("maintenance_mode")
   maintenanceMessage String?  @map("maintenance_message")
   createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)

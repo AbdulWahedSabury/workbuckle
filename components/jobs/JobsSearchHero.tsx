@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { ArrowRight, Search } from "lucide-react";
 import { useDebouncedCallback } from "use-debounce";
+import { useTranslations } from "next-intl";
 import RevealSection from "@/components/motion/RevealSection";
 import FadeUp from "@/components/motion/FadeUp";
 import HeroBackground from "../motion/HeroBackground";
@@ -22,6 +23,7 @@ const DEBOUNCE_MS = 300;
  */
 export default function JobsSearchHero({ campaign }: { campaign?: CampaignSummary | null }) {
   const { search, setSearch } = useJobsQuery();
+  const t = useTranslations("jobs.search");
   const [value, setValue] = useState(search);
 
   // Adopt URL changes made elsewhere (back/forward, a shared link) without an
@@ -47,16 +49,15 @@ export default function JobsSearchHero({ campaign }: { campaign?: CampaignSummar
         <FadeUp className="mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-ink/40 px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-primary backdrop-blur-md sm:px-4 sm:py-1.5 sm:text-[13px]">
             <span className="size-1.5 rounded-full bg-primary" />
-            {campaign ? "Campaign" : "Jobs List"}
+            {campaign ? t("eyebrow_campaign") : t("eyebrow")}
           </span>
           <h1 className="mt-5 text-balance text-3xl font-bold leading-[1.1] tracking-tight text-white drop-shadow-[0_2px_24px_rgb(0_0_0/0.5)] sm:mt-6 sm:text-5xl lg:text-6xl">
             {campaign ? (
               campaign.title
             ) : (
-              <>
-                Explore our diverse range of{" "}
-                <span className="text-primary">career opportunities</span>
-              </>
+              t.rich("title", {
+                accent: (chunks) => <span className="text-primary">{chunks}</span>,
+              })
             )}
           </h1>
           {campaign && (
@@ -76,7 +77,7 @@ export default function JobsSearchHero({ campaign }: { campaign?: CampaignSummar
                 className="size-5 flex-none text-white/50 transition-colors group-focus-within:text-primary"
                 aria-hidden="true"
               />
-              <span className="sr-only">Search jobs</span>
+              <span className="sr-only">{t("label")}</span>
               <input
                 type="search"
                 autoComplete="off"
@@ -86,7 +87,7 @@ export default function JobsSearchHero({ campaign }: { campaign?: CampaignSummar
                   setValue(event.target.value);
                   debouncedSearch(event.target.value);
                 }}
-                placeholder="Search job title, company or keyword"
+                placeholder={t("placeholder")}
                 className="w-full min-w-0 bg-transparent text-sm text-white placeholder:text-white/50 focus:outline-none sm:text-base"
               />
             </label>
@@ -94,7 +95,7 @@ export default function JobsSearchHero({ campaign }: { campaign?: CampaignSummar
               type="submit"
               className="flex w-full flex-none items-center justify-center gap-2 rounded-xl bg-primary px-7 py-3 font-semibold text-ink transition-all duration-300 hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 active:scale-[0.98] sm:w-auto sm:rounded-full sm:py-3.5"
             >
-              <span>Search</span>
+              <span>{t("submit")}</span>
               <ArrowRight className="size-4" aria-hidden="true" />
             </button>
           </form>

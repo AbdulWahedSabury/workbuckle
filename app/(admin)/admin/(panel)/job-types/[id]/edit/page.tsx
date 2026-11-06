@@ -5,6 +5,8 @@ import JobTypeForm from "@/components/admin/JobTypeForm";
 import { updateJobType } from "@/lib/admin/actions/job-types";
 import { requireAdmin } from "@/lib/admin/auth";
 import { getJobType } from "@/lib/admin/queries";
+import { translationFormValues } from "@/lib/admin/translations";
+import { JOB_TYPE_TRANSLATABLE_FIELDS } from "@/schemas/AdminSchemas";
 
 export const metadata: Metadata = { title: "Edit job type" };
 
@@ -21,7 +23,11 @@ export default async function EditJobTypePage({
       <PageHeader title="Edit job type" description={jobType.slug} />
       <JobTypeForm
         action={updateJobType.bind(null, jobType.id)}
-        jobType={{ name: jobType.name, slug: jobType.slug }}
+        jobType={{
+          name: jobType.name,
+          slug: jobType.slug,
+          translations: translationFormValues(jobType.translations, JOB_TYPE_TRANSLATABLE_FIELDS),
+        }}
         submitLabel="Save changes"
       />
     </>

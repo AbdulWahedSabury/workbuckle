@@ -9,6 +9,8 @@ import { STATUS_BADGE } from "@/components/admin/tables/JobsTable";
 import { updateCampaign } from "@/lib/admin/actions/campaigns";
 import { requireAdmin } from "@/lib/admin/auth";
 import { getCampaign } from "@/lib/admin/queries";
+import { translationFormValues } from "@/lib/admin/translations";
+import { CAMPAIGN_TRANSLATABLE_FIELDS } from "@/schemas/AdminSchemas";
 
 export const metadata: Metadata = { title: "Edit campaign" };
 
@@ -31,6 +33,7 @@ export default async function EditCampaignPage({
             img: campaign.img,
             imageAlt: campaign.imageAlt,
             intro: campaign.intro,
+            translations: translationFormValues(campaign.translations, CAMPAIGN_TRANSLATABLE_FIELDS),
           }}
           submitLabel="Save changes"
         />

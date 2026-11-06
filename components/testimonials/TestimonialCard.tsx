@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion, type Variants } from "framer-motion";
 import { Quote, Star } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { Testimonial } from "@/lib/home/types";
 import { EASE_OUT_QUART } from "@/lib/motion";
 
@@ -21,6 +22,7 @@ interface TestimonialCardProps {
 }
 
 export default function TestimonialCard({ testimonial, direction, onSwipe }: TestimonialCardProps) {
+  const t = useTranslations("components.testimonials");
   return (
     <motion.article
       custom={direction}
@@ -41,7 +43,7 @@ export default function TestimonialCard({ testimonial, direction, onSwipe }: Tes
       <div className="relative aspect-[4/5] overflow-hidden rounded-sm-card bg-gray-3">
         <Image
           src={testimonial.image}
-          alt={`Portrait of ${testimonial.name}, ${testimonial.role} (reviewer photo, ~600×750)`}
+          alt={t("portrait", { name: testimonial.name, role: testimonial.role })}
           fill
           sizes="(min-width: 1024px) 26vw, (min-width: 640px) 40vw, 90vw"
           className="pointer-events-none object-cover"

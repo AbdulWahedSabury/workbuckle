@@ -1,26 +1,40 @@
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import Reveal from "@/components/motion/Reveal";
-import ContactForm from "./ContactForm";
-import ContactImage from "./ContactImage";
 
+// Placeholder photo: point this at the final image when it's ready, and update
+// `pages.contact.hero_image_alt` in lang/en.json to describe it. A wide image works
+// best, since it's cropped to a banner. Text sits centered on top under a dark overlay.
+const HERO_IMAGE = "/images/hero/hospitality.png";
+
+/** Full-width image hero with the page title and intro centered on top. */
 export default function ContactHero() {
   const t = useTranslations("pages.contact");
 
   return (
-    <section className="overflow-x-clip pt-5 sm:pt-10">
-      <div className="container-site">
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-12.5">
-          <Reveal effect="slideInBottom">
-            <ContactImage src="/images/contact/contact.jpg" alt={t("image_alt")} />
-          </Reveal>
-          <Reveal effect="slideInBottom" delay={200}>
-            <div className="mb-10">
-              <h1 className="mb-4 text-4xl sm:text-5xl lg:text-6xl">{t("title")}</h1>
-              <p className="text-pretty">{t("description")}</p>
-            </div>
-            <ContactForm />
-          </Reveal>
-        </div>
+    <section className="relative isolate flex min-h-[380px] items-center overflow-hidden bg-ink lg:min-h-[520px]">
+      <Image
+        src={HERO_IMAGE}
+        alt={t("hero_image_alt")}
+        fill
+        preload
+        sizes="100vw"
+        className="-z-20 object-cover object-[center_20%]"
+      />
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-ink/75" />
+
+      <div className="container-site py-16 lg:py-24">
+        <Reveal effect="slideInBottom" delay={0} offset={0} className="mx-auto max-w-3xl text-center">
+          <span className="mb-4 inline-flex items-center rounded-full bg-primary px-4 py-1.5 text-xs font-semibold tracking-wider text-on-primary uppercase sm:text-sm">
+            {t("hero_eyebrow")}
+          </span>
+          <h1 className="mb-5 text-5xl tracking-tight text-balance text-white lg:text-7xl">
+            {t("title")}
+          </h1>
+          <p className="mx-auto max-w-2xl text-base leading-relaxed text-pretty text-white sm:text-lg">
+            {t("description")}
+          </p>
+        </Reveal>
       </div>
     </section>
   );

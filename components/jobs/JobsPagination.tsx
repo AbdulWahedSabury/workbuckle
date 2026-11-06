@@ -3,6 +3,7 @@
 import type { MouseEvent, ReactNode } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { getPageItems } from "@/lib/jobs/pagination";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ const navButtonClass =
 /** Page-number links (`?page=`) for the jobs feed. Renders nothing for a single page. */
 export default function JobsPagination({ page: serverPage, pageCount }: JobsPaginationProps) {
   const { page: requested, isPending, setPage, hrefForPage } = useJobsQuery();
+  const t = useTranslations("jobs.pagination");
   if (pageCount <= 1) return null;
 
   // While a page change is loading, highlight where we're going, not where we were.
@@ -27,7 +29,7 @@ export default function JobsPagination({ page: serverPage, pageCount }: JobsPagi
 
   return (
     <nav
-      aria-label="Job list pagination"
+      aria-label={t("label")}
       className="mt-8 flex flex-wrap items-center justify-center gap-2 sm:gap-3"
     >
       <PageLink
@@ -35,7 +37,7 @@ export default function JobsPagination({ page: serverPage, pageCount }: JobsPagi
         href={hrefForPage(currentPage - 1)}
         disabled={currentPage <= 1}
         onNavigate={setPage}
-        label="Previous page"
+        label={t("previous")}
         className={navButtonClass}
       >
         <ChevronLeft className="size-4 sm:size-5" aria-hidden="true" />
@@ -54,7 +56,7 @@ export default function JobsPagination({ page: serverPage, pageCount }: JobsPagi
               href={hrefForPage(item)}
               current={currentPage === item}
               onNavigate={setPage}
-              label={`Page ${item}`}
+              label={t("page", { page: item })}
               className={cn(
                 "inline-flex size-10 items-center justify-center rounded-lg text-sm font-semibold transition-colors",
                 currentPage === item
@@ -69,7 +71,7 @@ export default function JobsPagination({ page: serverPage, pageCount }: JobsPagi
       </div>
 
       <span className="px-2 text-xs font-semibold text-ink sm:hidden">
-        Page {currentPage} of {pageCount}
+        {t("page_of", { page: currentPage, count: pageCount })}
       </span>
 
       <PageLink
@@ -77,7 +79,7 @@ export default function JobsPagination({ page: serverPage, pageCount }: JobsPagi
         href={hrefForPage(currentPage + 1)}
         disabled={currentPage >= pageCount}
         onNavigate={setPage}
-        label="Next page"
+        label={t("next")}
         className={navButtonClass}
       >
         <ChevronRight className="size-4 sm:size-5" aria-hidden="true" />

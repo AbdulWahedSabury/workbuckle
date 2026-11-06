@@ -22,7 +22,7 @@ export default function OurStory() {
             <Reveal className="relative aspect-[3/4] overflow-hidden rounded-card bg-gray-3">
               <Image
                 src="/images/about/mission-1.jpg"
-                alt="Mission photo 1 — candidate preparing for an interview at home (~600×800)"
+                alt={t("story_alts.one")}
                 fill
                 sizes="(min-width: 768px) 25vw, 50vw"
                 className="object-cover"
@@ -31,7 +31,7 @@ export default function OurStory() {
             <Reveal className="relative mt-10 aspect-[3/4] overflow-hidden rounded-card bg-gray-3 lg:mt-20">
               <Image
                 src="/images/about/mission-2.jpg"
-                alt="Mission photo 2 — hiring manager welcoming a new team member (~600×800)"
+                alt={t("story_alts.two")}
                 fill
                 sizes="(min-width: 768px) 25vw, 50vw"
                 className="object-cover"

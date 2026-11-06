@@ -1,5 +1,6 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Briefcase, Home } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import RevealSection from "@/components/motion/RevealSection";
 import FadeUp from "@/components/motion/FadeUp";
@@ -10,6 +11,7 @@ import SiteShell from "@/components/layout/SiteShell";
 // noindex, and extra exports from this special file can trip the bundler.
 
 export default function NotFound() {
+  const t = useTranslations("not_found");
   return (
     <SiteShell>
       <div className="w-full max-w-full overflow-x-hidden">
@@ -44,26 +46,25 @@ export default function NotFound() {
 
               <FadeUp className="mt-2">
                 <span className="inline-flex items-center rounded-full bg-white/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-primary sm:px-4 sm:py-1.5 sm:text-sm">
-                  Page not found
+                  {t("badge")}
                 </span>
               </FadeUp>
 
               <FadeUp className="mt-5">
                 <h1 className="text-balance text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-                  This page has moved on to a new opportunity
+                  {t("title")}
                 </h1>
               </FadeUp>
 
               <FadeUp className="mt-4">
                 <p className="max-w-md text-base text-white/70 sm:text-lg">
-                  The link may be broken, or the role you were looking for has already been filled.
-                  Plenty of others are still open.
+                  {t("description")}
                 </p>
               </FadeUp>
 
               <FadeUp className="mt-10 flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row">
                 <CtaButton href="/jobs" className="w-full justify-center sm:w-auto">
-                  Browse open jobs
+                  {t("browse")}
                 </CtaButton>
                 <Link
                   href="/"
@@ -73,27 +74,27 @@ export default function NotFound() {
                     className="size-4 transition-transform group-hover:-translate-x-0.5"
                     aria-hidden="true"
                   />
-                  Back to home
+                  {t("back_home")}
                 </Link>
               </FadeUp>
 
               {/* Quick links */}
               <FadeUp className="mt-12 w-full border-t border-white/10 pt-8">
                 <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-white/50">
-                  Popular destinations
+                  {t("popular")}
                 </p>
-                <nav aria-label="Popular pages" className="flex flex-wrap justify-center gap-2">
+                <nav aria-label={t("popular_label")} className="flex flex-wrap justify-center gap-2">
                   <Link
                     href="/"
                     className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-primary hover:text-ink"
                   >
-                    <Home className="size-4" aria-hidden="true" /> Home
+                    <Home className="size-4" aria-hidden="true" /> {t("home")}
                   </Link>
                   <Link
                     href="/jobs"
                     className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-primary hover:text-ink"
                   >
-                    <Briefcase className="size-4" aria-hidden="true" /> All jobs
+                    <Briefcase className="size-4" aria-hidden="true" /> {t("all_jobs")}
                   </Link>
                 </nav>
               </FadeUp>

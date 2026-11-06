@@ -4,26 +4,27 @@ import CtaButton from "@/components/ui/CtaButton";
 import PhotoCard from "./PhotoCard";
 interface PhotoItem {
   src: string;
-  alt: string;
+  /** Key under pages.about.hero_alts in lang/*.json. */
+  altKey: string;
   size: string;
   parallax: [from: number, to: number];
 }
 const leftPhotos: PhotoItem[] = [
   {
     src: "/images/about/hero-1.png",
-    alt: "Candidate smiling during a video interview",
+    altKey: "interview",
     size: "lg:h-[250px] lg:w-[240px] xl:h-[280px] xl:w-[290px] 2xl:h-[320px] 2xl:w-[340px]",
     parallax: [-5, 5],
   },
   {
     src: "/images/about/hero-2.jpg",
-    alt: "Two colleagues reviewing a resume together",
+    altKey: "resume",
     size: "lg:h-[170px] lg:w-[190px] lg:self-end xl:h-[190px] xl:w-[230px] 2xl:h-[210px] 2xl:w-[270px]",
     parallax: [5, -5],
   },
   {
     src: "/images/about/hero-3.png",
-    alt: "Work Buckle team working in a bright office",
+    altKey: "office",
     size: "lg:h-[180px] lg:w-[250px] xl:h-[210px] xl:w-[300px] 2xl:h-[250px] 2xl:w-[360px]",
     parallax: [5, -5],
   },
@@ -32,13 +33,13 @@ const leftPhotos: PhotoItem[] = [
 const rightPhotos: PhotoItem[] = [
   {
     src: "/images/about/hero-4.jpg",
-    alt: "Recruiter shaking hands with a new hire",
+    altKey: "handshake",
     size: "lg:h-[250px] lg:w-[250px] lg:self-end xl:h-[280px] xl:w-[300px] 2xl:h-[320px] 2xl:w-[360px]",
     parallax: [5, -6],
   },
   {
     src: "/images/about/hero.png",
-    alt: "Team celebrating around a laptop",
+    altKey: "celebration",
     size: "lg:h-[250px] lg:w-[240px] xl:h-[280px] xl:w-[290px] 2xl:h-[320px] 2xl:w-[340px]",
     parallax: [-6, 5],
   },
@@ -59,7 +60,7 @@ export default function AboutHero() {
             {leftPhotos.map((p) => (
               <PhotoCard
                 key={p.src}
-                photo={p}
+                photo={{ ...p, alt: t(`hero_alts.${p.altKey}`) }}
                 sizes="(min-width: 1024px) 360px, 33vw"
               />
             ))}
@@ -80,7 +81,7 @@ export default function AboutHero() {
             {rightPhotos.map((p) => (
               <PhotoCard
                 key={p.src}
-                photo={p}
+                photo={{ ...p, alt: t(`hero_alts.${p.altKey}`) }}
                 sizes="(min-width: 1024px) 360px, 50vw"
               />
             ))}

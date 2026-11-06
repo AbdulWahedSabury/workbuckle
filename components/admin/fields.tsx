@@ -12,6 +12,8 @@ export type BaseProps = {
   error?: string[];
   hint?: React.ReactNode;
   required?: boolean;
+  /** Keep the label for screen readers only, e.g. when LocalizedField shows it above the tabs. */
+  hideLabel?: boolean;
 };
 
 export function FieldShell({
@@ -20,11 +22,12 @@ export function FieldShell({
   error,
   hint,
   required,
+  hideLabel,
   children,
 }: BaseProps & { children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={name} className="text-sm font-semibold text-ink">
+      <label htmlFor={name} className={cn("text-sm font-semibold text-ink", hideLabel && "sr-only")}>
         {label} {required && <span className="text-red-600" aria-hidden="true">*</span>}
       </label>
       {children}

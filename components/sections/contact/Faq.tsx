@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import SectionHeader from "@/components/ui/SectionHeader";
 import Accordion, { type AccordionItem } from "@/components/ui/Accordion";
 import { listPublicFaqs } from "@/lib/faqs/public-faqs";
@@ -16,7 +16,7 @@ export default function Faq() {
 async function FaqContent() {
   let items: AccordionItem[] = [];
   try {
-    items = await listPublicFaqs();
+    items = await listPublicFaqs(await getLocale());
   } catch (error) {
     console.error("Failed to list FAQs:", error);
   }

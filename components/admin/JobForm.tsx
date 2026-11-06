@@ -5,6 +5,8 @@ import Link from "next/link";
 import { initialActionState, type ActionState } from "@/lib/admin/action-state";
 import type { SelectOption } from "@/lib/admin/queries";
 import { JOB_STATUSES, type JobStatus } from "@/schemas/AdminSchemas";
+import { defaultLocale, type Locale } from "@/types/locale";
+import LocalizedField from "./LocalizedField";
 import { FormMessage, SelectField, TextField } from "./fields";
 import { useActionErrorToast } from "./useActionErrorToast";
 import { SubmitButton } from "./buttons";
@@ -26,6 +28,8 @@ export type JobFormValues = {
   requirements: string;
   benefits: string;
   status: string;
+  /** Saved translations keyed by form field name, e.g. { title_el: "…" }. */
+  translations?: Record<string, string>;
 };
 
 export type JobFormOptions = {
@@ -96,7 +100,14 @@ export default function JobForm({
   // After a failed submit, show what was typed rather than the saved values.
   const v = state.values;
   const errors = state.errors ?? {};
-  const value = (field: keyof JobFormValues) => (v ? v[field] : initialJob?.[field]);
+  const value = (field: Exclude<keyof JobFormValues, "translations">) =>
+    v ? v[field] : initialJob?.[field];
+  /** English comes from the job's own fields, other languages from its translations. */
+  const localizedValue = (
+    field: Exclude<keyof JobFormValues, "translations">,
+    locale: Locale,
+    name: string
+  ) => (locale === defaultLocale ? value(field) : v ? v[name] : initialJob?.translations?.[name]);
 
   return (
     <form action={formAction} className="flex flex-col gap-6">
@@ -107,46 +118,71 @@ export default function JobForm({
         <div className="flex min-w-0 flex-col gap-6">
           <fieldset className={fieldsetClass}>
             <legend className={legendClass}>Basics</legend>
-            <TextField
-              name="title"
-              label="Job title"
-              placeholder="Front desk receptionist"
-              required
-              defaultValue={value("title")}
-              error={errors.title}
-            />
+            <LocalizedField label="Job title" field="title" errors={errors} required>
+              {(input) => (
+                <TextField
+                  name={input.name}
+                  label={input.label}
+                  required={input.required}
+                  hideLabel
+                  placeholder={input.locale === defaultLocale ? "Front desk receptionist" : undefined}
+                  defaultValue={localizedValue("title", input.locale, input.name)}
+                  error={errors[input.name]}
+                />
+              )}
+            </LocalizedField>
             <div className="grid gap-5 sm:grid-cols-2">
-              <TextField
-                name="salary"
-                label="Salary"
-                placeholder="€1,200 – €1,500 / month"
-                required
-                defaultValue={value("salary")}
-                error={errors.salary}
-              />
-              <TextField
-                name="experience"
-                label="Experience"
-                placeholder="1+ year in hospitality"
-                required
-                defaultValue={value("experience")}
-                error={errors.experience}
-              />
+              <LocalizedField label="Salary" field="salary" errors={errors} required>
+                {(input) => (
+                  <TextField
+                    name={input.name}
+                    label={input.label}
+                    required={input.required}
+                    hideLabel
+                    placeholder={input.locale === defaultLocale ? "€1,200 – €1,500 / month" : undefined}
+                    defaultValue={localizedValue("salary", input.locale, input.name)}
+                    error={errors[input.name]}
+                  />
+                )}
+              </LocalizedField>
+              <LocalizedField label="Experience" field="experience" errors={errors} required>
+                {(input) => (
+                  <TextField
+                    name={input.name}
+                    label={input.label}
+                    required={input.required}
+                    hideLabel
+                    placeholder={input.locale === defaultLocale ? "1+ year in hospitality" : undefined}
+                    defaultValue={localizedValue("experience", input.locale, input.name)}
+                    error={errors[input.name]}
+                  />
+                )}
+              </LocalizedField>
             </div>
           </fieldset>
 
           <fieldset className={fieldsetClass}>
             <legend className={legendClass}>Job details</legend>
             {RICH_TEXT_FIELDS.map((field) => (
-              <RichTextEditor
+              <LocalizedField
                 key={field.name}
-                name={field.name}
                 label={field.label}
-                placeholder={field.placeholder}
+                field={field.name}
+                errors={errors}
                 required
-                defaultValue={value(field.name)}
-                error={errors[field.name]}
-              />
+              >
+                {(input) => (
+                  <RichTextEditor
+                    name={input.name}
+                    label={input.label}
+                    required={input.required}
+                    hideLabel
+                    placeholder={input.locale === defaultLocale ? field.placeholder : undefined}
+                    defaultValue={localizedValue(field.name, input.locale, input.name)}
+                    error={errors[input.name]}
+                  />
+                )}
+              </LocalizedField>
             ))}
           </fieldset>
         </div>
@@ -236,3 +272,4 @@ export default function JobForm({
     </form>
   );
 }
+

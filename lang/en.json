@@ -5,7 +5,27 @@
       "quick_links": "Quick Links",
       "support": "Customer Support",
       "follow_us": "Follow us",
-      "about": "Workbuckle – Connecting hospitality professionals with exciting career opportunities across Europe. Your trusted partner in recruitment and career development."
+      "about": "Workbuckle – Connecting hospitality professionals with exciting career opportunities across Europe. Your trusted partner in recruitment and career development.",
+      "copyright": "© {year} Work Buckle. All rights reserved.",
+      "columns": {
+        "candidates": "For candidates",
+        "company": "Company"
+      }
+    },
+    "header": {
+      "open_menu": "Open menu",
+      "close_menu": "Close menu",
+      "primary_nav": "Primary",
+      "mobile_nav": "Mobile",
+      "mobile_menu": "Mobile menu",
+      "language": "Language"
+    },
+    "logo": {
+      "label": "Work Buckle home",
+      "alt": "Work Buckle logo mark — orange magnifier speech bubble with black WB monogram"
+    },
+    "social": {
+      "call_us": "Call us"
     }
   },
   "Metadata": {
@@ -14,6 +34,38 @@
       "description": "Join prestigious 5-star hotels and luxury resorts in Limassol and Nicosia. Full EU working rights, competitive compensation, and structured accommodation support included",
       "keywords": {
         "jobs": "Waiters, Barista, accountant"
+      }
+    },
+    "site": {
+      "title": "Work Buckle — Find work that fits",
+      "description": "Work Buckle connects job seekers with hiring teams. Browse featured roles, top companies, and career categories."
+    },
+    "pages": {
+      "about": {
+        "title": "About",
+        "description": "Why Work Buckle exists, what we stand for, and the people who use it every day."
+      },
+      "contact": {
+        "title": "Contact",
+        "description": "Reach out to the Work Buckle team — we're here to understand your needs and provide tailored solutions."
+      },
+      "jobs": {
+        "title": "Jobs",
+        "description": "Search and filter open hospitality roles across Cyprus.",
+        "campaign_title": "{campaign} – Jobs"
+      },
+      "privacy": {
+        "title": "Privacy Policy",
+        "description": "How Work Buckle collects, uses, shares and protects the personal information of candidates, employers and visitors."
+      },
+      "terms": {
+        "title": "Terms and Conditions",
+        "description": "The terms that apply when candidates, employers and visitors use the Work Buckle website and recruitment services."
+      },
+      "job": {
+        "description": "{title} in {location} at {client}. Apply through Work Buckle.",
+        "not_found": "Job not found",
+        "apply_title": "Apply: {title}"
       }
     }
   },
@@ -29,9 +81,12 @@
   },
   "pages": {
     "contact": {
+      "hero_eyebrow": "Get in touch",
       "title": "Contact us",
       "description": "We’re here to understand your needs and provide tailored solutions. Reach out to our team to explore how we can support your goals and address any questions you may have.",
+      "hero_image_alt": "Hotel staff standing together in a lobby",
       "image_alt": "Work Buckle team member ready to help",
+      "form_title": "Send us a message",
       "form": {
         "name": "Name",
         "email": "Email address",
@@ -40,7 +95,8 @@
         "submit": "Submit",
         "submitting": "Please wait...",
         "success": "Thank you! Your submission has been received!",
-        "error": "Oops! Something went wrong while submitting the form."
+        "error": "Oops! Something went wrong while submitting the form.",
+        "honeypot": "Leave this field empty"
       },
       "info": {
         "title": "We’re here to assist you",
@@ -79,6 +135,45 @@
         "description": "Join the candidates and companies who use Work Buckle to find each other every day.",
         "cta_label": "Jobs",
         "cta_href": "/#jobs"
+      },
+      "hero_alts": {
+        "interview": "Candidate smiling during a video interview",
+        "resume": "Two colleagues reviewing a resume together",
+        "office": "Work Buckle team working in a bright office",
+        "handshake": "Recruiter shaking hands with a new hire",
+        "celebration": "Team celebrating around a laptop"
+      },
+      "story_alts": {
+        "one": "Mission photo 1 — candidate preparing for an interview at home (~600×800)",
+        "two": "Mission photo 2 — hiring manager welcoming a new team member (~600×800)"
+      },
+      "stats": {
+        "founded": "Founded",
+        "placed": "Candidates placed",
+        "partners": "Partner companies",
+        "countries": "Countries served"
+      },
+      "partners": {
+        "eyebrow": "Our Partners",
+        "title": "How We Serve Our Partners & Candidates",
+        "employers": {
+          "title": "For Employers: Tailored Workforce Solutions",
+          "text": "Finding the right personnel for luxury hospitality and high-stakes operations requires more than matching keywords on a resume.",
+          "points": [
+            "Deep Industry Knowledge: 25 years of market intelligence ensures precise candidate selection aligned with your brand standards.",
+            "End-to-End Screening: We vet and pre-screen candidates for skill, mindset, and cultural fit before they ever reach your interview room.",
+            "Reliable EU Talent Pipelines: We bridge the gap between Cyprus’s premier employers and qualified professionals across Europe."
+          ]
+        },
+        "candidates": {
+          "title": "For Candidates: Complete Career Support",
+          "text": "Moving to a new country or stepping into a new role is a life-changing decision. We stand by our candidates as active advisors throughout the entire transition.",
+          "points": [
+            "Needs-First Matching: We take the time to understand your individual career goals, lifestyle preferences, and salary expectations.",
+            "Relocation & Onboarding Guidance: From navigating local paperwork to settling into your new role, we provide ongoing support.",
+            "Transparent Communication: Clear contracts, honest advice, and direct feedback at every stage of the recruitment process."
+          ]
+        }
       }
     },
     "home": {
@@ -91,29 +186,39 @@
         "images": {
           "barman": {
             "alt": "Smiling job seeker in a light shirt",
-            "badge": ["Barman position"]
+            "badge": [
+              "Barman position"
+            ]
           },
           "frontdesk": {
             "alt": "Confident professional woman in an office",
-            "badge": ["Front-desk"]
+            "badge": [
+              "Front-desk"
+            ]
           },
           "waitress": {
             "alt": "Thoughtful candidate portrait",
-            "badge": ["Waitress"]
+            "badge": [
+              "Waitress"
+            ]
           },
-          
           "chef": {
             "alt": "Thoughtful candidate portrait",
-            "badge": ["Chef"]
+            "badge": [
+              "Chef"
+            ]
           },
           "porter": {
             "alt": "Thoughtful candidate portrait",
-            "badge": ["Porter"]
+            "badge": [
+              "Porter"
+            ]
           },
-          
           "waitress2": {
             "alt": "Thoughtful candidate portrait",
-            "badge": ["Waitress"]
+            "badge": [
+              "Waitress"
+            ]
           }
         },
         "headline": [
@@ -200,7 +305,9 @@
         "offer_arrival": {
           "title": "Offer & Arrival",
           "description": "Receive your formal contract, book your travel, and let us assist you with housing and onboarding."
-        }
+        },
+        "eyebrow": "How to apply",
+        "title": "Simple Application Process"
       },
       "relocationBenefits": {
         "heading": "RELOCATION & BENEFITS PACKAGE",
@@ -228,12 +335,12 @@
         "title": "Explore job categories",
         "description": "Find open roles in the field you know best.",
         "count": "{count, plural, one {# open role} other {# open roles}}",
-        "cta" : "Explore jobs"
+        "cta": "Explore jobs"
       },
       "featured_jobs": {
         "title": "Hand-picked roles, updated daily",
         "eyebrow": "Featured jobs",
-        "description" : "",
+        "description": "",
         "categories": {
           "front_office": {
             "title": "Front Office & Guest Experience",
@@ -299,9 +406,27 @@
         "read_time": "{min} mins read"
       }
     },
-    "job":{
-      "apply":"Apply for role",
-      "back":"Back to all jobs"
+    "job": {
+      "apply": "Apply for role",
+      "back": "Back to all jobs",
+      "sections": {
+        "description": "Job description",
+        "responsibilities": "Responsibilities",
+        "requirements": "Requirements",
+        "benefits": "Benefits"
+      },
+      "details": {
+        "location": "Location",
+        "schedule": "Schedule",
+        "category": "Category",
+        "salary": "Salary",
+        "experience": "Experience",
+        "status": "Status"
+      },
+      "actively_hiring": "Actively hiring",
+      "key_details": "Key details",
+      "no_description": "No description has been provided for this role yet.",
+      "overview": "Role overview"
     },
     "privacy": {
       "eyebrow": "Legal",
@@ -363,7 +488,7 @@
         },
         "cookies": {
           "title": "Cookies",
-          "body": "Our public website does not use advertising or tracking cookies. We only use strictly necessary cookies, for example to keep authorised team members signed in to our admin area."
+          "body": "Our public website does not use advertising or tracking cookies. We only use strictly necessary cookies, for example to keep authorised team members signed in to our admin area and to remember the language you chose."
         },
         "changes": {
           "title": "Changes to this policy",
@@ -535,5 +660,152 @@
     "title": "404 Not Found",
     "description": "Your visited page not found. You may go home page.",
     "cta": "Back to Home"
+  },
+  "not_found": {
+    "badge": "Page not found",
+    "title": "This page has moved on to a new opportunity",
+    "description": "The link may be broken, or the role you were looking for has already been filled. Plenty of others are still open.",
+    "browse": "Browse open jobs",
+    "back_home": "Back to home",
+    "popular": "Popular destinations",
+    "popular_label": "Popular pages",
+    "home": "Home",
+    "all_jobs": "All jobs"
+  },
+  "components": {
+    "cta_banner": {
+      "title": "Begin your new journey with us",
+      "body": "Build Your Career in Paradise: Luxury Hospitality Jobs in Cyprus.",
+      "cta": "Browse Jobs"
+    },
+    "carousel": {
+      "previous": "Previous jobs",
+      "next": "Next jobs"
+    },
+    "testimonials": {
+      "eyebrow": "Success stories",
+      "title": "People who found their fit",
+      "description": "Real feedback from candidates and hiring managers.",
+      "previous": "Previous testimonial",
+      "next": "Next testimonial",
+      "choose": "Choose testimonial",
+      "show": "Show testimonial from {name}",
+      "portrait": "Portrait of {name}, {role} (reviewer photo, ~600×750)",
+      "items": {
+        "jacqueline": {
+          "role": "Healthcare Administrator",
+          "quote": "I had been applying for months elsewhere. Here the listings were current, the salaries were visible, and I had two interviews in my first week."
+        },
+        "louis": {
+          "role": "Head of Product",
+          "quote": "We posted one product role and had a shortlist of strong candidates within days. The applicant board kept the whole team on the same page."
+        },
+        "priya": {
+          "role": "Data Analyst",
+          "quote": "Filtering by experience level meant I only saw roles I was genuinely qualified for. It made switching industries feel manageable."
+        }
+      }
+    }
+  },
+  "jobs": {
+    "feed": {
+      "eyebrow": "Job Feed",
+      "count": "{count, plural, one {# open role} other {# open roles}}",
+      "fallback_title": "Open roles",
+      "loading_title": "Loading roles…",
+      "error": "Something went wrong loading jobs. Please try again shortly."
+    },
+    "empty": {
+      "filtered_title": "No roles match your filters",
+      "filtered_body": "Try another city, category or job type, or clear the filters to see every open role.",
+      "title": "No open roles right now",
+      "body": "New positions are added regularly. Check back soon.",
+      "clear": "Clear filters"
+    },
+    "filters": {
+      "remove_campaign": "Remove campaign filter: {campaign}",
+      "unknown_campaign": "Unknown campaign",
+      "every_campaign": "Show jobs from every campaign",
+      "category": "Category",
+      "all_categories": "All categories",
+      "job_type": "Job type",
+      "all_job_types": "All job types",
+      "clear": "Clear",
+      "location": "Filter by location",
+      "all_locations": "All"
+    },
+    "loading": {
+      "title": "Fetching available roles...",
+      "body": "Gathering positions across all districts"
+    },
+    "pagination": {
+      "label": "Job list pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "page": "Page {page}",
+      "page_of": "Page {page} of {count}"
+    },
+    "search": {
+      "eyebrow": "Jobs List",
+      "eyebrow_campaign": "Campaign",
+      "title": "Explore our diverse range of <accent>career opportunities</accent>",
+      "label": "Search jobs",
+      "placeholder": "Search job title, company or keyword",
+      "submit": "Search"
+    },
+    "row": {
+      "active": "Active",
+      "view_details": "view details"
+    }
+  },
+  "apply": {
+    "heading": "Personal Details & Resume",
+    "fields": {
+      "first_name": {
+        "label": "First Name",
+        "placeholder": "John"
+      },
+      "last_name": {
+        "label": "Last Name",
+        "placeholder": "Doe"
+      },
+      "email": {
+        "label": "Email Address",
+        "placeholder": "john.doe@example.com"
+      },
+      "phone": {
+        "label": "Phone Number",
+        "placeholder": "+357 99 123456"
+      },
+      "linkedin": {
+        "label": "LinkedIn Profile (optional)",
+        "placeholder": "https://www.linkedin.com/in/your-profile"
+      },
+      "resume": {
+        "label": "Resume / CV",
+        "hint": "PDF, DOC or DOCX (Max {size}MB)",
+        "drop": "Drag & drop your resume here, or <browse>browse files</browse>"
+      },
+      "cover_letter": {
+        "label": "Cover Letter / Message",
+        "placeholder": "Introduce yourself and highlight relevant experience..."
+      }
+    },
+    "errors": {
+      "resume_type": "Please upload your resume as a PDF, DOC or DOCX file.",
+      "resume_size": "Your resume must be {size} MB or smaller.",
+      "network": "Could not reach the server. Please check your connection and try again.",
+      "job_unavailable": "This job is no longer accepting applications.",
+      "invalid": "Please check your details: enter a valid email address and phone number, and upload your CV.",
+      "rate_limited": "Too many applications from your network. Please try again later.",
+      "invalid_cv": "Your CV could not be read. Please upload a PDF, DOC or DOCX file.",
+      "upload_failed": "We could not upload your CV. Please try again.",
+      "server_error": "Something went wrong. Please try again."
+    },
+    "success": {
+      "title": "Application Submitted!",
+      "body": "Thank you, <name>{firstName}</name>. Your application has been received. We'll be in touch soon.",
+      "again": "Submit Another Application"
+    }
   }
 }

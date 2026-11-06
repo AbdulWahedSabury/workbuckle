@@ -7,10 +7,14 @@ import { FormMessage, TextField } from "./fields";
 import { useActionErrorToast } from "./useActionErrorToast";
 import { SubmitButton } from "./buttons";
 import { fieldsetClass, secondaryLinkClass } from "./styles";
+import { defaultLocale } from "@/types/locale";
+import LocalizedField from "./LocalizedField";
 
 export type JobTypeFormValues = {
   name: string;
   slug: string;
+  /** Saved translations keyed by form field name, e.g. { name_el: "…" }. */
+  translations?: Record<string, string>;
 };
 
 export default function JobTypeForm({
@@ -33,14 +37,21 @@ export default function JobTypeForm({
       <FormMessage message={state.message} />
 
       <div className={fieldsetClass}>
-        <TextField
-          name="name"
-          label="Name"
-          placeholder="Full-time"
-          required
-          defaultValue={v ? v.name : jobType?.name}
-          error={errors.name}
-        />
+        <LocalizedField label="Name" field="name" errors={errors} required>
+          {(input) => (
+            <TextField
+              name={input.name}
+              label={input.label}
+              required={input.required}
+              hideLabel
+              placeholder={input.locale === defaultLocale ? "Full-time" : undefined}
+              defaultValue={
+                v ? v[input.name] : input.locale === defaultLocale ? jobType?.name : jobType?.translations?.[input.name]
+              }
+              error={errors[input.name]}
+            />
+          )}
+        </LocalizedField>
         <TextField
           name="slug"
           label="Slug"

@@ -3,6 +3,7 @@
 import { useId } from "react";
 import { motion } from "framer-motion";
 import { MapPin } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { snappySpring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import type { CityOption } from "@/types/job";
@@ -21,10 +22,11 @@ export default function LocationChips({
 }) {
   const { location, setLocation } = useJobsQuery();
   const pillId = useId();
+  const t = useTranslations("jobs.filters");
 
   // Every job has exactly one city, so the city counts add up to "All".
   const total = cities.reduce((sum, city) => sum + city.count, 0);
-  const options = [{ name: "All", slug: "", count: total }, ...cities];
+  const options = [{ name: t("all_locations"), slug: "", count: total }, ...cities];
   // A city from the URL with no published jobs isn't listed; keep it visible
   // so the filter shows what is actually being applied.
   if (location && !cities.some((city) => city.slug === location)) {
@@ -41,7 +43,7 @@ export default function LocationChips({
       <MapPin className="mx-2.5 size-4 flex-none text-gray-2" aria-hidden="true" />
       <div
         role="group"
-        aria-label="Filter by location"
+        aria-label={t("location")}
         className="flex min-w-0 gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {options.map((option) => {

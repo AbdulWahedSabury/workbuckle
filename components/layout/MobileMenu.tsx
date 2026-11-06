@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Logo from "@/components/ui/Logo";
+import LanguageSwitcher from "./LanguageSwitcher";
 import type { Menu } from "@/types/navigation";
 
 interface MobileMenuProps {
@@ -17,6 +18,7 @@ interface MobileMenuProps {
 
 export default function MobileMenu({ open, onClose, links }: MobileMenuProps) {
   const t = useTranslations("navigation");
+  const h = useTranslations("layout.header");
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
@@ -44,7 +46,7 @@ export default function MobileMenu({ open, onClose, links }: MobileMenuProps) {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 32 }}
-            aria-label="Mobile menu"
+            aria-label={h("mobile_menu")}
           >
             <div className="mb-8 flex items-center justify-between">
               <Logo />
@@ -53,14 +55,14 @@ export default function MobileMenu({ open, onClose, links }: MobileMenuProps) {
                 whileTap={{ scale: 0.95 }}
                 onClick={onClose}
                 className="flex size-11 items-center justify-center rounded-full bg-gray-3 text-ink"
-                aria-label="Close menu"
+                aria-label={h("close_menu")}
               >
                 <X className="size-5" />
               </motion.button>
             </div>
             <motion.nav
               className="flex flex-col"
-              aria-label="Mobile"
+              aria-label={h("mobile_nav")}
               initial="hidden"
               animate="show"
               variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
@@ -78,6 +80,7 @@ export default function MobileMenu({ open, onClose, links }: MobileMenuProps) {
                 </motion.div>
               ))}
             </motion.nav>
+            <LanguageSwitcher className="mt-8" onNavigate={onClose} />
           </motion.aside>
         </>
       )}

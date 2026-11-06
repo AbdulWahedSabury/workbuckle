@@ -2,19 +2,27 @@
 
 import { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 import FadeUp from "@/components/motion/FadeUp";
 import RevealSection from "@/components/motion/RevealSection";
 import TestimonialCard from "@/components/testimonials/TestimonialCard";
 import TestimonialControls from "@/components/testimonials/TestimonialControls";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { TESTIMONIALS } from "@/lib/home/data";
+import type { Testimonial } from "@/lib/home/types";
 
 export default function Testimonials() {
   const [[index, direction], setSlide] = useState<[number, number]>([0, 0]);
   const [isPaused, setIsPaused] = useState(false);
+  const t = useTranslations("components.testimonials");
 
   const count = TESTIMONIALS.length;
-  const current = TESTIMONIALS[index]!;
+  const source = TESTIMONIALS[index]!;
+  const current: Testimonial = {
+    ...source,
+    role: t(`items.${source.id}.role`),
+    quote: t(`items.${source.id}.quote`),
+  };
 
   const paginate = (dir: number) =>
     setSlide(([i]) => [(i + dir + count) % count, dir]);
@@ -36,12 +44,12 @@ export default function Testimonials() {
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.55fr_1fr] lg:gap-[50px]">
           <div className="flex flex-col justify-between gap-8">
             <SectionHeader
-              eyebrow="Success stories"
-              title="People who found their fit"
-              description="Real feedback from candidates and hiring managers."
+              eyebrow={t("eyebrow")}
+              title={t("title")}
+              description={t("description")}
             />
             <TestimonialControls
-              names={TESTIMONIALS.map((t) => t.name)}
+              names={TESTIMONIALS.map((item) => item.name)}
               index={index}
               onPrev={() => paginate(-1)}
               onNext={() => paginate(1)}

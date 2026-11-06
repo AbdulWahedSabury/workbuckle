@@ -6,9 +6,9 @@ import type { ApplicationTextFieldName } from "./types";
 
 export interface TextFieldConfig {
   name: ApplicationTextFieldName;
-  label: string;
+  /** Key under `apply.fields` in lang/*.json holding the label and placeholder. */
+  messageKey: "first_name" | "last_name" | "email" | "phone";
   type: "text" | "email" | "tel" | "url";
-  placeholder: string;
   icon: LucideIcon;
   required?: boolean;
   autoComplete?: string;
@@ -18,18 +18,16 @@ export const NAME_FIELDS: TextFieldConfig[][] = [
   [
     {
       name: "firstName",
-      label: "First Name",
+      messageKey: "first_name",
       type: "text",
-      placeholder: "John",
       icon: User,
       required: true,
       autoComplete: "given-name",
     },
     {
       name: "lastName",
-      label: "Last Name",
+      messageKey: "last_name",
       type: "text",
-      placeholder: "Doe",
       icon: User,
       required: true,
       autoComplete: "family-name",
@@ -38,18 +36,16 @@ export const NAME_FIELDS: TextFieldConfig[][] = [
   [
     {
       name: "email",
-      label: "Email Address",
+      messageKey: "email",
       type: "email",
-      placeholder: "john.doe@example.com",
       icon: Mail,
       required: true,
       autoComplete: "email",
     },
     {
       name: "phone",
-      label: "Phone Number",
+      messageKey: "phone",
       type: "tel",
-      placeholder: "+357 99 123456",
       icon: Phone,
       required: true,
       autoComplete: "tel",
@@ -62,7 +58,8 @@ export const NAME_FIELDS: TextFieldConfig[][] = [
 export const RESUME_EXTENSIONS: readonly string[] = CV_EXTENSIONS;
 export const RESUME_MAX_BYTES = CV_MAX_BYTES;
 export const RESUME_ACCEPT = CV_EXTENSIONS.map((ext) => `.${ext}`).join(",");
-export const RESUME_HINT = `PDF, DOC or DOCX (Max ${CV_MAX_BYTES / (1024 * 1024)}MB)`;
+/** For the `{size}` placeholder in the apply.fields.resume.hint and apply.errors.resume_size messages. */
+export const RESUME_MAX_MB = CV_MAX_BYTES / (1024 * 1024);
 
 export const EMPTY_APPLICATION_FORM = {
   firstName: "",

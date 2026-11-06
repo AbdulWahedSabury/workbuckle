@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import RevealSection from "@/components/motion/RevealSection";
 import FadeUp from "@/components/motion/FadeUp";
@@ -10,13 +10,16 @@ import { getPublishedJob } from "@/lib/jobs/public-jobs";
 
 export async function generateMetadata({
   params,
-}: PageProps<"/jobs/[id]/apply">): Promise<Metadata> {
+}: PageProps<"/[locale]/jobs/[id]/apply">): Promise<Metadata> {
   const { id } = await params;
-  const job = await getPublishedJob(id, await getLocale());
-  return { title: job ? `Apply: ${job.title}` : "Job not found" };
+  const [job, t] = await Promise.all([
+    getPublishedJob(id, await getLocale()),
+    getTranslations("Metadata.pages.job"),
+  ]);
+  return { title: job ? t("apply_title", { title: job.title }) : t("not_found") };
 }
 
-export default async function ApplyPage({ params }: PageProps<"/jobs/[id]/apply">) {
+export default async function ApplyPage({ params }: PageProps<"/[locale]/jobs/[id]/apply">) {
   const { id } = await params;
   // Drafts and closed jobs 404 here too; submitApplication re-checks on submit.
   const job = await getPublishedJob(id, await getLocale());

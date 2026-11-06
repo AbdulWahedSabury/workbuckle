@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { getLocale } from "next-intl/server";
+import { useTranslations } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 import SectionHeader from "@/components/ui/SectionHeader";
 import JobsFeedList from "@/components/jobs/JobsFeedList";
 import JobsFilters from "@/components/jobs/JobsFilters";
@@ -18,7 +19,7 @@ import type { CategoryOption, CityOption, JobTypeOption, PublicJobSummary } from
 
 /** Header, filters, rows and pagination for one page of published jobs (Server Component). */
 export default async function JobsFeed({ params }: { params: JobsListParams }) {
-  const locale = await getLocale();
+  const [locale, t] = await Promise.all([getLocale(), getTranslations("jobs.feed")]);
 
   let result: Paginated<PublicJobSummary> | null = null;
   let cities: CityOption[] = [];
@@ -30,9 +31,9 @@ export default async function JobsFeed({ params }: { params: JobsListParams }) {
     [result, cities, jobTypes, categories, campaign] = await Promise.all([
       listPublishedJobsPage(params, locale),
       listPublicCities(params),
-      listPublicJobTypes(),
+      listPublicJobTypes(locale),
       listPublicCategories(locale),
-      params.campaign ? getCampaignSummary(params.campaign) : null,
+      params.campaign ? getCampaignSummary(params.campaign, locale) : null,
     ]);
     campaignTitle = campaign?.title ?? null;
   } catch (error) {
@@ -40,7 +41,7 @@ export default async function JobsFeed({ params }: { params: JobsListParams }) {
   }
 
   const total = result?.total ?? 0;
-  const title = result ? `${total} open ${total === 1 ? "role" : "roles"}` : "Open roles";
+  const title = result ? t("count", { count: total }) : t("fallback_title");
 
   return (
     <>
@@ -60,9 +61,10 @@ export default async function JobsFeed({ params }: { params: JobsListParams }) {
 
 /** First-load placeholder while the feed streams in. */
 export function JobsFeedFallback() {
+  const t = useTranslations("jobs.feed");
   return (
     <>
-      <FeedHeader title="Loading roles…" />
+      <FeedHeader title={t("loading_title")} />
       <div className="mt-8">
         <JobsLoadingState />
       </div>
@@ -72,10 +74,11 @@ export function JobsFeedFallback() {
 
 /** Title with the filter bar (when given) underneath, full width. */
 function FeedHeader({ title, children }: { title: string; children?: ReactNode }) {
+  const t = useTranslations("jobs.feed");
   return (
     <div>
       <div aria-live="polite">
-        <SectionHeader eyebrow="Job Feed" title={title} description="" />
+        <SectionHeader eyebrow={t("eyebrow")} title={title} description="" />
       </div>
       {children}
     </div>

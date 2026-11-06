@@ -1,8 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 export function JobsLoadingState() {
+  const t = useTranslations("jobs.loading");
   return (
     <motion.div
       key="loading"
@@ -40,10 +42,10 @@ export function JobsLoadingState() {
 
       {/* Text Feedback */}
       <p className="text-base font-medium text-foreground">
-        Fetching available roles...
+        {t("title")}
       </p>
       <p className="text-xs text-muted-foreground mt-1">
-        Gathering positions across all districts
+        {t("body")}
       </p>
     </motion.div>
   );

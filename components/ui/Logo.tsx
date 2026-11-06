@@ -1,7 +1,8 @@
 "use client"
 import { useSiteSetting } from "@/providers/SiteSettingProvider";
 import Image from "next/image";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 interface LogoProps {
   tone?: "dark" | "light";
@@ -10,11 +11,12 @@ interface LogoProps {
 
 export default function Logo({ tone = "light", href = "/" }: LogoProps) {
     const {logo,name} = useSiteSetting();
+    const t = useTranslations("layout.logo");
   return (
-    <Link href={href} className="flex items-center gap-2.5" aria-label="Work Buckle home">
+    <Link href={href} className="flex items-center gap-2.5" aria-label={t("label")}>
       <Image
         src={logo}
-        alt="Work Buckle logo mark — orange magnifier speech bubble with black WB monogram"
+        alt={t("alt")}
         width={44}
         height={44}
         className="size-10 object-contain lg:size-11"

@@ -19,23 +19,41 @@ import type {
 /** Only published jobs are visible on the site; drafts and closed jobs stay in the panel. */
 const PUBLIC_STATUS: JobStatus = 'published';
 
-const summarySelect = {
-  id: true,
-  title: true,
-  salary: true,
-  experience: true,
-  client: { select: { name: true } },
-  city: { select: { name: true, state: true } },
-  jobType: { select: { name: true, slug: true } },
-  jobCategory: {
-    select: {
-      imageUrl: true,
-      translations: { select: { locale: true, name: true } },
+/** Fields of a list row; `translations` is the job's row for `locale`, if the admin wrote one. */
+function summarySelect(locale: string) {
+  return {
+    id: true,
+    title: true,
+    salary: true,
+    experience: true,
+    client: { select: { name: true } },
+    city: { select: { name: true, state: true } },
+    jobType: {
+      select: {
+        name: true,
+        slug: true,
+        translations: { where: { locale }, select: { name: true } },
+      },
     },
-  },
-} satisfies Prisma.JobSelect;
+    jobCategory: {
+      select: {
+        imageUrl: true,
+        translations: { select: { locale: true, name: true } },
+      },
+    },
+    translations: {
+      where: { locale },
+      select: { title: true, salary: true, experience: true },
+    },
+  } satisfies Prisma.JobSelect;
+}
 
-type SummaryRow = Prisma.JobGetPayload<{ select: typeof summarySelect }>;
+type SummaryRow = Prisma.JobGetPayload<{ select: ReturnType<typeof summarySelect> }>;
+
+/** The translated text when the admin filled it in, else the English column. */
+function translated(text: string | undefined, english: string): string {
+  return text?.trim() ? text : english;
+}
 
 /** Category name in `locale`, else the default locale, else any translation. */
 function categoryName(translations: { locale: string; name: string }[], locale: string): string {
@@ -48,14 +66,15 @@ function categoryName(translations: { locale: string; name: string }[], locale: 
 }
 
 function toSummary(row: SummaryRow, locale: string): PublicJobSummary {
+  const text = row.translations[0];
   return {
     id: row.id,
-    title: row.title,
-    salary: row.salary,
-    experience: row.experience,
+    title: translated(text?.title, row.title),
+    salary: translated(text?.salary, row.salary),
+    experience: translated(text?.experience, row.experience),
     client: row.client.name,
     city: row.city.name,
-    jobType: row.jobType.name,
+    jobType: translated(row.jobType.translations[0]?.name, row.jobType.name),
     jobTypeSlug: row.jobType.slug,
     category: categoryName(row.jobCategory.translations, locale),
   };
@@ -70,7 +89,7 @@ const publicOrderBy = [
 
 /**
  * Published jobs narrowed by the list filters. Text matching is
- * case-insensitive (ILIKE); the search looks at title, city, type and category.
+ * case-insensitive (ILIKE); the search looks at title (in any language), city, type and category.
  */
 function publicJobsWhere({
   search,
@@ -89,8 +108,10 @@ function publicJobsWhere({
     ...(search && {
       OR: [
         { title: contains },
+        { translations: { some: { title: contains } } },
         { city: { name: contains } },
         { jobType: { name: contains } },
+        { jobType: { translations: { some: { name: contains } } } },
         { jobCategory: { translations: { some: { name: contains } } } },
       ],
     }),
@@ -108,7 +129,7 @@ export async function listPublishedJobsPage(
     { page: params.page, pageSize },
     () => prisma.job.count({ where }),
     ({ skip, take }) =>
-      prisma.job.findMany({ where, orderBy: publicOrderBy, select: summarySelect, skip, take })
+      prisma.job.findMany({ where, orderBy: publicOrderBy, select: summarySelect(locale), skip, take })
   );
   return { ...info, rows: rows.map((row) => toSummary(row, locale)) };
 }
@@ -133,13 +154,19 @@ export async function listPublicCities(
   return cities.map(({ name, slug, _count }) => ({ name, slug, count: _count.jobs }));
 }
 
-/** Job types with at least one published job, A–Z, for the type filter. */
-export async function listPublicJobTypes(): Promise<JobTypeOption[]> {
-  return prisma.jobType.findMany({
+/** Job types with at least one published job, named in `locale` and sorted A–Z, for the type filter. */
+export async function listPublicJobTypes(locale: string): Promise<JobTypeOption[]> {
+  const jobTypes = await prisma.jobType.findMany({
     where: { jobs: { some: { status: PUBLIC_STATUS } } },
-    select: { name: true, slug: true },
-    orderBy: { name: 'asc' },
+    select: {
+      name: true,
+      slug: true,
+      translations: { where: { locale }, select: { name: true } },
+    },
   });
+  return jobTypes
+    .map(({ name, slug, translations }) => ({ name: translated(translations[0]?.name, name), slug }))
+    .sort((a, b) => a.name.localeCompare(b.name, locale));
 }
 
 /**
@@ -170,31 +197,45 @@ export async function listPublicCategories(locale: string): Promise<CategoryOpti
 }
 
 /**
- * One published job, or null if the id is malformed, unknown or not
- * published. Cached per request, so a page and its generateMetadata share one
- * query. Stored HTML is sanitized again here, whatever wrote it.
+ * One published job in `locale` (each field falls back to English when not
+ * translated), or null if the id is malformed, unknown or not published.
+ * Cached per request, so a page and its generateMetadata share one query.
+ * Stored HTML is sanitized again here, whatever wrote it.
  */
 export const getPublishedJob = cache(async (id: string, locale: string): Promise<PublicJob | null> => {
   if (!isUuid(id)) return null;
   const row = await prisma.job.findFirst({
     where: { id, status: PUBLIC_STATUS },
     select: {
-      ...summarySelect,
+      ...summarySelect(locale),
       description: true,
       responsibilities: true,
       requirements: true,
       benefits: true,
+      translations: {
+        where: { locale },
+        select: {
+          title: true,
+          salary: true,
+          experience: true,
+          description: true,
+          responsibilities: true,
+          requirements: true,
+          benefits: true,
+        },
+      },
     },
   });
   if (!row) return null;
+  const text = row.translations[0];
 
   return {
     ...toSummary(row, locale),
     location: row.city.state ? `${row.city.name}, ${row.city.state}` : row.city.name,
-    description: sanitizeRichText(row.description),
-    responsibilities: sanitizeRichText(row.responsibilities),
-    requirements: sanitizeRichText(row.requirements),
-    benefits: sanitizeRichText(row.benefits),
+    description: sanitizeRichText(translated(text?.description, row.description)),
+    responsibilities: sanitizeRichText(translated(text?.responsibilities, row.responsibilities)),
+    requirements: sanitizeRichText(translated(text?.requirements, row.requirements)),
+    benefits: sanitizeRichText(translated(text?.benefits, row.benefits)),
     categoryImage: row.jobCategory.imageUrl,
   };
 });

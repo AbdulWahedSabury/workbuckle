@@ -5,6 +5,8 @@ import JobForm from "@/components/admin/JobForm";
 import { updateJob } from "@/lib/admin/actions/jobs";
 import { requireAdmin } from "@/lib/admin/auth";
 import { getJob, getJobFormOptions } from "@/lib/admin/queries";
+import { translationFormValues } from "@/lib/admin/translations";
+import { JOB_TRANSLATABLE_FIELDS } from "@/schemas/AdminSchemas";
 
 export const metadata: Metadata = { title: "Edit job" };
 
@@ -34,6 +36,7 @@ export default async function EditJobPage({ params }: PageProps<"/admin/jobs/[id
           requirements: job.requirements,
           benefits: job.benefits,
           status: job.status,
+          translations: translationFormValues(job.translations, JOB_TRANSLATABLE_FIELDS),
         }}
         options={options}
         submitLabel="Save changes"

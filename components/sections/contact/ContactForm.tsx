@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 
 export default function ContactForm() {
   const f = useTranslations("form");
+  const c = useTranslations("pages.contact.form");
   const FormSchema = getContactFormSchema(f);
 
   const {
@@ -86,13 +87,14 @@ export default function ContactForm() {
       id="contact-form"
       onSubmit={handleSubmit(onSubmit)}
       noValidate
-      className="space-y-6"
+      // Clears the sticky header and the heading above the form on #contact-form jumps.
+      className="scroll-mt-44 space-y-6 lg:scroll-mt-48"
       aria-describedby="contact-form"
     >
       {/* Honeypot: moved off-screen rather than display:none, since some bots skip
           display:none fields. Hidden from screen readers and the tab order. */}
       <div aria-hidden="true" className="absolute left-[-9999px] h-px w-px overflow-hidden">
-        <label htmlFor={HONEYPOT_FIELD}>Leave this field empty</label>
+        <label htmlFor={HONEYPOT_FIELD}>{c("honeypot")}</label>
         <input
           ref={honeypotRef}
           type="text"

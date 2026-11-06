@@ -2,8 +2,10 @@ import FadeUp from "@/components/motion/FadeUp";
 import RevealSection from "@/components/motion/RevealSection";
 import Spin from "@/components/motion/Spin";
 import CtaButton from "@/components/ui/CtaButton";
+import { useTranslations } from "next-intl";
 
 export default function CtaBanner() {
+  const t = useTranslations("components.cta_banner");
   return (
     <RevealSection className="section-spacing">
       <div className="container-site">
@@ -16,16 +18,15 @@ export default function CtaBanner() {
           <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[1fr_auto] lg:gap-16">
             <div>
               <h2 className="mb-4 text-3xl tracking-tight text-white sm:text-5xl lg:text-6xl">
-                Begin your new journey with us
+                {t("title")}
               </h2>
               <p className="max-w-[560px] text-lg text-white/70">
-                Build Your Career in Paradise: Luxury Hospitality Jobs in
-                Cyprus.
+                {t("body")}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <CtaButton href="#jobs" tone="primary">
-                Browse Jobs
+                {t("cta")}
               </CtaButton>
             </div>
           </div>

@@ -3,6 +3,7 @@
 import { useCallback, type ReactNode } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 /**
  * Header row with prev/next controls above a swipeable row of slides.
@@ -15,6 +16,7 @@ export default function CampaignCarousel({
   header: ReactNode;
   children: ReactNode;
 }) {
+  const t = useTranslations("components.carousel");
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
     loop: false,
@@ -41,7 +43,7 @@ export default function CampaignCarousel({
           <button
             onClick={scrollPrev}
             type="button"
-            aria-label="Previous jobs"
+            aria-label={t("previous")}
             className="flex size-10 items-center justify-center rounded-full border border-line bg-white text-ink transition-colors hover:bg-gray-100 hover:text-black focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <ChevronLeft className="size-5" />
@@ -49,7 +51,7 @@ export default function CampaignCarousel({
           <button
             onClick={scrollNext}
             type="button"
-            aria-label="Next jobs"
+            aria-label={t("next")}
             className="flex size-10 items-center justify-center rounded-full border border-line bg-white text-ink transition-colors hover:bg-gray-100 hover:text-black focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <ChevronRight className="size-5" />

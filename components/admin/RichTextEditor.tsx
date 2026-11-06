@@ -32,6 +32,7 @@ export default function RichTextEditor({
   hint,
   error,
   required,
+  hideLabel,
 }: {
   name: string;
   label: string;
@@ -40,6 +41,8 @@ export default function RichTextEditor({
   hint?: string;
   error?: string[];
   required?: boolean;
+  /** Keep the label for screen readers only, e.g. when LocalizedField shows it above the tabs. */
+  hideLabel?: boolean;
 }) {
   const [html, setHtml] = useState(defaultValue ?? "");
   const invalid = Boolean(error?.length);
@@ -78,7 +81,7 @@ export default function RichTextEditor({
     <div className="flex flex-col gap-1.5">
       <span
         id={labelId}
-        className="text-sm font-semibold text-ink"
+        className={cn("text-sm font-semibold text-ink", hideLabel && "sr-only")}
         onClick={() => editor?.commands.focus()}
       >
         {label} {required && <span className="text-red-600" aria-hidden="true">*</span>}

@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import ContactFormSection from "@/components/sections/contact/ContactFormSection";
 import ContactHero from "@/components/sections/contact/ContactHero";
 import ContactInfoSection from "@/components/sections/contact/ContactInfoSection";
 import Faq from "@/components/sections/contact/Faq";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description:
-    "Reach out to the Work Buckle team — we're here to understand your needs and provide tailored solutions.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Metadata.pages.contact");
+  return { title: t("title"), description: t("description") };
+}
 
 export default function ContactPage() {
   return (
     <>
       <ContactHero />
+      <ContactFormSection />
       <ContactInfoSection />
       <Faq />
     </>

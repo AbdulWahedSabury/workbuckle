@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import FadeUp from "@/components/motion/FadeUp";
 import RevealSection from "@/components/motion/RevealSection";
 import FooterLinkColumns from "@/components/layout/FooterLinkColumns";
@@ -32,7 +32,7 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col gap-3 border-t border-line pt-6 text-sm sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Work Buckle. All rights reserved.</p>
+          <p>{t('copyright', { year: new Date().getFullYear() })}</p>
           <p className="flex flex-wrap gap-x-4 gap-y-1">
             <Link href="/privacy" className="hover:text-ink">
               {n('privacy')}

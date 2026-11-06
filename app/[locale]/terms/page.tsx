@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import LegalHero from "@/components/sections/legal/LegalHero";
 import LegalContent, { type LegalSection } from "@/components/sections/legal/LegalContent";
 
-export const metadata: Metadata = {
-  title: "Terms and Conditions",
-  description:
-    "The terms that apply when candidates, employers and visitors use the Work Buckle website and recruitment services.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Metadata.pages.terms");
+  return { title: t("title"), description: t("description") };
+}
 
 /** Entries in `pages.terms.sections` (lang/*.json), in display order. */
 const SECTIONS: LegalSection[] = [

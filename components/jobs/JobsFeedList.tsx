@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 import JobRow from "@/components/jobs/JobRow";
 import { JobsEmptyState } from "@/components/jobs/JobsEmptyState";
@@ -18,6 +19,7 @@ export interface JobsFeedListProps {
  */
 export default function JobsFeedList({ jobs, isError = false }: JobsFeedListProps) {
   const { isPending, hasFilters, clearFilters } = useJobsQuery();
+  const t = useTranslations("jobs.feed");
 
   return (
     <motion.ul
@@ -37,7 +39,7 @@ export default function JobsFeedList({ jobs, isError = false }: JobsFeedListProp
             exit={{ opacity: 0 }}
             className="list-none rounded-sm-card border border-line p-10 text-center text-gray-2"
           >
-            Something went wrong loading jobs. Please try again shortly.
+            {t("error")}
           </motion.li>
         ) : jobs.length > 0 ? (
           jobs.map((job) => (

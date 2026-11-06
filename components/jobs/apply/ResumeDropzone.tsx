@@ -1,5 +1,6 @@
 import { useState, type DragEvent } from "react";
 import { FileText, Upload, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export interface ResumeDropzoneProps {
   label: string;
@@ -22,6 +23,7 @@ export default function ResumeDropzone({
   onClear,
 }: ResumeDropzoneProps) {
   const [dragActive, setDragActive] = useState(false);
+  const t = useTranslations("apply.fields.resume");
 
   const handleDrag = (e: DragEvent) => {
     e.preventDefault();
@@ -84,8 +86,11 @@ export default function ResumeDropzone({
           <div>
             <Upload className="mx-auto mb-2 size-7 text-gray-2" />
             <p className="text-sm font-semibold text-ink">
-              Drag &amp; drop your resume here, or{" "}
-              <span className="underline decoration-ink underline-offset-2">browse files</span>
+              {t.rich("drop", {
+                browse: (chunks) => (
+                  <span className="underline decoration-ink underline-offset-2">{chunks}</span>
+                ),
+              })}
             </p>
             <p className="mt-1 text-xs text-gray-2">{hint}</p>
           </div>

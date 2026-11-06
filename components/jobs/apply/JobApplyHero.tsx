@@ -1,5 +1,5 @@
 "use client"
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Building2, MapPin } from "lucide-react";
 
 import RevealSection from "@/components/motion/RevealSection";

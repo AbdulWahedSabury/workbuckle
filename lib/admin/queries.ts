@@ -399,7 +399,7 @@ export async function listJobTypes(
 export async function getJobType(id: string) {
   await requireView('jobTypes');
   if (!isUuid(id)) return null;
-  return prisma.jobType.findUnique({ where: { id } });
+  return prisma.jobType.findUnique({ where: { id }, include: { translations: true } });
 }
 
 // ─── FAQs ────────────────────────────────────────────────────────────────────
@@ -452,7 +452,7 @@ export async function listFaqs(params: ListParams<FaqSortKey>): Promise<Paginate
 export async function getFaq(id: string) {
   await requireView('faqs');
   if (!isUuid(id)) return null;
-  return prisma.faq.findUnique({ where: { id } });
+  return prisma.faq.findUnique({ where: { id }, include: { translations: true } });
 }
 
 // ─── Campaigns ───────────────────────────────────────────────────────────────
@@ -516,6 +516,7 @@ export async function getCampaign(id: string) {
         orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
         select: { id: true, title: true, status: true },
       },
+      translations: true,
     },
   });
 }
@@ -610,7 +611,7 @@ export async function listJobs(params: ListParams<JobSortKey>): Promise<Paginate
 export async function getJob(id: string) {
   await requireView('jobs');
   if (!isUuid(id)) return null;
-  return prisma.job.findUnique({ where: { id } });
+  return prisma.job.findUnique({ where: { id }, include: { translations: true } });
 }
 
 export type SelectOption = { value: string; label: string };

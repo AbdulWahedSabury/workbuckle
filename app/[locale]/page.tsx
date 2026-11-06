@@ -9,7 +9,7 @@ import HowToApply from "@/components/how_it_works/HowToApply";
 import RelocationBenefits from "@/components/relocation/RelocationBenefits";
 import Faq from "@/components/sections/contact/Faq";
 
-export default function HomePage({ searchParams }: PageProps<"/">) {
+export default function HomePage({ searchParams }: PageProps<"/[locale]">) {
   return (
     <>
       <HeroSection />

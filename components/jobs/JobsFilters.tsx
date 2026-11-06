@@ -1,6 +1,7 @@
 "use client";
 
 import { Briefcase, ChevronDown, LayoutGrid, Megaphone, X, type LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { CategoryOption, CityOption, JobTypeOption } from "@/types/job";
 import { useJobsQuery } from "./JobsQueryProvider";
 import LocationChips from "./LocationChips";
@@ -25,6 +26,8 @@ export default function JobsFilters({
 }) {
   const { type, setType, category, setCategory, campaign, setCampaign, hasFilters, clearFilters } =
     useJobsQuery();
+  const t = useTranslations("jobs.filters");
+  const campaignName = campaignTitle ?? t("unknown_campaign");
 
   return (
     <div className="flex flex-col gap-2 rounded-sm-card border border-line bg-white p-2 lg:flex-row lg:items-center">
@@ -35,26 +38,26 @@ export default function JobsFilters({
           <button
             type="button"
             onClick={() => setCampaign("")}
-            aria-label={`Remove campaign filter: ${campaignTitle ?? "unknown campaign"}`}
-            title="Show jobs from every campaign"
+            aria-label={t("remove_campaign", { campaign: campaignName })}
+            title={t("every_campaign")}
             className="inline-flex h-12 max-w-full min-w-0 flex-none items-center gap-2 rounded-full bg-ink pr-3 pl-4 text-sm font-semibold text-white transition-colors hover:bg-ink/85 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none lg:max-w-60"
           >
             <Megaphone className="size-4 flex-none text-primary" aria-hidden="true" />
-            <span className="truncate">{campaignTitle ?? "Unknown campaign"}</span>
+            <span className="truncate">{campaignName}</span>
             <X className="size-4 flex-none" aria-hidden="true" />
           </button>
         )}
         <FilterSelect
-          label="Category"
-          allLabel="All categories"
+          label={t("category")}
+          allLabel={t("all_categories")}
           icon={LayoutGrid}
           value={category}
           options={categories}
           onChange={setCategory}
         />
         <FilterSelect
-          label="Job type"
-          allLabel="All job types"
+          label={t("job_type")}
+          allLabel={t("all_job_types")}
           icon={Briefcase}
           value={type}
           options={jobTypes}
@@ -68,7 +71,7 @@ export default function JobsFilters({
             className="inline-flex h-12 flex-none items-center gap-1.5 rounded-full px-4 text-sm font-semibold text-gray-2 transition-colors hover:bg-gray-3 hover:text-ink focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
           >
             <X className="size-4" aria-hidden="true" />
-            Clear
+            {t("clear")}
           </button>
         )}
       </div>

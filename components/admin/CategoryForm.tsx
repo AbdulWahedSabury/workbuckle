@@ -4,15 +4,13 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { initialActionState, type ActionState } from "@/lib/admin/action-state";
 import { categoryNameField } from "@/schemas/AdminSchemas";
-import { defaultLocale, locales } from "@/types/locale";
 import { CheckboxField, FormMessage, TextField } from "./fields";
 import { useActionErrorToast } from "./useActionErrorToast";
 import { SubmitButton } from "./buttons";
 import IconPickerField from "./IconPickerField";
+import LocalizedField from "./LocalizedField";
 import ImageUploadField from "./ImageUploadField";
 import { fieldsetClass, legendClass, secondaryLinkClass } from "./styles";
-
-const LOCALE_LABELS: Record<string, string> = { en: "English", de: "German" };
 
 export type CategoryFormValues = {
   slug: string;
@@ -44,24 +42,24 @@ export default function CategoryForm({
 
       <fieldset className={fieldsetClass}>
         <legend className={legendClass}>Name</legend>
-        {locales.map((locale) => {
-          const field = categoryNameField(locale);
-          return (
+        <LocalizedField
+          label="Category name"
+          field="name"
+          errors={errors}
+          required
+          nameFor={categoryNameField}
+        >
+          {(input) => (
             <TextField
-              key={locale}
-              name={field}
-              label={LOCALE_LABELS[locale] ?? locale.toUpperCase()}
-              required={locale === defaultLocale}
-              hint={
-                locale === defaultLocale
-                  ? undefined
-                  : `Optional. Falls back to ${LOCALE_LABELS[defaultLocale] ?? defaultLocale} when empty.`
-              }
-              defaultValue={v ? v[field] : category?.names[locale]}
-              error={errors[field]}
+              name={input.name}
+              label={input.label}
+              required={input.required}
+              hideLabel
+              defaultValue={v ? v[input.name] : category?.names[input.locale]}
+              error={errors[input.name]}
             />
-          );
-        })}
+          )}
+        </LocalizedField>
       </fieldset>
 
       <fieldset className={fieldsetClass}>
