@@ -18,6 +18,7 @@ export type JobFormValues = {
   title: string;
   salary: string;
   experience: string;
+  openings: string;
   clientId: string;
   cityId: string;
   jobTypeId: string;
@@ -159,6 +160,14 @@ export default function JobForm({
                 )}
               </LocalizedField>
             </div>
+            <TextField
+              name="openings"
+              label="Number of openings"
+              type="number"
+              required
+              defaultValue={value("openings") ?? "1"}
+              error={errors.openings}
+            />
           </fieldset>
 
           <fieldset className={fieldsetClass}>

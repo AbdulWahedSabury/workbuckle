@@ -232,6 +232,7 @@ model Job {
   jobCategoryId    String           @map("job_category_id") @db.Uuid
   campaignId       String?          @map("campaign_id") @db.Uuid
   experience       String           @db.VarChar(120)
+  openings         Int              @default(1)
   description      String           @db.Text
   responsibilities String           @db.Text
   requirements     String           @db.Text

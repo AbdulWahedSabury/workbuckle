@@ -199,6 +199,12 @@ export const jobSchema = z.object({
   title: z.string().trim().min(1, 'Title is required.').max(200),
   salary: z.string().trim().min(1, 'Salary is required.').max(120),
   experience: z.string().trim().min(1, 'Experience is required.').max(120),
+  openings: z.coerce
+    .number({ invalid_type_error: 'Enter a number of openings.' })
+    .int('Enter a whole number.')
+    .min(1, 'At least 1 opening.')
+    .max(10_000, 'Too many openings.')
+    .default(1),
   clientId: relationId('client'),
   cityId: relationId('city'),
   jobTypeId: relationId('job type'),
