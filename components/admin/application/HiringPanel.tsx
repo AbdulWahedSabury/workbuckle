@@ -1,6 +1,7 @@
 import type { ApplicationDetail } from "@/lib/admin/queries";
 import { formatDate } from "../tables/format";
 import { ACTIVE_APPLICATION_STATUSES, isEmployerDecisionStage } from "@/schemas/AdminSchemas";
+import { JOB_CLOSED_MESSAGE, remainingPositions } from "@/lib/jobs/capacity";
 import HireButton from "../HireButton";
 import RejectButton from "../RejectButton";
 
@@ -13,14 +14,16 @@ function hireBlocker(app: ApplicationDetail, remaining: number): string | undefi
   if (app.viewerIsClient && !isEmployerDecisionStage(app.status)) return EMPLOYER_CLOSED;
   if (app.candidate.status === "hired") return "This candidate is already hired for another job.";
   if (app.candidate.status === "inactive") return "This candidate is inactive. Set them back to open first.";
-  if (remaining <= 0) return "All positions are filled. Raise the number of openings on the job first.";
+  const full = app.job.filledPositions >= app.job.totalPositions;
+  if (full) return "All positions are filled. Raise the number of openings on the job first.";
+  if (remaining <= 0) return JOB_CLOSED_MESSAGE; // closed by hand with openings left
   return undefined;
 }
 
 /** The final decision: hire or reject. For admins and the client's own users (see requireApplicationManager). */
 export default function HiringPanel({ application }: { application: ApplicationDetail }) {
   const { job, candidate } = application;
-  const remaining = Math.max(0, job.totalPositions - job.filledPositions);
+  const remaining = remainingPositions(job);
 
   if (application.status === "hired") {
     return (

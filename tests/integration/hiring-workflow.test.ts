@@ -3,6 +3,7 @@
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { prisma } from '@/lib/prisma';
 import { hireCandidate } from '@/lib/admin/actions/hiring';
+import { JOB_CLOSED_MESSAGE, remainingPositions } from '@/lib/jobs/capacity';
 import { rejectApplication, saveInterview, updateApplicationStatus } from '@/lib/admin/actions/applications';
 import { createCandidate as createCandidateAction, setCandidateStatus } from '@/lib/admin/actions/candidates';
 import { submitPublicApplication } from '@/lib/jobs/submit-application';
@@ -378,5 +379,33 @@ describe('Authorization', () => {
       'open',
       0,
     ]);
+  });
+});
+
+describe('Test K: a job closed by hand', () => {
+  it('has 0 remaining and refuses hires; publishing it again brings the openings back', async () => {
+    const f = await createJobFixtures();
+    const job = await createJob(f, 2);
+    const app = await createApplication((await createCandidate('Closy')).id, job.id);
+    const closed = await prisma.job.update({ where: { id: job.id }, data: { status: 'closed' } });
+    expect(remainingPositions(closed)).toBe(0);
+
+    expect((await hireCandidate(app.id)).error).toBe(JOB_CLOSED_MESSAGE);
+    const untouched = await prisma.jobApplication.findUniqueOrThrow({ where: { id: app.id }, include: { candidate: true, job: true } });
+    expect([untouched.status, untouched.candidate.status, untouched.job.filledPositions]).toEqual(['pending', 'open', 0]);
+
+    const reopened = await prisma.job.update({ where: { id: job.id }, data: { status: 'published' } });
+    expect(remainingPositions(reopened)).toBe(2);
+    expect((await hireCandidate(app.id)).error).toBeUndefined();
+    expect(remainingPositions(await prisma.job.findUniqueOrThrow({ where: { id: job.id } }))).toBe(1);
+  });
+
+  it('a full job keeps the "raise the openings" message, not the closed one', async () => {
+    const f = await createJobFixtures();
+    const job = await createJob(f, 1);
+    const [first, second] = await Promise.all([createCandidate('Fa'), createCandidate('Fb')]);
+    const [appFirst, appSecond] = await Promise.all([createApplication(first.id, job.id), createApplication(second.id, job.id)]);
+    expect((await hireCandidate(appFirst.id)).error).toBeUndefined(); // fills it and closes it
+    expect((await hireCandidate(appSecond.id)).error).toMatch(/Raise the number of openings/);
   });
 });

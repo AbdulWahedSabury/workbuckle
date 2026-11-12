@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { remainingPositions } from "@/lib/jobs/capacity";
 import { Pencil, SearchX, Users } from "lucide-react";
 import { deleteJob } from "@/lib/admin/actions/jobs";
 import { parseListParams } from "@/lib/admin/list-params";
@@ -70,14 +71,15 @@ const columns: Column<JobListRow, JobSortKey>[] = [
     header: "Positions",
     hideBelow: "sm",
     cell: (job) => {
-      const remaining = Math.max(0, job.totalPositions - job.filledPositions);
+      const remaining = remainingPositions(job);
+      const full = job.filledPositions >= job.totalPositions;
       return (
         <div className="flex flex-col whitespace-nowrap">
           <span className="font-semibold tabular-nums text-ink">
             {job.filledPositions}/{job.totalPositions} filled
           </span>
           <span className="text-xs text-gray-2">
-            {remaining ? `${remaining} remaining` : "Full"}
+            {remaining ? `${remaining} remaining` : full ? "Full" : "0 remaining · closed"}
           </span>
         </div>
       );

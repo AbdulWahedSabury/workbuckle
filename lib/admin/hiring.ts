@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@/lib/generated/prisma/client';
 import { ACTIVE_APPLICATION_STATUSES, isEmployerDecisionStage } from '@/schemas/AdminSchemas';
 import { markSubmitted } from '@/lib/admin/submission';
+import { JOB_CLOSED_MESSAGE } from '@/lib/jobs/capacity';
 
 type Tx = Prisma.TransactionClient;
 
@@ -26,7 +27,7 @@ export type HireOutcome = {
  *   1. candidate open → hired (locks the person first, so two hires of the same
  *      person for different jobs queue up instead of deadlocking; the second fails)
  *   2. application → hired, only from the status it was read with (no double hire)
- *   3. job filled_positions + 1, only while filled < total (no over-hiring)
+ *   3. job filled_positions + 1, only while filled < total and the job isn't closed (no over-hiring)
  *   4. job → closed when no positions remain
  *   5. the candidate's other active applications → cancelled
  *   6. history rows for every change
@@ -114,7 +115,8 @@ async function claimApplication(tx: Tx, id: string, fromStatus: string): Promise
 
 async function fillPosition(tx: Tx, jobId: string) {
   const filled = await tx.job.updateMany({
-    where: { id: jobId, filledPositions: { lt: prisma.job.fields.totalPositions } },
+    // A closed job has no openings left to fill (lib/jobs/capacity.ts).
+    where: { id: jobId, status: { not: 'closed' }, filledPositions: { lt: prisma.job.fields.totalPositions } },
     data: { filledPositions: { increment: 1 } },
   });
   const job = await tx.job.findUnique({
@@ -122,6 +124,10 @@ async function fillPosition(tx: Tx, jobId: string) {
     select: { title: true, status: true, totalPositions: true, filledPositions: true },
   });
   if (!job) throw new HireRefused('This job no longer exists.');
+  // Closed by hand with openings left; a full job gets the "raise the openings" message below.
+  if (!filled.count && job.status === 'closed' && job.filledPositions < job.totalPositions) {
+    throw new HireRefused(JOB_CLOSED_MESSAGE);
+  }
   if (!filled.count) {
     const full = job.totalPositions === 1
       ? `The only position for ${job.title} is filled.`

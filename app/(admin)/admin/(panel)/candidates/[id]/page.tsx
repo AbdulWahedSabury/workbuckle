@@ -22,6 +22,7 @@ import { cardClass, primaryButtonClass, secondaryLinkClass } from "@/components/
 import { formatDate } from "@/components/admin/tables/format";
 import { getApplication, type ApplicationDetail } from "@/lib/admin/queries";
 import { toZonedInputValue } from "@/lib/datetime";
+import { remainingPositions } from "@/lib/jobs/capacity";
 import { INTERVIEW_STATUSES, isEmployerInterviewStage, type InterviewStatus } from "@/schemas/AdminSchemas";
 
 export const metadata: Metadata = { title: "Candidate profile" };
@@ -204,7 +205,7 @@ function EmployerFeedbackSummary({ application }: { application: ApplicationDeta
 function ApplicationAside({ application, name }: { application: ApplicationDetail; name: string }) {
   const { job } = application;
   const badge = badgeFor(APPLICATION_STATUS_BADGE, application.status);
-  const remaining = Math.max(0, job.totalPositions - job.filledPositions);
+  const remaining = remainingPositions(job);
   return (
     <aside className="flex h-fit flex-col gap-6">
       <section className={`${cardClass} flex flex-col gap-5 p-5 sm:p-6`}>
@@ -224,6 +225,7 @@ function ApplicationAside({ application, name }: { application: ApplicationDetai
             </AdminOnly>
             <span className="block text-xs text-gray-2">
               {job.city.name} · {job.filledPositions}/{job.totalPositions} filled, {remaining} remaining
+              {job.status === "closed" && " (job closed)"}
             </span>
           </Detail>
           <Detail label="Status">
