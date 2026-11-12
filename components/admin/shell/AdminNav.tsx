@@ -10,6 +10,7 @@ import {
   Building2,
   CircleHelp,
   Globe,
+  IdCard,
   LayoutDashboard,
   MapPin,
   Megaphone,
@@ -46,6 +47,7 @@ const NAV_GROUPS: readonly NavGroup[] = [
     label: "Catalog",
     items: [
       { href: "/admin/categories", label: "Job categories", icon: Tags, section: "categories" },
+      { href: "/admin/positions", label: "Positions", icon: IdCard, section: "positions" },
       { href: "/admin/job-types", label: "Job types", icon: Briefcase, section: "jobTypes" },
       { href: "/admin/cities", label: "Cities", icon: MapPin, section: "cities" },
     ],

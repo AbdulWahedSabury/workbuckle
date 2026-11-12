@@ -5,4 +5,6 @@ export const E2E = {
   chef: 'E2E Head Chef', // 2 positions
   waiter: 'E2E Waiter', // 1 position
   otherClientJob: 'E2E Resort Lifeguard', // belongs to a second client
+  chefPosition: 'E2E Chef', // the chef job's position
+  waiterPosition: 'E2E Waiter position', // the waiter job's position
 };

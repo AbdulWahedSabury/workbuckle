@@ -130,10 +130,12 @@ test.describe('admin hiring workflow', () => {
     await expect(pipeline).toContainText(/Pending review\s*17%\s*1/);
   });
 
-  test('talent pool: open candidate without a job, assigned from their profile', async () => {
-    await page.goto('/admin/people?status=open&nojob=1');
-    await expect(page.getByRole('link', { name: 'Pia E2E', exact: true })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Dan E2E', exact: true })).toHaveCount(0); // has a job
+  test('talent pool: only people free to put forward; assigning one takes them out', async () => {
+    await page.goto('/admin/people');
+    await expect(page.getByRole('link', { name: 'Pia E2E', exact: true })).toBeVisible(); // no job yet
+    await expect(page.getByRole('link', { name: 'Ben E2E', exact: true })).toBeVisible(); // rejected: free again
+    await expect(page.getByRole('link', { name: 'Dan E2E', exact: true })).toHaveCount(0); // pending for a job
+    await expect(page.getByRole('link', { name: 'Anna E2E', exact: true })).toHaveCount(0); // hired
     await page.getByRole('link', { name: 'Pia E2E', exact: true }).click();
     await expect(page.getByText('Not assigned to any job yet.')).toBeVisible();
 
@@ -145,9 +147,9 @@ test.describe('admin hiring workflow', () => {
     const pia = await application('Pia', E2E.chef);
     expect([pia.status, pia.candidate_status]).toEqual(['pending', 'open']);
 
-    await page.goto('/admin/people?status=hired');
-    await expect(page.getByRole('link', { name: 'Anna E2E', exact: true })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Pia E2E', exact: true })).toHaveCount(0);
+    await page.goto('/admin/people');
+    await expect(page.getByRole('link', { name: 'Ben E2E', exact: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Pia E2E', exact: true })).toHaveCount(0); // now pending for a job
   });
 });
 

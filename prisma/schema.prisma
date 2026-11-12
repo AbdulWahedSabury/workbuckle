@@ -260,6 +260,10 @@ model Job {
   jobCategory      JobCategory      @relation(fields: [jobCategoryId], references: [id], onDelete: Restrict)
   // Optional; deleting a campaign leaves its jobs in place, unassigned.
   campaign         Campaign?        @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  // The role being hired for (Waiter, Bartender, ...). Required by the job form;
+  // null only on jobs saved before positions existed. Applicants get it (CandidatePosition).
+  positionId       String?          @map("position_id") @db.Uuid
+  position         Position?        @relation(fields: [positionId], references: [id], onDelete: Restrict)
   applications     JobApplication[]
   translations     JobTranslation[]
 
@@ -268,6 +272,7 @@ model Job {
   @@index([jobCategoryId])
   @@index([clientId])
   @@index([campaignId])
+  @@index([positionId])
   // Public /jobs list: WHERE status = 'published' ORDER BY created_at DESC.
   // Also serves status-only filters/counts (leftmost prefix), so it replaces @@index([status]).
   @@index([status, createdAt(sort: Desc)])
@@ -297,24 +302,59 @@ model JobTranslation {
   @@map("job_translations")
 }
 
+// A role jobs hire for and candidates are filtered by (Waiter, Bartender, ...).
+// Managed by admins like the other catalog lists; admin-only, so no translations.
+model Position {
+  id         String              @id @default(uuid()) @db.Uuid
+  name       String              @db.VarChar(120)
+  slug       String              @unique @db.VarChar(140)
+  createdAt  DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+  // Restrict (on Job.position): a position jobs still use can't be deleted.
+  jobs       Job[]
+  candidates CandidatePosition[]
+
+  @@index([name])
+  @@map("positions")
+}
+
+/// A person suited for a position. Added when they apply for or are assigned to a
+/// job with that position, or set by an admin on their profile.
+model CandidatePosition {
+  candidateId String    @map("candidate_id") @db.Uuid
+  positionId  String    @map("position_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  // Deleting a position removes it from everyone who had it.
+  position    Position  @relation(fields: [positionId], references: [id], onDelete: Cascade)
+
+  @@id([candidateId, positionId])
+  // Talent pool filter: people with a given position.
+  @@index([positionId])
+  @@map("candidate_positions")
+}
+
 /// A person, one per email address (stored lower-case). Their applications hang off it.
 model Candidate {
-  id           String           @id @default(uuid()) @db.Uuid
-  firstName    String           @map("first_name") @db.VarChar(120)
-  lastName     String           @map("last_name") @db.VarChar(120)
-  phone        String           @db.VarChar(40)
-  email        String           @unique @db.VarChar(255)
-  linkedin     String?          @map("linkedin_url") @db.VarChar(2048)
+  id           String              @id @default(uuid()) @db.Uuid
+  firstName    String              @map("first_name") @db.VarChar(120)
+  lastName     String              @map("last_name") @db.VarChar(120)
+  phone        String              @db.VarChar(40)
+  email        String              @unique @db.VarChar(255)
+  linkedin     String?             @map("linkedin_url") @db.VarChar(2048)
   // The person's own CV, used when an admin assigns them to a job. May be the same
   // storage object as an application's CV, so files are removed only when unused.
-  cvUrl        String?          @map("cv_url") @db.VarChar(2048)
-  cvPath       String?          @map("cv_path") @db.VarChar(1024)
+  cvUrl        String?             @map("cv_url") @db.VarChar(2048)
+  cvPath       String?             @map("cv_path") @db.VarChar(1024)
   // open | hired | inactive — validated in schemas/AdminSchemas.ts.
   // Set to hired only by the hire action; hired candidates can't apply again.
-  status       String           @default("open") @db.VarChar(20)
-  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt    DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+  status       String              @default("open") @db.VarChar(20)
+  createdAt    DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
   applications JobApplication[]
+  // Positions this person is suited for: from the jobs they applied or were
+  // assigned to, plus any an admin set on their profile. Filters the talent pool.
+  positions    CandidatePosition[]
 
   @@index([status])
   @@map("candidates")

@@ -99,6 +99,20 @@ export const citySchema = z.object({
   state: optionalText(120),
 });
 
+// ─── Positions ───────────────────────────────────────────────────────────────
+
+/** A role jobs hire for and the talent pool filters by (Waiter, Bartender, ...). */
+export const positionSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required.').max(120),
+  slug,
+});
+
+/** The positions an admin sets on a person's profile: any number, no duplicates. */
+export const personPositionsSchema = z
+  .array(z.string().uuid('Choose a valid position.'))
+  .max(200)
+  .transform((ids) => [...new Set(ids)]);
+
 // ─── Job types ───────────────────────────────────────────────────────────────
 
 export const jobTypeSchema = z.object({
@@ -210,6 +224,7 @@ export const jobSchema = z.object({
   cityId: relationId('city'),
   jobTypeId: relationId('job type'),
   jobCategoryId: relationId('category'),
+  positionId: relationId('position'),
   // Optional: blank ("No campaign") → null.
   campaignId: z
     .string()

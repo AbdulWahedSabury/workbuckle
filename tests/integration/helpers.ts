@@ -9,6 +9,8 @@ const TABLES = [
   'candidates',
   'job_translations',
   'jobs',
+  'candidate_positions',
+  'positions',
   'clients',
   'cities',
   'job_types',
@@ -38,13 +40,14 @@ const next = () => ++seq;
 /** Lookups every job needs, once per test. */
 export async function createJobFixtures() {
   const n = next();
-  const [client, city, jobType, category] = await Promise.all([
+  const [client, city, jobType, category, position] = await Promise.all([
     prisma.client.create({ data: { name: `Employer ${n}`, email: `hr${n}@employer.test` } }),
     prisma.city.create({ data: { name: `City ${n}`, slug: `city-${n}` } }),
     prisma.jobType.create({ data: { name: `Type ${n}`, slug: `type-${n}` } }),
     prisma.jobCategory.create({ data: { slug: `category-${n}` } }),
+    prisma.position.create({ data: { name: `Position ${n}`, slug: `position-${n}` } }),
   ]);
-  return { client, city, jobType, category };
+  return { client, city, jobType, category, position };
 }
 
 type Fixtures = Awaited<ReturnType<typeof createJobFixtures>>;
@@ -65,6 +68,7 @@ export async function createJob(f: Fixtures, totalPositions: number, title = `Jo
       cityId: f.city.id,
       jobTypeId: f.jobType.id,
       jobCategoryId: f.category.id,
+      positionId: f.position.id,
     },
   });
 }

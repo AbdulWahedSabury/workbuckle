@@ -5,43 +5,49 @@ import AdminOnly from "@/components/admin/AdminOnly";
 import PageHeader from "@/components/admin/PageHeader";
 import { ListView } from "@/components/admin/data-table";
 import PeopleTable from "@/components/admin/tables/PeopleTable";
+import PositionFilter from "@/components/admin/PositionFilter";
 import { primaryLinkClass } from "@/components/admin/styles";
 import { requireView } from "@/lib/admin/auth";
-import { getPeopleCounts, type PeopleFilters } from "@/lib/admin/queries";
+import { getPeopleCounts, getPositionOptions, type PeopleFilters } from "@/lib/admin/queries";
 import { cn } from "@/lib/utils";
-import { CANDIDATE_STATUSES, type CandidateStatus } from "@/schemas/AdminSchemas";
 
 export const metadata: Metadata = { title: "Talent pool" };
 
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
-/** ?status=open|hired|inactive and ?nojob=1 narrow the pool. */
-function parseFilters(params: Record<string, string | string[] | undefined>): PeopleFilters {
-  const status = first(params.status);
+/** Available (open) people by default; ?status=inactive shows the inactive ones; ?position=<id> narrows to one position. */
+function parseFilters(params: Record<string, string | string[] | undefined>, positionIds: string[]): PeopleFilters {
+  const position = first(params.position);
   return {
-    status: CANDIDATE_STATUSES.includes(status as CandidateStatus) ? (status as CandidateStatus) : undefined,
-    withoutJob: first(params.nojob) === "1",
+    status: first(params.status) === "inactive" ? "inactive" : "open",
+    positionId: position && positionIds.includes(position) ? position : undefined,
   };
+}
+
+/** A tab's link, keeping the position filter. */
+function tabHref(status: "open" | "inactive", positionId?: string): string {
+  const params = new URLSearchParams();
+  if (status === "inactive") params.set("status", "inactive");
+  if (positionId) params.set("position", positionId);
+  const query = params.toString();
+  return query ? `/admin/people?${query}` : "/admin/people";
 }
 
 export default async function PeoplePage({ searchParams }: PageProps<"/admin/people">) {
   await requireView("people");
-  const filters = parseFilters(await searchParams);
-  const counts = await getPeopleCounts();
+  const positions = await getPositionOptions();
+  const filters = parseFilters(await searchParams, positions.map((p) => p.value));
+  const counts = await getPeopleCounts(filters.positionId);
   const tabs = [
-    { label: "All", count: counts.all, href: "/admin/people", active: !filters.status && !filters.withoutJob },
-    { label: "Open", count: counts.open, href: "/admin/people?status=open", active: filters.status === "open" && !filters.withoutJob },
-    { label: "Open, no job yet", count: null, href: "/admin/people?status=open&nojob=1", active: filters.status === "open" && filters.withoutJob },
-    { label: "No job yet", count: counts.withoutJob, href: "/admin/people?nojob=1", active: !filters.status && filters.withoutJob },
-    { label: "Hired", count: counts.hired, href: "/admin/people?status=hired", active: filters.status === "hired" },
-    { label: "Inactive", count: counts.inactive, href: "/admin/people?status=inactive", active: filters.status === "inactive" },
+    { label: "Available", count: counts.open, href: tabHref("open", filters.positionId), active: filters.status === "open" },
+    { label: "Inactive", count: counts.inactive, href: tabHref("inactive", filters.positionId), active: filters.status === "inactive" },
   ];
 
   return (
     <>
       <PageHeader
         title="Talent pool"
-        description="Everyone you have on file, with or without a job. Open candidates are available to put forward."
+        description="People free to put forward: not hired, and no job in progress. Anyone pending, in review, submitted or interviewing for a job is under Candidates."
         actions={
           <AdminOnly>
             <Link href="/admin/candidates/new" className={primaryLinkClass}>
@@ -62,11 +68,16 @@ export default async function PeoplePage({ searchParams }: PageProps<"/admin/peo
             )}
           >
             {tab.label}
-            {tab.count !== null && <span className="tabular-nums opacity-70">{tab.count}</span>}
+            <span className="tabular-nums opacity-70">{tab.count}</span>
           </Link>
         ))}
       </nav>
-      <ListView searchLabel="Search candidates" searchPlaceholder="Search by name, email or phone" columnCount={6}>
+      <ListView
+        searchLabel="Search candidates"
+        searchPlaceholder="Search by name, email or phone"
+        columnCount={7}
+        toolbar={<PositionFilter options={positions} value={filters.positionId} />}
+      >
         <PeopleTable searchParams={searchParams} filters={filters} />
       </ListView>
     </>

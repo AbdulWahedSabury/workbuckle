@@ -10,6 +10,7 @@ import { FIX_FIELDS_MESSAGE, formValues, isNotFound } from '@/lib/admin/form';
 import { parseTranslations, type ParsedTranslations } from '@/lib/admin/translations';
 import { cvObjectPath } from '@/lib/cv-storage';
 import { removeCvsIfUnused } from '@/lib/admin/cv-files';
+import { givePositionToApplicants } from '@/lib/admin/positions';
 import { sanitizeRichText } from '@/lib/rich-text';
 import { isUuid } from '@/lib/utils';
 import {
@@ -72,11 +73,12 @@ function invalidForm(
 
 /** The selects can go stale (another admin deleted a city, …); flag the field instead of a FK error. */
 async function missingRelations(data: JobInput): Promise<ActionState['errors']> {
-  const [client, city, jobType, category, campaign] = await Promise.all([
+  const [client, city, jobType, category, position, campaign] = await Promise.all([
     prisma.client.count({ where: { id: data.clientId } }),
     prisma.city.count({ where: { id: data.cityId } }),
     prisma.jobType.count({ where: { id: data.jobTypeId } }),
     prisma.jobCategory.count({ where: { id: data.jobCategoryId } }),
+    prisma.position.count({ where: { id: data.positionId } }),
     data.campaignId ? prisma.campaign.count({ where: { id: data.campaignId } }) : 1,
   ]);
   const errors: NonNullable<ActionState['errors']> = {};
@@ -84,6 +86,7 @@ async function missingRelations(data: JobInput): Promise<ActionState['errors']> 
   if (!city) errors.cityId = ['This city no longer exists.'];
   if (!jobType) errors.jobTypeId = ['This job type no longer exists.'];
   if (!category) errors.jobCategoryId = ['This category no longer exists.'];
+  if (!position) errors.positionId = ['This position no longer exists.'];
   if (!campaign) errors.campaignId = ['This campaign no longer exists.'];
   return Object.keys(errors).length ? errors : undefined;
 }
@@ -172,6 +175,8 @@ export async function updateJob(
         where: { jobId: id, locale: { in: translations.emptyLocales } },
       }),
     ]);
+    // Everyone who already applied gets the job's position too (no-op for those who have it).
+    await prisma.$transaction((tx) => givePositionToApplicants(tx, id, result.data.positionId));
   } catch (error) {
     // Deleted, or a hire landed after capacityErrors() and the openings no longer fit.
     if (isNotFound(error)) {

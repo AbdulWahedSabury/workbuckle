@@ -71,9 +71,9 @@ describe('talent pool: candidates without a job', () => {
     expect(url).toBe(`/admin/people/${person.id}`);
     expect([person.status, person.applications.length, Boolean(person.cvUrl && person.cvPath)]).toEqual(['open', 0, true]);
 
-    const { rows } = await listPeople(page1, { status: 'open', withoutJob: true });
+    const { rows } = await listPeople(page1);
     expect(rows.map((r) => r.email)).toEqual(['pool@candidate.test']);
-    expect(await getPeopleCounts()).toMatchObject({ all: 1, open: 1, hired: 0, inactive: 0, withoutJob: 1 });
+    expect(await getPeopleCounts()).toEqual({ open: 1, inactive: 0 });
 
     const again = await run(() => createCandidateAction({}, poolForm('POOL@candidate.test')));
     expect(typeof again === 'object' && again.errors?.email?.[0]).toMatch(/already exists/);
@@ -184,19 +184,26 @@ describe('talent pool: candidates without a job', () => {
     expect(notifications.at(-1)).toMatchObject({ title: 'New job application' });
   });
 
-  it('pool filters: hired, inactive, no job yet', async () => {
+  it('the pool holds only people not hired and with no job in progress; rejected ones come back', async () => {
     const f = await createJobFixtures();
-    const job = await createJob(f, 1);
-    const [hiredP, idleP] = await Promise.all([createCandidate('Hpers'), createCandidate('Ipers')]);
-    await createCandidate('Npers');
-    await hireCandidate((await createApplication(hiredP.id, job.id)).id);
-    await setCandidateStatus(idleP.id, 'inactive');
-    const names = async (filters: Parameters<typeof listPeople>[1]) =>
+    const [jobA, jobB] = await Promise.all([createJob(f, 1), createJob(f, 2)]);
+    const [hiredP, idleP, , pendingP, rejectedP, mixedP] = await Promise.all(
+      ['Hpers', 'Ipers', 'Npers', 'Ppers', 'Rpers', 'Mpers'].map((n) => createCandidate(n))
+    );
+    await hireCandidate((await createApplication(hiredP.id, jobA.id)).id); // hired: out
+    await setCandidateStatus(idleP.id, 'inactive'); // inactive, no job: Inactive tab
+    await createApplication(pendingP.id, jobB.id); // pending: in progress, out
+    const rejected = await createApplication(rejectedP.id, jobB.id);
+    expect(await updateApplicationStatus(rejected.id, 'rejected')).toEqual({}); // only a rejection: back in the pool
+    const mixedRejected = await createApplication(mixedP.id, jobB.id);
+    expect(await updateApplicationStatus(mixedRejected.id, 'rejected')).toEqual({});
+    await createApplication(mixedP.id, (await createJob(f, 1)).id); // rejected once, now pending elsewhere: out
+
+    const names = async (filters?: Parameters<typeof listPeople>[1]) =>
       (await listPeople(page1, filters)).rows.map((r) => r.firstName).sort();
-    expect(await names({ status: 'hired' })).toEqual(['Hpers']);
+    expect(await names()).toEqual(['Npers', 'Rpers']);
     expect(await names({ status: 'inactive' })).toEqual(['Ipers']);
-    expect(await names({ status: 'open', withoutJob: true })).toEqual(['Npers']);
-    expect(await names({ withoutJob: true })).toEqual(['Ipers', 'Npers']);
+    expect(await getPeopleCounts()).toEqual({ open: 2, inactive: 1 });
   });
 });
 

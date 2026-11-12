@@ -62,6 +62,22 @@ const columns: Column<PersonListRow, PeopleSortKey>[] = [
       return <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>;
     },
   },
+  {
+    id: "positions",
+    header: "Positions",
+    cell: (p) =>
+      p.positions.length ? (
+        <span className="flex flex-wrap gap-1">
+          {p.positions.map(({ position }) => (
+            <span key={position.id} className="rounded-full border border-line px-2 py-0.5 text-xs whitespace-nowrap text-ink">
+              {position.name}
+            </span>
+          ))}
+        </span>
+      ) : (
+        <span className="text-gray-2/60">None</span>
+      ),
+  },
   { id: "applications", header: "Latest application", hideBelow: "md", cell: (p) => <LatestApplication person={p} /> },
   {
     id: "createdAt",
@@ -126,7 +142,10 @@ export default async function PeopleTable({
         params.q ? (
           <EmptyState icon={SearchX} title={`No candidates match “${params.q}”`} description="Try a different name, email or phone." />
         ) : (
-          <EmptyState title="No candidates here" description="Add a candidate, with or without a job, to build the pool." />
+          <EmptyState
+            title="No one in the pool here"
+            description="People show here once they have no job in progress. Add a candidate without a job to build the pool."
+          />
         )
       }
     />

@@ -10,6 +10,7 @@ import { FIX_FIELDS_MESSAGE, formValues, isUniqueViolation, validationError } fr
 import { InvalidCvFileError, removeCv, uploadCv } from '@/lib/cv-storage';
 import { removeCvsIfUnused } from '@/lib/admin/cv-files';
 import { markSubmitted, reachesEmployer } from '@/lib/admin/submission';
+import { givePositionOfJob } from '@/lib/admin/positions';
 import { assignToJobSchema, candidateManualStatusSchema, candidateSchema, cvFileSchema } from '@/schemas/AdminSchemas';
 import { sendCandidateProfileEmail } from '@/lib/admin/candidate-profile-email';
 import { isUuid } from '@/lib/utils';
@@ -85,6 +86,7 @@ async function saveCandidate(data: CandidateInput, cv: Cv, actorId: string) {
     });
     await tx.applicationEvent.create({ data: { applicationId: app.id, field: 'status', toValue: status, actorId } });
     if (reachesEmployer(status)) await markSubmitted(tx, app.id);
+    await givePositionOfJob(tx, person.id, jobId);
     return { personId: person.id, applicationId: app.id };
   });
 }
@@ -179,6 +181,7 @@ export async function assignToJob(candidateId: string, _prev: ActionState, formD
         select: { id: true },
       });
       await tx.applicationEvent.create({ data: { applicationId: app.id, field: 'status', toValue: status, actorId: user.id } });
+      await givePositionOfJob(tx, candidateId, jobId);
       return app.id;
     });
   } catch (error) {

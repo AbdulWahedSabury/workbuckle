@@ -35,6 +35,7 @@ function jobForm(f: Fixtures, overrides: Record<string, string> = {}) {
     cityId: f.city.id,
     jobTypeId: f.jobType.id,
     jobCategoryId: f.category.id,
+    positionId: f.position.id,
     campaignId: '',
     description: '<p>Desc</p>',
     responsibilities: '<p>Resp</p>',

@@ -5,6 +5,7 @@ import { createAdminNotification } from '@/lib/admin/actions/notifications';
 import { formValues, isUniqueViolation } from '@/lib/admin/form';
 import { InvalidCvFileError, removeCv, uploadCv } from '@/lib/cv-storage';
 import { prisma } from '@/lib/prisma';
+import { givePositionOfJob } from '@/lib/admin/positions';
 import { clientIp, createRateLimiter } from '@/lib/rate-limit';
 import { isUuid } from '@/lib/utils';
 import { applicationSchema, cvFileSchema } from '@/schemas/AdminSchemas';
@@ -106,9 +107,11 @@ export async function submitPublicApplication(
 
   let applicationId: string;
   try {
-    // A matching returning applicant without a saved CV gets this one; a mismatch never does.
+    // A matching returning applicant without a saved CV gets this one; a mismatch never does,
+    // and doesn't get the job's position either (it may not be the person behind the email).
     applicationId = await saveApplication(fields.data, jobId, upload, {
       fillMissingCv: Boolean(person) && !differences.length,
+      givePosition: !differences.length,
       note,
     });
   } catch (error) {
@@ -204,7 +207,7 @@ async function saveApplication(
   fields: ApplicationFields,
   jobId: string,
   cv: { path: string; url: string },
-  { fillMissingCv, note }: { fillMissingCv: boolean; note: string | null },
+  { fillMissingCv, givePosition, note }: { fillMissingCv: boolean; givePosition: boolean; note: string | null },
 ): Promise<string> {
   const { coverLetter, ...personDetails } = fields;
   return prisma.$transaction(async (tx) => {
@@ -225,6 +228,7 @@ async function saveApplication(
     await tx.applicationEvent.create({
       data: { applicationId: application.id, field: 'status', toValue: 'pending', note },
     });
+    if (givePosition) await givePositionOfJob(tx, person.id, jobId);
     return application.id;
   });
 }

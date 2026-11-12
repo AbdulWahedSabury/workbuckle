@@ -31,6 +31,8 @@ export default async function EditJobPage({ params }: PageProps<"/admin/jobs/[id
           cityId: job.cityId,
           jobTypeId: job.jobTypeId,
           jobCategoryId: job.jobCategoryId,
+          // Jobs saved before positions existed have none: the admin picks one now.
+          positionId: job.positionId ?? "",
           campaignId: job.campaignId ?? "",
           description: job.description,
           responsibilities: job.responsibilities,

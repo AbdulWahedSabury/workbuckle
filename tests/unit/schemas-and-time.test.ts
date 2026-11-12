@@ -60,13 +60,23 @@ describe('input schemas', () => {
   it('job openings must be a whole number from 1 to 10,000', () => {
     const base = {
       title: 't', salary: 's', experience: 'e', clientId: crypto.randomUUID(), cityId: crypto.randomUUID(),
-      jobTypeId: crypto.randomUUID(), jobCategoryId: crypto.randomUUID(), description: '<p>x</p>',
+      jobTypeId: crypto.randomUUID(), jobCategoryId: crypto.randomUUID(), positionId: crypto.randomUUID(), description: '<p>x</p>',
       responsibilities: '<p>x</p>', requirements: '<p>x</p>', benefits: '<p>x</p>', status: 'draft',
     };
     expect(jobSchema.parse({ ...base, totalPositions: '4' }).totalPositions).toBe(4);
     for (const bad of ['0', '-1', '2.5', 'x', '10001']) {
       expect(jobSchema.safeParse({ ...base, totalPositions: bad }).success, bad).toBe(false);
     }
+  });
+
+  it('a job needs a position', () => {
+    const base = {
+      title: 't', salary: 's', experience: 'e', clientId: crypto.randomUUID(), cityId: crypto.randomUUID(),
+      jobTypeId: crypto.randomUUID(), jobCategoryId: crypto.randomUUID(), description: '<p>x</p>',
+      responsibilities: '<p>x</p>', requirements: '<p>x</p>', benefits: '<p>x</p>', status: 'draft',
+    };
+    expect(jobSchema.safeParse(base).success).toBe(false);
+    expect(jobSchema.safeParse({ ...base, positionId: crypto.randomUUID() }).success).toBe(true);
   });
 });
 

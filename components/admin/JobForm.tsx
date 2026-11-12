@@ -23,6 +23,7 @@ export type JobFormValues = {
   cityId: string;
   jobTypeId: string;
   jobCategoryId: string;
+  positionId: string;
   campaignId: string;
   description: string;
   responsibilities: string;
@@ -38,6 +39,7 @@ export type JobFormOptions = {
   clients: SelectOption[];
   jobTypes: SelectOption[];
   categories: SelectOption[];
+  positions: SelectOption[];
   campaigns: SelectOption[];
 };
 
@@ -243,6 +245,16 @@ export default function JobForm({
               defaultValue={value("jobCategoryId")}
               error={errors.jobCategoryId}
               hint={emptyHint(options.categories, "active categories", "/admin/categories")}
+            />
+            <SelectField
+              name="positionId"
+              label="Position"
+              placeholder="Choose a position"
+              required
+              options={options.positions}
+              defaultValue={value("positionId")}
+              error={errors.positionId}
+              hint={emptyHint(options.positions, "positions", "/admin/positions/new")}
             />
             <SelectField
               name="cityId"

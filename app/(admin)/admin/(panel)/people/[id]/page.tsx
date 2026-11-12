@@ -6,13 +6,14 @@ import AdminOnly from "@/components/admin/AdminOnly";
 import AssignToJobForm from "@/components/admin/AssignToJobForm";
 import CandidateAvailabilitySelect from "@/components/admin/CandidateAvailabilitySelect";
 import PageHeader from "@/components/admin/PageHeader";
+import PersonPositionsForm from "@/components/admin/PersonPositionsForm";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { APPLICATION_STATUS_BADGE, CANDIDATE_STATUS_BADGE, badgeFor } from "@/components/admin/status-labels";
 import { cardClass, primaryButtonClass, secondaryLinkClass } from "@/components/admin/styles";
 import { formatDate } from "@/components/admin/tables/format";
 import { assignToJob } from "@/lib/admin/actions/candidates";
 import { viewerCanEdit } from "@/lib/admin/auth";
-import { getAssignableJobOptions, getPerson, type PersonDetail } from "@/lib/admin/queries";
+import { getAssignableJobOptions, getPerson, getPositionOptions, type PersonDetail } from "@/lib/admin/queries";
 
 export const metadata: Metadata = { title: "Candidate" };
 
@@ -29,7 +30,7 @@ function Detail({ label, children }: { label: string; children: React.ReactNode 
 
 export default async function PersonPage({ params }: PageProps<"/admin/people/[id]">) {
   const { id } = await params;
-  const person = await getPerson(id);
+  const [person, positionOptions] = await Promise.all([getPerson(id), getPositionOptions()]);
   if (!person) notFound();
   const name = `${person.firstName} ${person.lastName}`;
   const availability = badgeFor(CANDIDATE_STATUS_BADGE, person.status);
@@ -86,6 +87,15 @@ export default async function PersonPage({ params }: PageProps<"/admin/people/[i
             </Detail>
           </dl>
 
+          <h2 className={`border-t border-line pt-5 ${sectionTitle}`}>Positions</h2>
+          <AdminOnly fallback={<PositionList positions={person.positions} />}>
+            <PersonPositionsForm
+              candidateId={person.id}
+              options={positionOptions}
+              selected={person.positions.map(({ position }) => position.id)}
+            />
+          </AdminOnly>
+
           <h2 className={`border-t border-line pt-5 ${sectionTitle}`}>Applications</h2>
           <Applications applications={person.applications} />
         </section>
@@ -98,6 +108,20 @@ export default async function PersonPage({ params }: PageProps<"/admin/people/[i
         </AdminOnly>
       </div>
     </>
+  );
+}
+
+/** Read-only for viewers. */
+function PositionList({ positions }: { positions: PersonDetail["positions"] }) {
+  if (!positions.length) return <p className="text-sm text-gray-2/60">No positions yet.</p>;
+  return (
+    <ul className="flex flex-wrap gap-2">
+      {positions.map(({ position }) => (
+        <li key={position.id} className="rounded-full border border-line px-3 py-1 text-sm text-ink">
+          {position.name}
+        </li>
+      ))}
+    </ul>
   );
 }
 
