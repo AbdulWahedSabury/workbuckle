@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 export type ColumnAlign = "left" | "center" | "right";
 
 /** Breakpoint below which a column is hidden, to keep narrow screens readable. */
-export type ColumnBreakpoint = "sm" | "md" | "lg";
+export type ColumnBreakpoint = "sm" | "md" | "lg" | "xl";
 
 /**
  * One column of a <DataTable>. `T` is the row type; `K` is the union of sort
@@ -34,4 +34,5 @@ export const hideBelowClass: Record<ColumnBreakpoint, string> = {
   sm: "hidden sm:table-cell",
   md: "hidden md:table-cell",
   lg: "hidden lg:table-cell",
+  xl: "hidden xl:table-cell",
 };

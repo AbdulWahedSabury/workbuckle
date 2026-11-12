@@ -47,7 +47,7 @@ const columns: Column<JobListRow, JobSortKey>[] = [
     id: "type",
     header: "Type",
     sortKey: "type",
-    hideBelow: "md",
+    hideBelow: "xl",
     cell: (job) => job.jobType.name,
   },
   {
@@ -69,7 +69,7 @@ const columns: Column<JobListRow, JobSortKey>[] = [
   {
     id: "positions",
     header: "Positions",
-    hideBelow: "sm",
+    hideBelow: "xl",
     cell: (job) => {
       const remaining = remainingPositions(job);
       const full = job.filledPositions >= job.totalPositions;
@@ -111,7 +111,7 @@ const columns: Column<JobListRow, JobSortKey>[] = [
     id: "updatedAt",
     header: "Updated",
     sortKey: "updatedAt",
-    hideBelow: "lg",
+    hideBelow: "xl",
     cell: (job) => (
       <time dateTime={job.updatedAt.toISOString()} className="whitespace-nowrap">
         {formatDate(job.updatedAt)}
