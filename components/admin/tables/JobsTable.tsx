@@ -47,7 +47,7 @@ const columns: Column<JobListRow, JobSortKey>[] = [
     id: "type",
     header: "Type",
     sortKey: "type",
-    hideBelow: "xl",
+    hideBelow: "2xl",
     cell: (job) => job.jobType.name,
   },
   {
@@ -61,26 +61,13 @@ const columns: Column<JobListRow, JobSortKey>[] = [
     id: "status",
     header: "Status",
     sortKey: "status",
+    // Positions sit under the badge rather than in their own column, to keep the table narrow.
     cell: (job) => {
       const badge = STATUS_BADGE[job.status] ?? { tone: "neutral" as const, label: job.status };
-      return <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>;
-    },
-  },
-  {
-    id: "positions",
-    header: "Positions",
-    hideBelow: "xl",
-    cell: (job) => {
-      const remaining = remainingPositions(job);
-      const full = job.filledPositions >= job.totalPositions;
       return (
-        <div className="flex flex-col whitespace-nowrap">
-          <span className="font-semibold tabular-nums text-ink">
-            {job.filledPositions}/{job.totalPositions} filled
-          </span>
-          <span className="text-xs text-gray-2">
-            {remaining ? `${remaining} remaining` : full ? "Full" : "0 remaining · closed"}
-          </span>
+        <div className="flex flex-col items-start gap-1.5">
+          <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
+          <PositionsSummary job={job} />
         </div>
       );
     },
@@ -111,7 +98,7 @@ const columns: Column<JobListRow, JobSortKey>[] = [
     id: "updatedAt",
     header: "Updated",
     sortKey: "updatedAt",
-    hideBelow: "xl",
+    hideBelow: "2xl",
     cell: (job) => (
       <time dateTime={job.updatedAt.toISOString()} className="whitespace-nowrap">
         {formatDate(job.updatedAt)}
@@ -162,6 +149,21 @@ const columns: Column<JobListRow, JobSortKey>[] = [
     ),
   },
 ];
+
+function PositionsSummary({ job }: { job: JobListRow }) {
+  const remaining = remainingPositions(job);
+  const full = job.filledPositions >= job.totalPositions;
+  return (
+    <div className="flex flex-col whitespace-nowrap text-xs">
+      <span className="font-semibold tabular-nums text-ink">
+        {job.filledPositions}/{job.totalPositions} filled
+      </span>
+      <span className="text-gray-2">
+        {remaining ? `${remaining} remaining` : full ? "Full" : "0 remaining · closed"}
+      </span>
+    </div>
+  );
+}
 
 function CandidateCountLink({
   jobId,

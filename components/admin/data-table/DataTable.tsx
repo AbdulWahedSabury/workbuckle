@@ -34,7 +34,9 @@ export default function DataTable<T, K extends string = string>({
 
   return (
     <div className="overflow-hidden rounded-sm-card border border-line bg-white">
-      <div className="overflow-x-auto">
+      {/* relative: clips absolutely positioned cell content (e.g. an sr-only
+          header) too; without it a wide table stretches the whole page. */}
+      <div className="relative overflow-x-auto">
         <table className="w-full text-sm">
           <caption className="sr-only">{caption}</caption>
           <thead className="border-b border-line bg-gray-3/60">
