@@ -7,17 +7,21 @@ import type { Faq, Prisma } from '@/lib/generated/prisma/client';
 import { SITE_SETTING_ID } from '@/lib/site-settings';
 import { isUuid } from '@/lib/utils';
 import { defaultLocale } from '@/types/locale';
-import { CANDIDATE_STATUSES, type CandidateStatus } from '@/schemas/AdminSchemas';
+import { APPLICATION_STATUSES, type ApplicationStatus, type CandidateStatus } from '@/schemas/AdminSchemas';
+import { applicationScope, isClientUser, jobScope, scoped } from '@/lib/admin/scope';
+import { canEdit } from '@/lib/auth/roles';
 
 export async function getAdminCounts() {
-  await requireView('dashboard');
+  const user = await requireView('dashboard');
+  const jobs$ = jobScope(user);
   const [categories, activeCategories, cities, jobs, publishedJobs, candidates] = await Promise.all([
     prisma.jobCategory.count(),
     prisma.jobCategory.count({ where: { isActive: true } }),
     prisma.city.count(),
-    prisma.job.count(),
-    prisma.job.count({ where: { status: 'published' } }),
-    prisma.candidate.count(),
+    prisma.job.count({ where: jobs$ }),
+    prisma.job.count({ where: scoped(jobs$, { status: 'published' }) }),
+    // Applications, the same rows the Candidates list shows (a client: only those submitted to it).
+    prisma.jobApplication.count({ where: applicationScope(user) }),
   ]);
   return { categories, activeCategories, cities, jobs, publishedJobs, candidates };
 }
@@ -48,8 +52,15 @@ export type ActivityDay = { date: string; count: number };
  * the newest applications and the jobs with the most applicants. Cached per
  * request, since several dashboard widgets read it.
  */
+const isApplicationStatus = (status: string): status is ApplicationStatus =>
+  (APPLICATION_STATUSES as readonly string[]).includes(status);
+
+const emptyStatusCounts = () =>
+  Object.fromEntries(APPLICATION_STATUSES.map((status) => [status, 0])) as Record<ApplicationStatus, number>;
+
 export const getCandidateInsights = cache(async (days = 14) => {
-  await requireView('candidates');
+  const user = await requireView('candidates');
+  const scope = applicationScope(user);
   const now = new Date();
   const todayStart = new Date(`${dayKey(now)}T00:00:00.000Z`);
   const since = new Date(todayStart.getTime() - (days - 1) * DAY_MS);
@@ -73,32 +84,32 @@ export const getCandidateInsights = cache(async (days = 14) => {
     latest,
     topJobs,
   ] = await Promise.all([
-    prisma.candidate.groupBy({ by: ['status'], _count: { _all: true } }),
-    prisma.candidate.findMany({ where: { createdAt: { gte: since } }, select: { createdAt: true } }),
-    prisma.candidate.count({ where: { createdAt: { gte: weekAgo } } }),
-    prisma.candidate.count({ where: { createdAt: { gte: twoWeeksAgo, lt: weekAgo } } }),
-    prisma.candidate.count({ where: { createdAt: { gte: todayStart } } }),
-    prisma.candidate.count({ where: { createdAt: { gte: monthAgo } } }),
-    prisma.candidate.count({ where: { createdAt: { gte: threeMonthsAgo } } }),
-    prisma.candidate.count({ where: { createdAt: { gte: sixMonthsAgo } } }),
-    prisma.candidate.count({ where: { createdAt: { gte: yearAgo } } }),
-    prisma.candidate.findMany({
+    prisma.jobApplication.groupBy({ by: ['status'], where: scope, _count: { _all: true } }),
+    prisma.jobApplication.findMany({ where: scoped(scope, { createdAt: { gte: since } }), select: { createdAt: true } }),
+    prisma.jobApplication.count({ where: scoped(scope, { createdAt: { gte: weekAgo } }) }),
+    prisma.jobApplication.count({ where: scoped(scope, { createdAt: { gte: twoWeeksAgo, lt: weekAgo } }) }),
+    prisma.jobApplication.count({ where: scoped(scope, { createdAt: { gte: todayStart } }) }),
+    prisma.jobApplication.count({ where: scoped(scope, { createdAt: { gte: monthAgo } }) }),
+    prisma.jobApplication.count({ where: scoped(scope, { createdAt: { gte: threeMonthsAgo } }) }),
+    prisma.jobApplication.count({ where: scoped(scope, { createdAt: { gte: sixMonthsAgo } }) }),
+    prisma.jobApplication.count({ where: scoped(scope, { createdAt: { gte: yearAgo } }) }),
+    prisma.jobApplication.findMany({
+      where: scope,
       orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
       take: 5,
       select: {
         id: true,
-        firstName: true,
-        lastName: true,
         status: true,
+        candidate: { select: { firstName: true, lastName: true } },
         createdAt: true,
         job: { select: { title: true } },
       },
     }),
     prisma.job.findMany({
-      where: { candidates: { some: {} } },
-      orderBy: [{ candidates: { _count: 'desc' } }, { updatedAt: 'desc' }],
+      where: scoped(jobScope(user), { applications: { some: scope } }),
+      orderBy: [{ applications: { _count: 'desc' } }, { updatedAt: 'desc' }],
       take: 5,
-      select: { id: true, title: true, status: true, _count: { select: { candidates: true } } },
+      select: { id: true, title: true, status: true, _count: { select: { applications: { where: scope } } } },
     }),
   ]);
 
@@ -112,13 +123,10 @@ export const getCandidateInsights = cache(async (days = 14) => {
     return { date, count: perDay.get(date) ?? 0 };
   });
 
-  const statusCounts: Record<string, number> = {
-    pending: 0,
-    Review: 0,
-    "Short list": 0,
-    submitted: 0,
-  };
-  for (const row of byStatus) statusCounts[row.status] = row._count._all;
+  const statusCounts = emptyStatusCounts();
+  for (const row of byStatus) {
+    if (isApplicationStatus(row.status)) statusCounts[row.status] = row._count._all;
+  }
 
   const periodCounts = {
     today: todayCount,
@@ -134,8 +142,8 @@ export const getCandidateInsights = cache(async (days = 14) => {
 
 /** Jobs per status (draft | published | closed). */
 export async function getJobStatusCounts(): Promise<Record<string, number>> {
-  await requireView('jobs');
-  const rows = await prisma.job.groupBy({ by: ['status'], _count: { _all: true } });
+  const user = await requireView('jobs');
+  const rows = await prisma.job.groupBy({ by: ['status'], where: jobScope(user), _count: { _all: true } });
   const counts: Record<string, number> = { published: 0, draft: 0, closed: 0 };
   for (const row of rows) counts[row.status] = row._count._all;
   return counts;
@@ -529,11 +537,11 @@ const jobListInclude = {
   client: { select: { name: true } },
   city: { select: { name: true } },
   jobType: { select: { name: true } },
-  _count: { select: { candidates: true } },
+  _count: { select: { applications: true } },
 } satisfies Prisma.JobInclude;
 
 export type JobListRow = Prisma.JobGetPayload<{ include: typeof jobListInclude }> & {
-  candidateStatusCounts: Record<CandidateStatus, number>;
+  candidateStatusCounts: Record<ApplicationStatus, number>;
 };
 
 export const JOB_SORT_KEYS = ['title', 'client', 'city', 'type', 'status', 'updatedAt'] as const;
@@ -550,18 +558,18 @@ const jobOrderBy: Record<JobSortKey, (dir: SortDir) => Prisma.JobOrderByWithRela
 
 /** One page of jobs matching `q` by title, city or type. Default order is newest edit first. */
 export async function listJobs(params: ListParams<JobSortKey>): Promise<Paginated<JobListRow>> {
-  await requireView('jobs');
+  const user = await requireView('jobs');
   const { q, sort } = params;
-  const where: Prisma.JobWhereInput | undefined = q
-    ? {
+  const where: Prisma.JobWhereInput = scoped<Prisma.JobWhereInput>(jobScope(user), {
+    ...(q && {
         OR: [
           { title: { contains: q, mode: 'insensitive' } },
           { client: { name: { contains: q, mode: 'insensitive' } } },
           { city: { name: { contains: q, mode: 'insensitive' } } },
           { jobType: { name: { contains: q, mode: 'insensitive' } } },
         ],
-      }
-    : undefined;
+      }),
+  });
 
   const page = await fetchPage(
     params,
@@ -573,7 +581,10 @@ export async function listJobs(params: ListParams<JobSortKey>): Promise<Paginate
           ...(sort ? jobOrderBy[sort.key](sort.dir) : [{ updatedAt: 'desc' as const }]),
           { id: 'asc' },
         ],
-        include: jobListInclude,
+        include: {
+          ...jobListInclude,
+          _count: { select: { applications: { where: applicationScope(user) } } },
+        },
         skip,
         take,
       })
@@ -581,24 +592,17 @@ export async function listJobs(params: ListParams<JobSortKey>): Promise<Paginate
 
   const rows = page.rows;
   const counts = rows.length
-    ? await prisma.candidate.groupBy({
+    ? await prisma.jobApplication.groupBy({
         by: ['jobId', 'status'],
-        where: { jobId: { in: rows.map((job) => job.id) } },
+        where: scoped(applicationScope(user), { jobId: { in: rows.map((job) => job.id) } }),
         _count: { _all: true },
       })
     : [];
-  const countsByJob = new Map<string, Record<CandidateStatus, number>>();
-  for (const job of rows) {
-    countsByJob.set(
-      job.id,
-      Object.fromEntries(CANDIDATE_STATUSES.map((status) => [status, 0])) as Record<CandidateStatus, number>
-    );
-  }
+  const countsByJob = new Map<string, Record<ApplicationStatus, number>>();
+  for (const job of rows) countsByJob.set(job.id, emptyStatusCounts());
   for (const row of counts) {
     const jobCounts = countsByJob.get(row.jobId);
-    if (jobCounts && CANDIDATE_STATUSES.includes(row.status as CandidateStatus)) {
-      jobCounts[row.status as CandidateStatus] = row._count._all;
-    }
+    if (jobCounts && isApplicationStatus(row.status)) jobCounts[row.status] = row._count._all;
   }
 
   return {
@@ -611,9 +615,9 @@ export async function listJobs(params: ListParams<JobSortKey>): Promise<Paginate
 }
 
 export async function getJob(id: string) {
-  await requireView('jobs');
+  const user = await requireView('jobs');
   if (!isUuid(id)) return null;
-  return prisma.job.findUnique({ where: { id }, include: { translations: true } });
+  return prisma.job.findFirst({ where: scoped(jobScope(user), { id }), include: { translations: true } });
 }
 
 export type SelectOption = { value: string; label: string };
@@ -654,61 +658,62 @@ export async function getJobFormOptions(currentCategoryId?: string) {
   };
 }
 
-// ─── Candidates ──────────────────────────────────────────────────────────────
+// ─── Candidates (job applications) ───────────────────────────────────────────
 
-const candidateListInclude = {
+const applicationListInclude = {
   job: { select: { id: true, title: true } },
-} satisfies Prisma.CandidateInclude;
+  candidate: { select: { id: true, firstName: true, lastName: true, email: true, phone: true, status: true } },
+} satisfies Prisma.JobApplicationInclude;
 
-export type CandidateListRow = Prisma.CandidateGetPayload<{ include: typeof candidateListInclude }>;
+export type ApplicationListRow = Prisma.JobApplicationGetPayload<{ include: typeof applicationListInclude }>;
 
 export const CANDIDATE_SORT_KEYS = ['name', 'job', 'status', 'createdAt'] as const;
 export type CandidateSortKey = (typeof CANDIDATE_SORT_KEYS)[number];
 
-const candidateOrderBy: Record<
+const applicationOrderBy: Record<
   CandidateSortKey,
-  (dir: SortDir) => Prisma.CandidateOrderByWithRelationInput[]
+  (dir: SortDir) => Prisma.JobApplicationOrderByWithRelationInput[]
 > = {
-  name: (dir) => [{ lastName: dir }, { firstName: dir }],
+  name: (dir) => [{ candidate: { lastName: dir } }, { candidate: { firstName: dir } }],
   job: (dir) => [{ job: { title: dir } }, { createdAt: 'desc' }],
   status: (dir) => [{ status: dir }, { createdAt: 'desc' }],
   createdAt: (dir) => [{ createdAt: dir }],
 };
 
-/** One page of candidates matching `q` by name, email or job title. Default order is newest first. */
-export async function listCandidates(
+/** One page of applications matching `q` by name, email or job title. Default order is newest first. */
+export async function listApplications(
   params: ListParams<CandidateSortKey>,
   jobId?: string,
-  status?: CandidateStatus
-): Promise<Paginated<CandidateListRow>> {
-  await requireView('candidates');
+  status?: ApplicationStatus
+): Promise<Paginated<ApplicationListRow>> {
+  const user = await requireView('candidates');
   const { q, sort } = params;
-  const where: Prisma.CandidateWhereInput = {
+  const where: Prisma.JobApplicationWhereInput = scoped<Prisma.JobApplicationWhereInput>(applicationScope(user), {
     ...(jobId ? { jobId } : {}),
     ...(status ? { status } : {}),
     ...(q
       ? {
           OR: [
-            { firstName: { contains: q, mode: 'insensitive' } },
-            { lastName: { contains: q, mode: 'insensitive' } },
-            { email: { contains: q, mode: 'insensitive' } },
+            { candidate: { firstName: { contains: q, mode: 'insensitive' } } },
+            { candidate: { lastName: { contains: q, mode: 'insensitive' } } },
+            { candidate: { email: { contains: q, mode: 'insensitive' } } },
             { job: { title: { contains: q, mode: 'insensitive' } } },
           ],
         }
       : {}),
-  };
+  });
 
   return fetchPage(
     params,
-    () => prisma.candidate.count({ where }),
+    () => prisma.jobApplication.count({ where }),
     ({ skip, take }) =>
-      prisma.candidate.findMany({
+      prisma.jobApplication.findMany({
         where,
         orderBy: [
-          ...(sort ? candidateOrderBy[sort.key](sort.dir) : [{ createdAt: 'desc' as const }]),
+          ...(sort ? applicationOrderBy[sort.key](sort.dir) : [{ createdAt: 'desc' as const }]),
           { id: 'asc' },
         ],
-        include: candidateListInclude,
+        include: applicationListInclude,
         skip,
         take,
       })
@@ -728,20 +733,166 @@ export async function getCandidateJobOptions(): Promise<SelectOption[]> {
   }));
 }
 
-export async function getCandidate(id: string) {
-  await requireView('candidates');
+/** One application with its person, their other applications, the job's capacity and the history. */
+export async function getApplication(id: string) {
+  const user = await requireView('candidates');
+  const client = isClientUser(user);
+  const application = await prisma.jobApplication.findFirst({
+    where: scoped(applicationScope(user), { id }),
+    include: {
+      job: {
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          totalPositions: true,
+          filledPositions: true,
+          city: { select: { name: true } },
+        },
+      },
+      candidate: {
+        include: {
+          applications: {
+            // Other applications name other clients' jobs: never for client users.
+            where: client ? { id: { in: [] } } : { id: { not: id } },
+            orderBy: { createdAt: 'desc' },
+            select: { id: true, status: true, createdAt: true, job: { select: { title: true } } },
+          },
+        },
+      },
+      events: {
+        // The internal pipeline before submission (and who moved it) stays with the agency.
+        where: client ? { id: { in: [] } } : {},
+        orderBy: { createdAt: 'desc' },
+        include: { actor: { select: { name: true, email: true } } },
+      },
+    },
+  });
+  // Interview and the hiring decision: admins, and the client's own users (same rule as requireApplicationManager).
+  const viewerCanManage = canEdit(user.role) || client;
+  return application ? { ...application, viewerIsClient: client, viewerCanManage } : null;
+}
+
+export type ApplicationDetail = NonNullable<Awaited<ReturnType<typeof getApplication>>>;
+
+/** Where an application's CV is stored, for the signed-link route. */
+export async function getApplicationCv(id: string) {
+  const user = await requireView('candidates');
+  return prisma.jobApplication.findFirst({ where: scoped(applicationScope(user), { id }), select: { cvPath: true, cvUrl: true } });
+}
+
+// ─── Talent pool (people) ────────────────────────────────────────────────────
+
+export const PEOPLE_SORT_KEYS = ['name', 'status', 'createdAt'] as const;
+export type PeopleSortKey = (typeof PEOPLE_SORT_KEYS)[number];
+
+const peopleOrderBy: Record<PeopleSortKey, (dir: SortDir) => Prisma.CandidateOrderByWithRelationInput[]> = {
+  name: (dir) => [{ lastName: dir }, { firstName: dir }],
+  status: (dir) => [{ status: dir }, { createdAt: 'desc' }],
+  createdAt: (dir) => [{ createdAt: dir }],
+};
+
+const personListInclude = {
+  _count: { select: { applications: true } },
+  applications: {
+    orderBy: { createdAt: 'desc' },
+    take: 1,
+    select: { status: true, job: { select: { title: true } } },
+  },
+} satisfies Prisma.CandidateInclude;
+
+export type PersonListRow = Prisma.CandidateGetPayload<{ include: typeof personListInclude }>;
+
+export type PeopleFilters = { status?: CandidateStatus; withoutJob?: boolean };
+
+/** One page of people matching `q` by name, email or phone; newest first by default. Admin and viewer only. */
+export async function listPeople(
+  params: ListParams<PeopleSortKey>,
+  filters: PeopleFilters = {}
+): Promise<Paginated<PersonListRow>> {
+  await requireView('people');
+  const { q, sort } = params;
+  const where: Prisma.CandidateWhereInput = {
+    ...(filters.status ? { status: filters.status } : {}),
+    ...(filters.withoutJob ? { applications: { none: {} } } : {}),
+    ...(q
+      ? {
+          OR: [
+            { firstName: { contains: q, mode: 'insensitive' } },
+            { lastName: { contains: q, mode: 'insensitive' } },
+            { email: { contains: q, mode: 'insensitive' } },
+            { phone: { contains: q } },
+          ],
+        }
+      : {}),
+  };
+  return fetchPage(
+    params,
+    () => prisma.candidate.count({ where }),
+    ({ skip, take }) =>
+      prisma.candidate.findMany({
+        where,
+        orderBy: [...(sort ? peopleOrderBy[sort.key](sort.dir) : [{ createdAt: 'desc' as const }]), { id: 'asc' }],
+        include: personListInclude,
+        skip,
+        take,
+      })
+  );
+}
+
+/** Talent pool counts for the filter tabs. */
+export async function getPeopleCounts() {
+  await requireView('people');
+  const [byStatus, withoutJob] = await Promise.all([
+    prisma.candidate.groupBy({ by: ['status'], _count: { _all: true } }),
+    prisma.candidate.count({ where: { applications: { none: {} } } }),
+  ]);
+  const counts = { all: 0, open: 0, hired: 0, inactive: 0, withoutJob };
+  for (const row of byStatus) {
+    counts.all += row._count._all;
+    if (row.status in counts) counts[row.status as CandidateStatus] = row._count._all;
+  }
+  return counts;
+}
+
+export async function getPerson(id: string) {
+  await requireView('people');
+  if (!isUuid(id)) return null;
   return prisma.candidate.findUnique({
     where: { id },
     include: {
-      job: { select: { id: true, title: true, city: { select: { name: true } } } },
+      applications: {
+        orderBy: { createdAt: 'desc' },
+        select: { id: true, status: true, createdAt: true, job: { select: { id: true, title: true, client: { select: { name: true } } } } },
+      },
     },
   });
 }
 
-/** Where a candidate's CV is stored, for the signed-link route. */
-export async function getCandidateCv(id: string) {
-  await requireView('candidates');
-  return prisma.candidate.findUnique({ where: { id }, select: { cvPath: true, cvUrl: true } });
+export type PersonDetail = NonNullable<Awaited<ReturnType<typeof getPerson>>>;
+
+/** Where a person's own CV is stored, for the signed-link route. */
+export async function getPersonCv(id: string) {
+  await requireView('people');
+  if (!isUuid(id)) return null;
+  const person = await prisma.candidate.findUnique({ where: { id }, select: { cvPath: true, cvUrl: true } });
+  return person?.cvUrl ? { cvPath: person.cvPath, cvUrl: person.cvUrl } : null;
+}
+
+/** Jobs a person can be assigned to: not closed, with a position left, not applied for yet. */
+export async function getAssignableJobOptions(personId: string): Promise<SelectOption[]> {
+  await requireAdmin();
+  const jobs = await prisma.job.findMany({
+    where: { status: { not: 'closed' }, applications: { none: { candidateId: personId } } },
+    orderBy: { createdAt: 'desc' },
+    select: { id: true, title: true, status: true, totalPositions: true, filledPositions: true, client: { select: { name: true } } },
+  });
+  return jobs
+    .filter((j) => j.filledPositions < j.totalPositions)
+    .map((j) => ({
+      value: j.id,
+      label: `${j.title} · ${j.client.name}${j.status === 'draft' ? ' (draft)' : ''} · ${j.totalPositions - j.filledPositions} open`,
+    }));
 }
 
 // ─── Users ───────────────────────────────────────────────────────────────────
@@ -751,6 +902,8 @@ const userListSelect = {
   email: true,
   name: true,
   role: true,
+  clientId: true,
+  client: { select: { name: true } },
   createdAt: true,
 } satisfies Prisma.UserSelect;
 
@@ -791,6 +944,13 @@ export async function listUsers(params: ListParams<UserSortKey>): Promise<Pagina
         take,
       })
   );
+}
+
+/** Clients a Client-role user can be linked to, A–Z. */
+export async function getClientOptions(): Promise<SelectOption[]> {
+  await requireAdmin();
+  const clients = await prisma.client.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true } });
+  return clients.map((c) => ({ value: c.id, label: c.name }));
 }
 
 export async function getUser(id: string) {

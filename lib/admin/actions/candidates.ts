@@ -6,171 +6,225 @@ import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
 import { setFlash } from '@/lib/admin/flash-server';
 import type { ActionState, DeleteResult } from '@/lib/admin/action-state';
-import { FIX_FIELDS_MESSAGE, formValues, isNotFound, validationError } from '@/lib/admin/form';
+import { FIX_FIELDS_MESSAGE, formValues, isUniqueViolation, validationError } from '@/lib/admin/form';
 import { InvalidCvFileError, removeCv, uploadCv } from '@/lib/cv-storage';
-import { candidateSchema, candidateScreeningNotesSchema, candidateStatusSchema, cvFileSchema } from '@/schemas/AdminSchemas';
+import { removeCvsIfUnused } from '@/lib/admin/cv-files';
+import { markSubmitted, reachesEmployer } from '@/lib/admin/submission';
+import { assignToJobSchema, candidateManualStatusSchema, candidateSchema, cvFileSchema } from '@/schemas/AdminSchemas';
 import { sendCandidateProfileEmail } from '@/lib/admin/candidate-profile-email';
+import { isUuid } from '@/lib/utils';
+import type { z } from 'zod';
 
 const LIST_PATH = '/admin/candidates';
+const PEOPLE_PATH = '/admin/people';
 
-function revalidateCandidateViews(id: string) {
-  revalidatePath(LIST_PATH);
-  revalidatePath(`${LIST_PATH}/${id}`);
+type CandidateInput = z.infer<typeof candidateSchema>;
+type Cv = { path: string; url: string };
+
+function revalidateCandidateViews() {
+  revalidatePath(LIST_PATH, 'layout');
+  revalidatePath(PEOPLE_PATH, 'layout');
   revalidatePath('/admin/jobs');
   revalidatePath('/admin');
 }
 
-export async function createCandidate(
-  _prev: ActionState,
-  formData: FormData
-): Promise<ActionState> {
-  await requireAdmin();
-
-  const values = formValues(formData);
-  const result = candidateSchema.safeParse(values);
-  const cv = cvFileSchema.safeParse(formData.get('cv'));
-
-  if (!result.success || !cv.success) {
-    const state = result.success
-      ? { message: FIX_FIELDS_MESSAGE, values }
-      : validationError(result.error, values);
-    if (!cv.success) state.errors = { ...state.errors, cv: [cv.error.issues[0].message] };
-    return state;
+/** Why a person can't get a new application, if they can't. */
+function personBlocker(person: { status: string } | null): string | undefined {
+  if (person?.status === 'hired') return 'This candidate is already hired and can’t be added to another job.';
+  if (person?.status === 'inactive') {
+    return 'This candidate is inactive. Set them back to open on their profile before adding a new application.';
   }
+  return undefined;
+}
 
-  const job = await prisma.job.findUnique({
-    where: { id: result.data.jobId },
-    select: { id: true, client: { select: { email: true } } },
+/** Field errors that stop an admin-added candidate before the CV upload. */
+async function addBlockers(data: CandidateInput): Promise<ActionState['errors']> {
+  const { jobId } = data;
+  const [job, person] = await Promise.all([
+    jobId
+      ? prisma.job.findUnique({
+          where: { id: jobId },
+          select: { client: { select: { email: true, _count: { select: { users: { where: { role: 'EMPLOYER' } } } } } } },
+        })
+      : null,
+    prisma.candidate.findUnique({
+      where: { email: data.email },
+      // No job: only whether the person exists matters (a blank id isn't a valid uuid to filter on).
+      select: { status: true, applications: { where: jobId ? { jobId } : { id: { in: [] } }, select: { id: true } } },
+    }),
+  ]);
+  if (!jobId) return person ? { email: ['A candidate with this email already exists. Open them under People.'] } : undefined;
+  if (!job) return { jobId: ['This job no longer exists.'] };
+  const blocked = personBlocker(person);
+  if (blocked) return { email: [blocked] };
+  if (person?.applications.length) return { jobId: ['This candidate has already applied for this job.'] };
+  if (data.status === 'submitted' && !job.client.email && !job.client._count.users) {
+    return { jobId: ['Add a client login (Users) or an email address to this job’s client before submitting a candidate.'] };
+  }
+  if (data.status === 'submitted' && !data.screeningNotes?.trim()) {
+    return { screeningNotes: ['Add pre-screening interview notes before submitting a candidate.'] };
+  }
+  return undefined;
+}
+
+/** Person (found by email, details and CV updated), plus the application when a job was chosen. */
+async function saveCandidate(data: CandidateInput, cv: Cv, actorId: string) {
+  const { firstName, lastName, phone, email, linkedin, coverLetter, screeningNotes, jobId, status } = data;
+  const person$ = { firstName, lastName, phone, linkedin, cvUrl: cv.url, cvPath: cv.path };
+  return prisma.$transaction(async (tx) => {
+    const person = await tx.candidate.upsert({
+      where: { email },
+      create: { ...person$, email },
+      update: person$,
+      select: { id: true },
+    });
+    if (!jobId) return { personId: person.id, applicationId: null };
+    const app = await tx.jobApplication.create({
+      data: { candidateId: person.id, jobId, status, coverLetter, screeningNotes, cvUrl: cv.url, cvPath: cv.path },
+      select: { id: true },
+    });
+    await tx.applicationEvent.create({ data: { applicationId: app.id, field: 'status', toValue: status, actorId } });
+    if (reachesEmployer(status)) await markSubmitted(tx, app.id);
+    return { personId: person.id, applicationId: app.id };
   });
-  if (!job) return { errors: { jobId: ['This job no longer exists.'] }, values };
-  if (result.data.status === 'submitted' && !job.client.email) {
-    return { errors: { jobId: ['Add an email address to this job’s client before submitting a candidate.'] }, values };
-  }
-  if (result.data.status === 'submitted' && !result.data.screeningNotes?.trim()) {
-    return { errors: { screeningNotes: ['Add pre-screening interview notes before submitting a candidate.'] }, values };
-  }
+}
 
-  let upload: { path: string; url: string };
+async function uploadOrError(file: File, values: Record<string, string>): Promise<Cv | ActionState> {
   try {
-    upload = await uploadCv(cv.data);
+    return await uploadCv(file);
   } catch (error) {
     if (error instanceof InvalidCvFileError) return { errors: { cv: [error.message] }, values };
     console.error('Supabase Storage CV upload failed:', error);
     return { message: 'Could not upload the CV. Please try again.', values };
   }
+}
 
-  let candidateId: string;
+/** Admin adds a candidate: to a job (an application), or to the talent pool when no job is chosen. */
+export async function createCandidate(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const user = await requireAdmin();
+
+  const values = formValues(formData);
+  const result = candidateSchema.safeParse(values);
+  const cv = cvFileSchema.safeParse(formData.get('cv'));
+  if (!result.success || !cv.success) {
+    const state = result.success ? { message: FIX_FIELDS_MESSAGE, values } : validationError(result.error, values);
+    if (!cv.success) state.errors = { ...state.errors, cv: [cv.error.issues[0].message] };
+    return state;
+  }
+
+  const errors = await addBlockers(result.data);
+  if (errors) return { message: FIX_FIELDS_MESSAGE, errors, values };
+
+  const upload = await uploadOrError(cv.data, values);
+  if (!('path' in upload)) return upload;
+
+  let saved: Awaited<ReturnType<typeof saveCandidate>>;
   try {
-    const candidate = await prisma.candidate.create({
-      data: { ...result.data, cvUrl: upload.url, cvPath: upload.path },
-      select: { id: true },
-    });
-    candidateId = candidate.id;
+    saved = await saveCandidate(result.data, upload, user.id);
   } catch (error) {
     // Don't leave an orphaned file behind when the row didn't save.
     await removeCv(upload.path);
+    if (isUniqueViolation(error)) return { errors: { jobId: ['This candidate has already applied for this job.'] }, values };
     throw error;
   }
 
+  revalidateCandidateViews();
+  const name = `${result.data.firstName} ${result.data.lastName}`;
+  if (!saved.applicationId) {
+    await setFlash(`${name} added to the talent pool.`);
+    redirect(`${PEOPLE_PATH}/${saved.personId}`);
+  }
   if (result.data.status === 'submitted') {
-    const email = await sendCandidateProfileEmail(candidateId);
+    const email = await sendCandidateProfileEmail(saved.applicationId);
     if (email.error) {
-      revalidateCandidateViews(candidateId);
       await setFlash(email.error);
-      redirect(`${LIST_PATH}/${candidateId}`);
+      redirect(`${LIST_PATH}/${saved.applicationId}`);
+    }
+    if (email.notice) {
+      await setFlash(`Candidate ${name} added. ${email.notice}`);
+      redirect(LIST_PATH);
     }
   }
-
-  revalidatePath(LIST_PATH);
-  revalidatePath('/admin/jobs');
-  revalidatePath('/admin');
-  await setFlash(`Candidate ${result.data.firstName} ${result.data.lastName} added.`);
+  await setFlash(`Candidate ${name} added.`);
   redirect(LIST_PATH);
 }
 
-/** Moves a candidate through the recruiting pipeline. */
-export async function updateCandidateStatus(
-  id: string,
-  status: string
-): Promise<DeleteResult> {
-  await requireAdmin();
+/** Admin puts a pool candidate forward for a job, reusing the CV on their profile. */
+export async function assignToJob(candidateId: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
+  const user = await requireAdmin();
+  const values = formValues(formData);
+  const parsed = assignToJobSchema.safeParse(values);
+  if (!parsed.success) return validationError(parsed.error, values);
+  const { jobId, status } = parsed.data;
 
-  const parsed = candidateStatusSchema.safeParse(status);
-  if (!parsed.success) return { error: 'Invalid status.' };
+  const [person, job] = await Promise.all([
+    prisma.candidate.findUnique({
+      where: { id: candidateId },
+      select: { status: true, cvUrl: true, cvPath: true, applications: { where: { jobId }, select: { id: true } } },
+    }),
+    prisma.job.findUnique({ where: { id: jobId }, select: { id: true } }),
+  ]);
+  if (!person) return { message: 'This candidate no longer exists.', values };
+  if (!job) return { errors: { jobId: ['This job no longer exists.'] }, values };
+  const blocked = personBlocker(person);
+  if (blocked) return { message: blocked, values };
+  if (person.applications.length) return { errors: { jobId: ['This candidate has already applied for this job.'] }, values };
+  if (!person.cvUrl) return { message: 'Upload a CV for this candidate before assigning them to a job.', values };
 
-  const candidate = await prisma.candidate.findUnique({
-    where: { id },
-    select: {
-      status: true,
-      clientProfileEmailSentAt: true,
-      screeningNotes: true,
-      job: { select: { client: { select: { email: true } } } },
-    },
-  });
-  if (!candidate) return { error: 'This candidate no longer exists.' };
-
-  if (parsed.data === 'submitted' && !candidate.clientProfileEmailSentAt) {
-    if (!candidate.job.client.email) return { error: 'Add an email address to this job’s client before submitting this candidate.' };
-    if (!candidate.screeningNotes?.trim()) {
-      return { error: 'Open this candidate’s profile, add and save the pre-screening interview notes, then set the status to Submitted.' };
-    }
-  }
-
-  let transitioned = false;
-  if (candidate.status !== parsed.data) {
-    const updated = await prisma.candidate.updateMany({
-      where: { id, status: candidate.status },
-      data: { status: parsed.data },
-    });
-    if (!updated.count) return { error: 'This candidate’s status changed. Refresh and try again.' };
-    transitioned = true;
-  }
-
-  if (parsed.data === 'submitted' && !transitioned && !candidate.clientProfileEmailSentAt) {
-    return { error: 'This candidate is already submitted. Use the candidate profile to retry the client email if needed.' };
-  }
-
-  if (parsed.data === 'submitted' && transitioned && !candidate.clientProfileEmailSentAt) {
-    const email = await sendCandidateProfileEmail(id);
-    if (email.error) {
-      revalidateCandidateViews(id);
-      return email;
-    }
-  }
-
-  revalidateCandidateViews(id);
-  return {};
-}
-
-export async function saveCandidateScreeningNotes(id: string, notes: string): Promise<DeleteResult> {
-  await requireAdmin();
-  const parsed = candidateScreeningNotesSchema.safeParse(notes);
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid screening notes.' };
+  let applicationId: string;
   try {
-    await prisma.candidate.update({ where: { id }, data: { screeningNotes: parsed.data || null } });
+    applicationId = await prisma.$transaction(async (tx) => {
+      const app = await tx.jobApplication.create({
+        data: { candidateId, jobId, status, cvUrl: person.cvUrl!, cvPath: person.cvPath },
+        select: { id: true },
+      });
+      await tx.applicationEvent.create({ data: { applicationId: app.id, field: 'status', toValue: status, actorId: user.id } });
+      return app.id;
+    });
   } catch (error) {
-    if (isNotFound(error)) return { error: 'This candidate no longer exists.' };
+    if (isUniqueViolation(error)) return { errors: { jobId: ['This candidate has already applied for this job.'] }, values };
     throw error;
   }
-  revalidatePath(`${LIST_PATH}/${id}`);
+
+  revalidateCandidateViews();
+  await setFlash('Candidate assigned to the job.');
+  redirect(`${LIST_PATH}/${applicationId}`);
+}
+
+/** Admin sets a person open or inactive. Hired is set only by hiring, and stays. */
+export async function setCandidateStatus(candidateId: string, status: string): Promise<DeleteResult> {
+  await requireAdmin();
+  const parsed = candidateManualStatusSchema.safeParse(status);
+  if (!parsed.success) return { error: 'Invalid status.' };
+
+  const updated = await prisma.candidate.updateMany({
+    where: { id: candidateId, status: { not: 'hired' } },
+    data: { status: parsed.data },
+  });
+  if (!updated.count) {
+    const person = await prisma.candidate.findUnique({ where: { id: candidateId }, select: { status: true } });
+    return { error: person ? 'A hired candidate stays hired.' : 'This candidate no longer exists.' };
+  }
+
+  revalidateCandidateViews();
   return {};
 }
 
-export async function retryCandidateProfileEmail(id: string): Promise<DeleteResult> {
+/** Removes a person, their applications and CVs. Not once hired: that hire fills a position. */
+export async function deletePerson(candidateId: string): Promise<DeleteResult> {
   await requireAdmin();
-  const result = await sendCandidateProfileEmail(id);
-  if (!result.error) revalidatePath(`${LIST_PATH}/${id}`);
-  return result;
-}
+  if (!isUuid(candidateId)) return {};
+  const person = await prisma.candidate.findUnique({
+    where: { id: candidateId },
+    select: { cvPath: true, applications: { select: { status: true, cvPath: true } } },
+  });
+  if (!person) return {};
+  if (person.applications.some((a) => a.status === 'hired')) {
+    return { error: 'A hired candidate can’t be deleted: their hire is the record behind a filled position.' };
+  }
 
-export async function deleteCandidate(id: string): Promise<DeleteResult> {
-  await requireAdmin();
-
-  const candidate = await prisma.candidate.findUnique({ where: { id }, select: { cvPath: true } });
-  await prisma.candidate.deleteMany({ where: { id } });
-  await removeCv(candidate?.cvPath);
-
-  revalidatePath(LIST_PATH);
-  revalidatePath('/admin');
+  await prisma.candidate.deleteMany({ where: { id: candidateId } });
+  await removeCvsIfUnused([person.cvPath, ...person.applications.map((a) => a.cvPath)]);
+  revalidateCandidateViews();
   return {};
 }

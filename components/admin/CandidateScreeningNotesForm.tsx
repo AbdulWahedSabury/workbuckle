@@ -3,12 +3,12 @@
 import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { saveCandidateScreeningNotes } from "@/lib/admin/actions/candidates";
+import { saveApplicationScreeningNotes } from "@/lib/admin/actions/applications";
 import { inputClass } from "./fields";
 import { SubmitButton } from "./buttons";
 
-export default function CandidateScreeningNotesForm({ candidateId, initialNotes }: {
-  candidateId: string;
+export default function CandidateScreeningNotesForm({ applicationId, initialNotes }: {
+  applicationId: string;
   initialNotes: string | null;
 }) {
   const [notes, setNotes] = useState(initialNotes ?? "");
@@ -18,7 +18,7 @@ export default function CandidateScreeningNotesForm({ candidateId, initialNotes 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     startTransition(async () => {
-      const result = await saveCandidateScreeningNotes(candidateId, notes);
+      const result = await saveApplicationScreeningNotes(applicationId, notes);
       if (result.error) {
         toast.error(result.error);
         return;

@@ -26,7 +26,7 @@ export default async function EditJobPage({ params }: PageProps<"/admin/jobs/[id
           title: job.title,
           salary: job.salary,
           experience: job.experience,
-          openings: String(job.openings),
+          totalPositions: String(job.totalPositions),
           clientId: job.clientId,
           cityId: job.cityId,
           jobTypeId: job.jobTypeId,
@@ -40,6 +40,7 @@ export default async function EditJobPage({ params }: PageProps<"/admin/jobs/[id
           translations: translationFormValues(job.translations, JOB_TRANSLATABLE_FIELDS),
         }}
         options={options}
+        filledPositions={job.filledPositions}
         submitLabel="Save changes"
       />
     </>

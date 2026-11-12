@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   Tags,
   Users,
+  Contact,
   type LucideIcon,
 } from "lucide-react";
 import type { Role } from "@/lib/generated/prisma/enums";
@@ -36,6 +37,7 @@ const NAV_GROUPS: readonly NavGroup[] = [
     items: [
       { href: "/admin/jobs", label: "Jobs", icon: BriefcaseBusiness, section: "jobs" },
       { href: "/admin/candidates", label: "Candidates", icon: Users, section: "candidates" },
+      { href: "/admin/people", label: "Talent pool", icon: Contact, section: "people" },
       { href: "/admin/campaigns", label: "Campaigns", icon: Megaphone, section: "campaigns" },
       { href: "/admin/clients", label: "Clients", icon: Building2, section: "clients" },
     ],

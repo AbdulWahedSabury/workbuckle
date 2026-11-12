@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { defaultLocale, locales } from '@/types/locale';
 import { Role } from '@/lib/generated/prisma/enums';
+import { fromZonedInputValue } from '@/lib/datetime';
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -199,7 +200,7 @@ export const jobSchema = z.object({
   title: z.string().trim().min(1, 'Title is required.').max(200),
   salary: z.string().trim().min(1, 'Salary is required.').max(120),
   experience: z.string().trim().min(1, 'Experience is required.').max(120),
-  openings: z.coerce
+  totalPositions: z.coerce
     .number({ invalid_type_error: 'Enter a number of openings.' })
     .int('Enter a whole number.')
     .min(1, 'At least 1 opening.')
@@ -271,8 +272,109 @@ export const siteSettingSchema = z.object({
 
 // ─── Candidates ──────────────────────────────────────────────────────────────
 
-export const CANDIDATE_STATUSES = ['pending', 'Review', 'Short list', 'submitted'] as const;
+/** The person's availability. hired is set only by the hire action. */
+export const CANDIDATE_STATUSES = ['open', 'hired', 'inactive'] as const;
 export type CandidateStatus = (typeof CANDIDATE_STATUSES)[number];
+/** What an admin can set by hand; a hired candidate stays hired. */
+export const candidateManualStatusSchema = z.enum(['open', 'inactive']);
+
+/** One application's stage. Order = pipeline order. */
+export const APPLICATION_STATUSES = [
+  'pending',
+  'under_review',
+  'shortlisted',
+  'submitted',
+  'interview',
+  'rejected',
+  'hired',
+  'cancelled',
+] as const;
+export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
+
+/**
+ * Statuses an admin picks by hand. hired needs the explicit hire action, cancelled
+ * is automatic, and interview is set only by the employer recording one (saveInterview).
+ */
+export const MANUAL_APPLICATION_STATUSES = [
+  'pending',
+  'under_review',
+  'shortlisted',
+  'submitted',
+  'rejected',
+] as const satisfies readonly ApplicationStatus[];
+export type ManualApplicationStatus = (typeof MANUAL_APPLICATION_STATUSES)[number];
+
+/** Still in the running: cancelled automatically when the candidate is hired for another job. */
+export const ACTIVE_APPLICATION_STATUSES = [
+  'pending',
+  'under_review',
+  'shortlisted',
+  'submitted',
+  'interview',
+] as const satisfies readonly ApplicationStatus[];
+
+/** Reaching any of these means the employer has the candidate: it sets submittedAt. */
+export const EMPLOYER_STAGES = ['submitted', 'interview', 'hired'] as const satisfies readonly ApplicationStatus[];
+
+/** Where a client user may still hire or reject: anything else was decided, or moved back by the agency. */
+export const EMPLOYER_DECISION_STAGES = ['submitted', 'interview'] as const satisfies readonly ApplicationStatus[];
+
+/** Where a client user may still record the interview (feedback after a decision included). */
+export const EMPLOYER_INTERVIEW_STAGES = [
+  ...EMPLOYER_DECISION_STAGES,
+  'rejected',
+  'hired',
+] as const satisfies readonly ApplicationStatus[];
+
+export const isEmployerDecisionStage = (status: string): boolean =>
+  (EMPLOYER_DECISION_STAGES as readonly string[]).includes(status);
+export const isEmployerInterviewStage = (status: string): boolean =>
+  (EMPLOYER_INTERVIEW_STAGES as readonly string[]).includes(status);
+
+export const applicationStatusSchema = z.enum(MANUAL_APPLICATION_STATUSES, {
+  errorMap: () => ({ message: 'Choose a status.' }),
+});
+
+export const INTERVIEW_STATUSES = [
+  'not_scheduled',
+  'scheduled',
+  'completed',
+  'passed',
+  'failed',
+  'cancelled',
+] as const;
+export type InterviewStatus = (typeof INTERVIEW_STATUSES)[number];
+
+/**
+ * The employer interview panel. `interviewAt` is a datetime-local value in the
+ * business time zone (Cyprus), or blank. A scheduled interview needs a date.
+ */
+export const interviewSchema = z
+  .object({
+    interviewStatus: z.enum(INTERVIEW_STATUSES, {
+      errorMap: () => ({ message: 'Choose an interview status.' }),
+    }),
+    interviewAt: z
+      .string()
+      .trim()
+      .optional()
+      .transform((v, ctx) => {
+        if (!v) return null;
+        const date = fromZonedInputValue(v);
+        if (!date) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Enter a valid date and time.' });
+          return z.NEVER;
+        }
+        return date;
+      }),
+    interviewNotes: optionalText(10_000),
+    employerFeedback: optionalText(10_000),
+  })
+  .refine((v) => v.interviewStatus !== 'scheduled' || v.interviewAt !== null, {
+    message: 'Add the interview date and time.',
+    path: ['interviewAt'],
+  });
+export type InterviewInput = z.input<typeof interviewSchema>;
 
 export const CV_MAX_BYTES = 10 * 1024 * 1024;
 export const CV_EXTENSIONS = ['pdf', 'doc', 'docx'] as const;
@@ -284,7 +386,8 @@ export const candidateSchema = z.object({
   firstName: requiredText('First name', 120),
   lastName: requiredText('Last name', 120),
   phone: requiredText('Phone', 40).regex(/^[+\d][\d\s().-]{5,}$/, 'Enter a valid phone number.'),
-  email: z.string().trim().min(1, 'Email is required.').max(255).email('Enter a valid email address.'),
+  // Lower-case: one candidate per address (candidates.email is unique).
+  email: z.string().trim().toLowerCase().min(1, 'Email is required.').max(255).email('Enter a valid email address.'),
   linkedin: z
     .string()
     .trim()
@@ -294,13 +397,19 @@ export const candidateSchema = z.object({
     .transform((v) => (v ? v : null)),
   coverLetter: optionalText(10_000),
   screeningNotes: optionalText(10_000),
-  jobId: relationId('job'),
-  status: z
-    .enum(CANDIDATE_STATUSES, { errorMap: () => ({ message: 'Choose a status.' }) })
-    .default('pending'),
+  // Optional: blank adds the person to the talent pool without a job.
+  jobId: z.preprocess((v) => (v === '' ? undefined : v), relationId('job').optional()),
+  // The new application's stage.
+  status: applicationStatusSchema.default('pending'),
 });
 
-export const candidateStatusSchema = z.enum(CANDIDATE_STATUSES);
+/** Putting a pool candidate forward for a job. Submitting to the employer happens later, with notes. */
+export const ASSIGN_STATUSES = ['pending', 'under_review', 'shortlisted'] as const satisfies readonly ManualApplicationStatus[];
+export const assignToJobSchema = z.object({
+  jobId: relationId('job'),
+  status: z.enum(ASSIGN_STATUSES, { errorMap: () => ({ message: 'Choose a status.' }) }).default('pending'),
+});
+
 export const candidateScreeningNotesSchema = z.string().trim().max(10_000, 'Screening notes are too long.');
 
 /** The public apply form: the visitor's own details. The job and status are set by the server. */
@@ -333,7 +442,19 @@ const userFields = {
   email,
   name: optionalText(120),
   role: z.nativeEnum(Role, { errorMap: () => ({ message: 'Choose a role.' }) }),
+  // The client a Client (EMPLOYER) user belongs to; cleared for every other role.
+  clientId: z.string().trim().optional(),
 };
+
+/** A Client user must name its client (they'd see nothing otherwise); other roles never keep one. */
+function withClient<T extends { role: Role; clientId?: string }>(value: T, ctx: z.RefinementCtx) {
+  if (value.role !== Role.EMPLOYER) return { ...value, clientId: null };
+  if (!value.clientId || !z.string().uuid().safeParse(value.clientId).success) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['clientId'], message: 'Choose the client this user belongs to.' });
+    return z.NEVER;
+  }
+  return { ...value, clientId: value.clientId };
+}
 
 export const userCreateSchema = z.object({
   ...userFields,
@@ -341,7 +462,7 @@ export const userCreateSchema = z.object({
     .string()
     .min(PASSWORD_MIN_LENGTH, `Use at least ${PASSWORD_MIN_LENGTH} characters.`)
     .max(200),
-});
+}).transform(withClient);
 
 /** Blank password → undefined, i.e. keep the current one. */
 export const userUpdateSchema = z.object({
@@ -354,4 +475,4 @@ export const userUpdateSchema = z.object({
     .refine((v) => v === undefined || v.length >= PASSWORD_MIN_LENGTH, {
       message: `Use at least ${PASSWORD_MIN_LENGTH} characters, or leave blank to keep the current password.`,
     }),
-});
+}).transform(withClient);

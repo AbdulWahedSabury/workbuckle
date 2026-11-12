@@ -41,7 +41,14 @@ function getColumns(currentUserId: string): Column<UserListRow, UserSortKey>[] {
       id: "role",
       header: "Role",
       sortKey: "role",
-      cell: (user) => <StatusBadge tone={ROLE_TONE[user.role]}>{roleLabel(user.role)}</StatusBadge>,
+      cell: (user) => (
+        <div className="flex flex-col items-start gap-1">
+          <StatusBadge tone={ROLE_TONE[user.role]}>{roleLabel(user.role)}</StatusBadge>
+          {user.role === "EMPLOYER" && (
+            <span className="text-xs text-gray-2">{user.client?.name ?? "No client linked: sees nothing"}</span>
+          )}
+        </div>
+      ),
     },
     {
       id: "createdAt",

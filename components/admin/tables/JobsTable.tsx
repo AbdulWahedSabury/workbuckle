@@ -9,7 +9,8 @@ import { DeleteButton } from "@/components/admin/buttons";
 import EmptyState from "@/components/admin/EmptyState";
 import StatusBadge, { type StatusTone } from "@/components/admin/StatusBadge";
 import { iconButtonClass } from "@/components/admin/styles";
-import type { CandidateStatus } from "@/schemas/AdminSchemas";
+import type { ApplicationStatus } from "@/schemas/AdminSchemas";
+import { APPLICATION_STATUS_BADGE } from "@/components/admin/status-labels";
 import { formatDate } from "./format";
 
 export const STATUS_BADGE: Record<string, { tone: StatusTone; label: string }> = {
@@ -17,6 +18,16 @@ export const STATUS_BADGE: Record<string, { tone: StatusTone; label: string }> =
   draft: { tone: "neutral", label: "Draft" },
   closed: { tone: "danger", label: "Closed" },
 };
+
+/** The stages shown per job; rejected and cancelled stay in the candidates list. */
+const PIPELINE_COUNTS = [
+  "pending",
+  "under_review",
+  "shortlisted",
+  "submitted",
+  "interview",
+  "hired",
+] as const satisfies readonly ApplicationStatus[];
 
 const columns: Column<JobListRow, JobSortKey>[] = [
   { id: "client", header: "Client", sortKey: "client", hideBelow: "md", cell: (job) => job.client.name },
@@ -55,6 +66,24 @@ const columns: Column<JobListRow, JobSortKey>[] = [
     },
   },
   {
+    id: "positions",
+    header: "Positions",
+    hideBelow: "sm",
+    cell: (job) => {
+      const remaining = Math.max(0, job.totalPositions - job.filledPositions);
+      return (
+        <div className="flex flex-col whitespace-nowrap">
+          <span className="font-semibold tabular-nums text-ink">
+            {job.filledPositions}/{job.totalPositions} filled
+          </span>
+          <span className="text-xs text-gray-2">
+            {remaining ? `${remaining} remaining` : "Full"}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
     id: "candidates",
     header: "Candidates by status",
     cell: (job) => (
@@ -63,34 +92,16 @@ const columns: Column<JobListRow, JobSortKey>[] = [
         aria-label={`Candidates by status for ${job.title}`}
         className="grid w-64 grid-cols-2 gap-1.5"
       >
-        <CandidateCountLink
-          jobId={job.id}
-          status="pending"
-          label="Pending"
-          tone="neutral"
-          count={job.candidateStatusCounts.pending}
-        />
-        <CandidateCountLink
-          jobId={job.id}
-          status="Review"
-          label="Review"
-          tone="brand"
-          count={job.candidateStatusCounts.Review}
-        />
-        <CandidateCountLink
-          jobId={job.id}
-          status="Short list"
-          label="Short list"
-          tone="success"
-          count={job.candidateStatusCounts["Short list"]}
-        />
-        <CandidateCountLink
-          jobId={job.id}
-          status="submitted"
-          label="Submitted"
-          tone="neutral"
-          count={job.candidateStatusCounts.submitted}
-        />
+        {PIPELINE_COUNTS.map((status) => (
+          <CandidateCountLink
+            key={status}
+            jobId={job.id}
+            status={status}
+            label={APPLICATION_STATUS_BADGE[status].label}
+            tone={APPLICATION_STATUS_BADGE[status].tone}
+            count={job.candidateStatusCounts[status]}
+          />
+        ))}
       </div>
     ),
   },
@@ -136,8 +147,8 @@ const columns: Column<JobListRow, JobSortKey>[] = [
             description={
               <>
                 <strong>{job.title}</strong> will be permanently deleted
-                {job._count.candidates > 0 &&
-                  `, along with its ${job._count.candidates} ${job._count.candidates === 1 ? "candidate" : "candidates"}`}
+                {job._count.applications > 0 &&
+                  `, along with its ${job._count.applications} ${job._count.applications === 1 ? "application" : "applications"}`}
                 .
               </>
             }
@@ -158,7 +169,7 @@ function CandidateCountLink({
   count,
 }: {
   jobId: string;
-  status: CandidateStatus;
+  status: ApplicationStatus;
   label: string;
   tone: StatusTone;
   count: number;
@@ -166,7 +177,7 @@ function CandidateCountLink({
   return (
     <Link
       href={`/admin/candidates?job=${encodeURIComponent(jobId)}&status=${encodeURIComponent(status)}`}
-      aria-label={`View ${count} ${status} candidates`}
+      aria-label={`View ${count} ${label.toLowerCase()} candidates`}
       title={`View ${label} candidates`}
       className="group flex min-w-0 items-center justify-between gap-2 rounded-lg border border-line bg-white px-2.5 py-1.5 text-xs transition-colors hover:border-primary/40 hover:bg-gray-3 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
     >
@@ -174,7 +185,7 @@ function CandidateCountLink({
         <span
           aria-hidden="true"
           className={`size-1.5 shrink-0 rounded-full ${
-            tone === "brand" ? "bg-primary" : tone === "success" ? "bg-emerald-500" : "bg-gray-2/50"
+            tone === "brand" ? "bg-primary" : tone === "success" ? "bg-emerald-500" : tone === "danger" ? "bg-red-500" : "bg-gray-2/50"
           }`}
         />
         <span className="truncate text-gray-2 transition-colors group-hover:text-ink">{label}</span>

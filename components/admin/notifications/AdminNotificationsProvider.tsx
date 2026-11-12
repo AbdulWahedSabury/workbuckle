@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, use, useEffect, useRef, useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { playAlert } from "@/lib/admin/play-alert";
 
@@ -22,6 +22,10 @@ type AdminNotificationsContextValue = {
 
 const AdminNotificationsContext = createContext<AdminNotificationsContextValue | null>(null);
 
+/** Pages whose server data a new notification (an application, a hire) can change. */
+const LIVE_PAGES = [/^\/admin$/, /^\/admin\/candidates(\/|$)/, /^\/admin\/jobs$/, /^\/admin\/people(\/|$)/];
+const showsLiveData = (pathname: string) => LIVE_PAGES.some((page) => page.test(pathname));
+
 export function useAdminNotifications() {
   const ctx = use(AdminNotificationsContext);
   if (!ctx) throw new Error("useAdminNotifications must be used inside <AdminNotificationsProvider>");
@@ -35,18 +39,42 @@ export function useAdminNotifications() {
  */
 export default function AdminNotificationsProvider({
   canMarkRead,
+  enabled = true,
   children,
 }: {
   canMarkRead: boolean;
+  /** False for roles that may not see the feed (client users): no stream is opened. */
+  enabled?: boolean;
   children: ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [notifications, setNotifications] = useState<AdminNotificationItem[]>([]);
+  // Read inside the stream handler without reopening the stream on every navigation.
+  const currentPath = useRef(pathname);
+  // A notification arrived while the tab was hidden: refresh once when it is shown again.
+  const refreshWhenVisible = useRef(false);
+
+  useEffect(() => {
+    currentPath.current = pathname;
+  }, [pathname]);
+
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.hidden || !refreshWhenVisible.current) return;
+      refreshWhenVisible.current = false;
+      if (showsLiveData(currentPath.current)) router.refresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [router]);
+
   // Ids already shown. null until the first payload, which only seeds it, so
   // opening the panel doesn't replay alerts for everything still unread.
   const seen = useRef<Set<string> | null>(null);
 
   useEffect(() => {
+    if (!enabled) return;
     const source = new EventSource("/api/admin/notifications/stream");
 
     source.onmessage = (event) => {
@@ -73,8 +101,10 @@ export default function AdminNotificationsProvider({
               action: n.link ? { label: "View", onClick: () => router.push(n.link!) } : undefined,
             });
           }
-          // New candidates should show up in open lists/dashboards too.
-          router.refresh();
+          // New candidates should show up in open lists and the dashboard too: only on
+          // pages that show them, and a hidden tab waits until it is looked at again.
+          if (document.hidden) refreshWhenVisible.current = true;
+          else if (showsLiveData(currentPath.current)) router.refresh();
         }
       }
 
@@ -83,7 +113,7 @@ export default function AdminNotificationsProvider({
 
     // EventSource reconnects on its own; `seen` survives, so nothing replays.
     return () => source.close();
-  }, [router]);
+  }, [router, enabled]);
 
   const markAllRead = async () => {
     setNotifications([]);

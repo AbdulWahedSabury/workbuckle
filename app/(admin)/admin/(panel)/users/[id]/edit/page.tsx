@@ -4,7 +4,7 @@ import PageHeader from "@/components/admin/PageHeader";
 import UserForm from "@/components/admin/UserForm";
 import { requireAdmin } from "@/lib/admin/auth";
 import { updateUser } from "@/lib/admin/actions/users";
-import { getUser } from "@/lib/admin/queries";
+import { getClientOptions, getUser } from "@/lib/admin/queries";
 
 export const metadata: Metadata = { title: "Edit user" };
 
@@ -19,7 +19,8 @@ export default async function EditUserPage({ params }: PageProps<"/admin/users/[
       <PageHeader title="Edit user" description={user.email} />
       <UserForm
         action={updateUser.bind(null, user.id)}
-        user={{ email: user.email, name: user.name, role: user.role }}
+        user={{ email: user.email, name: user.name, role: user.role, clientId: user.clientId }}
+        clients={await getClientOptions()}
         isSelf={user.id === me.id}
         submitLabel="Save changes"
       />

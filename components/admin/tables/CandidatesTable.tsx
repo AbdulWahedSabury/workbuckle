@@ -1,33 +1,27 @@
 import Link from "next/link";
 import { ExternalLink, Eye, SearchX } from "lucide-react";
-import { deleteCandidate } from "@/lib/admin/actions/candidates";
+import { deleteApplication } from "@/lib/admin/actions/applications";
 import { parseListParams } from "@/lib/admin/list-params";
 import {
   CANDIDATE_SORT_KEYS,
-  listCandidates,
-  type CandidateListRow,
+  listApplications,
+  type ApplicationListRow,
   type CandidateSortKey,
 } from "@/lib/admin/queries";
-import type { CandidateStatus } from "@/schemas/AdminSchemas";
+import type { ApplicationStatus } from "@/schemas/AdminSchemas";
 import { DataTable, type Column } from "@/components/admin/data-table";
 import AdminOnly from "@/components/admin/AdminOnly";
 import { DeleteButton } from "@/components/admin/buttons";
-import CandidateStatusSelect from "@/components/admin/CandidateStatusSelect";
+import ApplicationStatusSelect from "@/components/admin/ApplicationStatusSelect";
 import EmptyState from "@/components/admin/EmptyState";
-import StatusBadge, { type StatusTone } from "@/components/admin/StatusBadge";
+import StatusBadge from "@/components/admin/StatusBadge";
+import { APPLICATION_STATUS_BADGE, CANDIDATE_STATUS_BADGE, badgeFor } from "@/components/admin/status-labels";
 import { iconButtonClass } from "@/components/admin/styles";
 import { formatDate } from "./format";
 
-const STATUS_BADGE: Record<string, { tone: StatusTone; label: string }> = {
-  pending: { tone: "neutral", label: "Pending" },
-  Review: { tone: "brand", label: "Review" },
-  "Short list": { tone: "success", label: "Short list" },
-  submitted: { tone: "neutral", label: "Submitted" },
-};
+const fullName = (c: ApplicationListRow) => `${c.candidate.firstName} ${c.candidate.lastName}`;
 
-const fullName = (c: CandidateListRow) => `${c.firstName} ${c.lastName}`;
-
-const columns: Column<CandidateListRow, CandidateSortKey>[] = [
+const columns: Column<ApplicationListRow, CandidateSortKey>[] = [
   {
     id: "name",
     header: "Candidate",
@@ -37,9 +31,15 @@ const columns: Column<CandidateListRow, CandidateSortKey>[] = [
         <Link href={`/admin/candidates/${c.id}`} className="font-semibold text-ink hover:underline">
           {fullName(c)}
         </Link>
-        <a href={`mailto:${c.email}`} className="text-xs text-gray-2 hover:text-ink">
-          {c.email}
+        <a href={`mailto:${c.candidate.email}`} className="text-xs text-gray-2 hover:text-ink">
+          {c.candidate.email}
         </a>
+        {c.candidate.status !== "open" && (
+          // Hired or inactive people can't be put forward for other jobs; flag it on every row.
+          <StatusBadge tone="neutral" dot={false} className="mt-1 self-start">
+            {`Candidate ${badgeFor(CANDIDATE_STATUS_BADGE, c.candidate.status).label.toLowerCase()}`}
+          </StatusBadge>
+        )}
       </div>
     ),
   },
@@ -47,7 +47,7 @@ const columns: Column<CandidateListRow, CandidateSortKey>[] = [
     id: "phone",
     header: "Phone",
     hideBelow: "lg",
-    cell: (c) => <span className="whitespace-nowrap">{c.phone}</span>,
+    cell: (c) => <span className="whitespace-nowrap">{c.candidate.phone}</span>,
   },
   {
     id: "job",
@@ -80,12 +80,12 @@ const columns: Column<CandidateListRow, CandidateSortKey>[] = [
     header: "Status",
     sortKey: "status",
     cell: (c) => {
-      const badge = STATUS_BADGE[c.status] ?? { tone: "neutral" as const, label: c.status };
+      const badge = badgeFor(APPLICATION_STATUS_BADGE, c.status);
       return (
         <div className="flex flex-col items-start gap-2">
           <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
           <AdminOnly>
-            <CandidateStatusSelect id={c.id} status={c.status} name={fullName(c)} />
+            <ApplicationStatusSelect id={c.id} status={c.status} name={fullName(c)} />
           </AdminOnly>
         </div>
       );
@@ -130,16 +130,17 @@ const columns: Column<CandidateListRow, CandidateSortKey>[] = [
         </a>
         <AdminOnly>
           <DeleteButton
-            action={deleteCandidate.bind(null, c.id)}
-            title="Delete this candidate?"
+            action={deleteApplication.bind(null, c.id)}
+            title="Delete this application?"
             description={
               <>
-                <strong>{fullName(c)}</strong>&rsquo;s application and uploaded CV will be
-                permanently deleted.
+                <strong>{fullName(c)}</strong>&rsquo;s application for {c.job.title} and its CV
+                will be permanently deleted. They stay in the talent pool.
               </>
             }
             label={`Delete ${fullName(c)}`}
-            successMessage="Candidate deleted."
+            successMessage="Application deleted."
+            disabledReason={c.status === "hired" ? "Hired applications can’t be deleted" : undefined}
           />
         </AdminOnly>
       </div>
@@ -156,10 +157,10 @@ export default async function CandidatesTable({
   /** Only show candidates who applied for this job. */
   jobId?: string;
   /** Only show candidates in this recruiting stage. */
-  status?: CandidateStatus;
+  status?: ApplicationStatus;
 }) {
   const params = parseListParams(await searchParams, CANDIDATE_SORT_KEYS);
-  const { rows, ...pageInfo } = await listCandidates(params, jobId, status);
+  const { rows, ...pageInfo } = await listApplications(params, jobId, status);
 
   return (
     <DataTable

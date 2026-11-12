@@ -26,13 +26,7 @@ import {
   listRecentChanges,
 } from "@/lib/admin/queries";
 import { canEdit, canView, roleLabel } from "@/lib/auth/roles";
-
-const CANDIDATE_BADGE: Record<string, { tone: StatusTone; label: string }> = {
-  pending: { tone: "neutral", label: "Pending" },
-  Review: { tone: "brand", label: "Review" },
-  "Short list": { tone: "success", label: "Short list" },
-  submitted: { tone: "neutral", label: "Submitted" },
-};
+import { APPLICATION_STATUS_BADGE, badgeFor } from "@/components/admin/status-labels";
 
 const JOB_BADGE: Record<string, { tone: StatusTone; label: string }> = {
   published: { tone: "success", label: "Published" },
@@ -245,9 +239,11 @@ async function CandidatePipeline() {
         totalLabel="applicants"
         items={[
           { key: "pending", label: "Pending review", count: statusCounts.pending, color: "bg-amber-400", href },
-          { key: "Review", label: "Review", count: statusCounts.Review, color: "bg-blue-500", href },
-          { key: "Short list", label: "Short list", count: statusCounts["Short list"], color: "bg-violet-500", href },
-          { key: "submitted", label: "Submitted", count: statusCounts.submitted, color: "bg-emerald-500", href },
+          { key: "under_review", label: "Under review", count: statusCounts.under_review, color: "bg-blue-500", href },
+          { key: "shortlisted", label: "Shortlisted", count: statusCounts.shortlisted, color: "bg-violet-500", href },
+          { key: "submitted", label: "Submitted", count: statusCounts.submitted, color: "bg-sky-500", href },
+          { key: "interview", label: "Interview", count: statusCounts.interview, color: "bg-orange-500", href },
+          { key: "hired", label: "Hired", count: statusCounts.hired, color: "bg-emerald-500", href },
         ]}
       />
       {statusCounts.pending > 0 && (
@@ -297,8 +293,8 @@ async function LatestApplications() {
       ) : (
         <ul className="-mx-2 flex flex-col">
           {latest.map((c) => {
-            const badge = CANDIDATE_BADGE[c.status] ?? { tone: "neutral" as const, label: c.status };
-            const initials = `${c.firstName[0] ?? ""}${c.lastName[0] ?? ""}`.toUpperCase();
+            const badge = badgeFor(APPLICATION_STATUS_BADGE, c.status);
+            const initials = `${c.candidate.firstName[0] ?? ""}${c.candidate.lastName[0] ?? ""}`.toUpperCase();
             return (
               <li key={c.id}>
                 <Link
@@ -313,7 +309,7 @@ async function LatestApplications() {
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold text-ink">
-                      {c.firstName} {c.lastName}
+                      {c.candidate.firstName} {c.candidate.lastName}
                     </span>
                     <span className="block truncate text-xs text-gray-2">{c.job.title}</span>
                   </span>
@@ -336,7 +332,7 @@ async function LatestApplications() {
 async function JobsOverview() {
   await connection();
   const [statusCounts, { topJobs }] = await Promise.all([getJobStatusCounts(), getCandidateInsights()]);
-  const most = Math.max(1, ...topJobs.map((j) => j._count.candidates));
+  const most = Math.max(1, ...topJobs.map((j) => j._count.applications));
   const jobsHref = "/admin/jobs?sort=status&dir=desc";
 
   return (
@@ -388,12 +384,12 @@ async function JobsOverview() {
                         {badge.label}
                       </StatusBadge>
                     )}
-                    <span className="font-semibold text-ink tabular-nums">{job._count.candidates}</span>
+                    <span className="font-semibold text-ink tabular-nums">{job._count.applications}</span>
                   </span>
                   <span aria-hidden="true" className="mt-1.5 ml-7 block h-1.5 overflow-hidden rounded-full bg-gray-3">
                     <span
                       className="block h-full rounded-full bg-primary/70 transition-colors group-hover:bg-primary"
-                      style={{ width: `${(job._count.candidates / most) * 100}%` }}
+                      style={{ width: `${(job._count.applications / most) * 100}%` }}
                     />
                   </span>
                 </Link>

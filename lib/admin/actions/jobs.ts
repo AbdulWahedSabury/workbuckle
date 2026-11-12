@@ -5,10 +5,11 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/admin/auth';
 import { setFlash } from '@/lib/admin/flash-server';
-import type { ActionState } from '@/lib/admin/action-state';
+import type { ActionState, DeleteResult } from '@/lib/admin/action-state';
 import { FIX_FIELDS_MESSAGE, formValues, isNotFound } from '@/lib/admin/form';
 import { parseTranslations, type ParsedTranslations } from '@/lib/admin/translations';
-import { cvObjectPath, removeCvs } from '@/lib/cv-storage';
+import { cvObjectPath } from '@/lib/cv-storage';
+import { removeCvsIfUnused } from '@/lib/admin/cv-files';
 import { sanitizeRichText } from '@/lib/rich-text';
 import { isUuid } from '@/lib/utils';
 import {
@@ -87,6 +88,23 @@ async function missingRelations(data: JobInput): Promise<ActionState['errors']> 
   return Object.keys(errors).length ? errors : undefined;
 }
 
+/**
+ * Openings can't drop below the hires already made, and a full job can't be
+ * published again until openings are raised. Closing and reopening are manual.
+ */
+async function capacityErrors(id: string, data: JobInput): Promise<ActionState['errors']> {
+  const job = await prisma.job.findUnique({ where: { id }, select: { filledPositions: true } });
+  if (!job) return undefined;
+  const filled = job.filledPositions;
+  if (data.totalPositions < filled) {
+    return { totalPositions: [`${filled} ${filled === 1 ? 'candidate is' : 'candidates are'} already hired; openings can't be lower.`] };
+  }
+  if (data.status === 'published' && data.totalPositions === filled) {
+    return { status: ['All positions are filled. Raise the number of openings to publish this job again.'] };
+  }
+  return undefined;
+}
+
 function createdJobMessage({ title, status }: JobInput): string {
   if (status === 'published') return `Job "${title}" published.`;
   if (status === 'draft') return `Job "${title}" saved as a draft.`;
@@ -127,9 +145,21 @@ export async function updateJob(
   const errors = await missingRelations(result.data);
   if (errors) return { message: FIX_FIELDS_MESSAGE, errors, values };
 
+  const capacity = await capacityErrors(id, result.data);
+  if (capacity) return { message: FIX_FIELDS_MESSAGE, errors: capacity, values };
+
   try {
     await prisma.$transaction([
-      prisma.job.update({ where: { id }, data: result.data }),
+      // Re-checked in the write: a hire between the check above and here can't push filled past total.
+      prisma.job.update({
+        where: {
+          id,
+          filledPositions: result.data.status === 'published'
+            ? { lt: result.data.totalPositions }
+            : { lte: result.data.totalPositions },
+        },
+        data: result.data,
+      }),
       ...translations.rows.map(({ locale, ...text }) =>
         prisma.jobTranslation.upsert({
           where: { jobId_locale: { jobId: id, locale } },
@@ -143,8 +173,9 @@ export async function updateJob(
       }),
     ]);
   } catch (error) {
+    // Deleted, or a hire landed after capacityErrors() and the openings no longer fit.
     if (isNotFound(error)) {
-      return { message: 'This job no longer exists.', values };
+      return { message: 'This job changed while you were editing (deleted, or someone was just hired). Refresh and try again.', values };
     }
     throw error;
   }
@@ -154,18 +185,33 @@ export async function updateJob(
   redirect(LIST_PATH);
 }
 
-export async function deleteJob(id: string): Promise<void> {
-  await requireAdmin();
-  if (!isUuid(id)) return;
+const JOB_HAS_HIRES =
+  'This job has hired candidates, so it can’t be deleted: the hires are the record behind its filled positions. Close the job instead.';
 
-  // Candidates cascade with the job; their CVs are in storage, so remove them
+/**
+ * Deletes a job with its applications. A job with a hire stays: deleting it
+ * would leave that person marked hired with no job behind it (and like
+ * deleteApplication, a hire is the record behind a filled position).
+ */
+export async function deleteJob(id: string): Promise<DeleteResult> {
+  await requireAdmin();
+  if (!isUuid(id)) return {};
+
+  // Applications cascade with the job; their CVs are in storage, so remove them
   // too or nothing would point at those files any more.
-  const candidates = await prisma.candidate.findMany({
+  const applications = await prisma.jobApplication.findMany({
     where: { jobId: id },
-    select: { cvPath: true, cvUrl: true },
+    select: { status: true, cvPath: true, cvUrl: true },
   });
-  await prisma.job.deleteMany({ where: { id } });
-  await removeCvs(candidates.map(cvObjectPath).filter((path) => path !== null));
+  if (applications.some((a) => a.status === 'hired')) return { error: JOB_HAS_HIRES };
+  // Re-checked in the delete itself, so a hire made in the meantime still blocks it.
+  const deleted = await prisma.job.deleteMany({ where: { id, applications: { none: { status: 'hired' } } } });
+  if (!deleted.count) {
+    return (await prisma.job.count({ where: { id } })) ? { error: JOB_HAS_HIRES } : {};
+  }
+  // A pool candidate's own CV may be the same file; removeCvsIfUnused keeps those.
+  await removeCvsIfUnused(applications.map(cvObjectPath));
 
   revalidateJobs();
+  return {};
 }

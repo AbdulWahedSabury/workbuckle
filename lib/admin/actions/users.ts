@@ -20,6 +20,8 @@ function parse(formData: FormData) {
   return { values, input: { ...values, password } };
 }
 
+const clientExists = async (id: string) => (await prisma.client.count({ where: { id } })) > 0;
+
 export async function createUser(_prev: ActionState, formData: FormData): Promise<ActionState> {
   await requireAdmin();
 
@@ -28,6 +30,9 @@ export async function createUser(_prev: ActionState, formData: FormData): Promis
   if (!result.success) return validationError(result.error, values);
 
   const { password, ...data } = result.data;
+  if (data.clientId && !(await clientExists(data.clientId))) {
+    return { errors: { clientId: ['This client no longer exists.'] }, values };
+  }
   try {
     await prisma.user.create({ data: { ...data, passwordHash: await hashPassword(password) } });
   } catch (error) {
@@ -58,6 +63,9 @@ export async function updateUser(
   // without one.
   if (id === admin.id && data.role !== Role.ADMIN) {
     return { errors: { role: ["You can't remove your own admin access."] }, values };
+  }
+  if (data.clientId && !(await clientExists(data.clientId))) {
+    return { errors: { clientId: ['This client no longer exists.'] }, values };
   }
 
   try {

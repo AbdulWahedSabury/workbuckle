@@ -15,6 +15,7 @@ export type UserFormValues = {
   email: string;
   name: string | null;
   role: Role;
+  clientId: string | null;
 };
 
 const roleOptions = ROLE_OPTIONS.map((o) => ({
@@ -26,6 +27,7 @@ export default function UserForm({
   action,
   user,
   isSelf = false,
+  clients,
   submitLabel,
 }: {
   action: (state: ActionState, formData: FormData) => Promise<ActionState>;
@@ -33,6 +35,8 @@ export default function UserForm({
   user?: UserFormValues;
   /** Editing your own account: you can't take away your own admin role. */
   isSelf?: boolean;
+  /** Choices for the Client role's client. */
+  clients: readonly { value: string; label: string }[];
   submitLabel: string;
 }) {
   const [state, formAction] = useActionState(action, initialActionState);
@@ -71,6 +75,15 @@ export default function UserForm({
           defaultValue={v ? v.role : (user?.role ?? "VIEWER")}
           hint={isSelf ? "You can't remove your own admin access." : undefined}
           error={errors.role}
+        />
+        <SelectField
+          name="clientId"
+          label="Client"
+          placeholder="No client"
+          options={clients}
+          defaultValue={v ? v.clientId : (user?.clientId ?? "")}
+          hint="Required for the Client role: they see only this client's jobs and the candidates submitted to it. Ignored for other roles."
+          error={errors.clientId}
         />
       </fieldset>
 

@@ -3,10 +3,10 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { retryCandidateProfileEmail } from "@/lib/admin/actions/candidates";
+import { retryApplicationProfileEmail } from "@/lib/admin/actions/applications";
 import { primaryButtonClass } from "./styles";
 
-export default function RetryCandidateProfileEmailButton({ candidateId }: { candidateId: string }) {
+export default function RetryProfileEmailButton({ applicationId }: { applicationId: string }) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
   return (
@@ -15,9 +15,10 @@ export default function RetryCandidateProfileEmailButton({ candidateId }: { cand
       disabled={pending}
       className={primaryButtonClass}
       onClick={() => startTransition(async () => {
-        const result = await retryCandidateProfileEmail(candidateId);
+        const result = await retryApplicationProfileEmail(applicationId);
         if (result.error) toast.error(result.error);
         else {
+          if (result.notice) toast.warning(result.notice);
           toast.success("Candidate profile emailed to the client.");
           router.refresh();
         }

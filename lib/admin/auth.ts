@@ -19,7 +19,7 @@ export const getPanelUser = cache(async () => {
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, email: true, name: true, role: true },
+    select: { id: true, email: true, name: true, role: true, clientId: true },
   });
   return user && isPanelRole(user.role) ? user : null;
 });

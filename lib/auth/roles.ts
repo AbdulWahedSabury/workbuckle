@@ -7,6 +7,10 @@ export type AdminSection =
   | 'dashboard'
   | 'jobs'
   | 'candidates'
+  /** Everyone in the talent pool, with or without a job. Not for client users. */
+  | 'people'
+  /** The live "new application" feed, which covers every client's jobs. */
+  | 'notifications'
   | 'campaigns'
   | 'categories'
   | 'jobTypes'
@@ -20,6 +24,8 @@ const ALL_SECTIONS: readonly AdminSection[] = [
   'dashboard',
   'jobs',
   'candidates',
+  'people',
+  'notifications',
   'campaigns',
   'categories',
   'jobTypes',
@@ -34,12 +40,14 @@ const ALL_SECTIONS: readonly AdminSection[] = [
 const VIEWABLE: Partial<Record<Role, readonly AdminSection[]>> = {
   [Role.ADMIN]: ALL_SECTIONS,
   [Role.VIEWER]: ALL_SECTIONS.filter((s) => s !== 'users'),
+  // Scoped to their own client in lib/admin/scope.ts: its jobs, and only the
+  // applications an admin has submitted to it.
   [Role.EMPLOYER]: ['dashboard', 'jobs', 'candidates'],
 };
 
 export const ROLE_OPTIONS: readonly { value: Role; label: string; description: string }[] = [
   { value: Role.ADMIN, label: 'Admin', description: 'Full access, including users.' },
-  { value: Role.EMPLOYER, label: 'Employer', description: 'Read-only: jobs and candidates.' },
+  { value: Role.EMPLOYER, label: 'Client', description: 'Read-only: their own jobs and the candidates submitted to them.' },
   { value: Role.VIEWER, label: 'Viewer', description: 'Read-only: everything except users.' },
   { value: Role.USER, label: 'No access', description: "Can't sign in to the panel." },
 ];

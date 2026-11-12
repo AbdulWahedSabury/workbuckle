@@ -8,7 +8,8 @@ import CandidatesTable from "@/components/admin/tables/CandidatesTable";
 import { primaryLinkClass, secondaryLinkClass } from "@/components/admin/styles";
 import { requireView } from "@/lib/admin/auth";
 import { getJob } from "@/lib/admin/queries";
-import { CANDIDATE_STATUSES, type CandidateStatus } from "@/schemas/AdminSchemas";
+import { APPLICATION_STATUSES, type ApplicationStatus } from "@/schemas/AdminSchemas";
+import { APPLICATION_STATUS_BADGE } from "@/components/admin/status-labels";
 
 export const metadata: Metadata = { title: "Candidates" };
 
@@ -23,21 +24,22 @@ export default async function CandidatesPage({ searchParams }: PageProps<"/admin
   const rawStatus = params.status;
   const statusParam = Array.isArray(rawStatus) ? rawStatus[0] : rawStatus;
   const status =
-    typeof statusParam === "string" && CANDIDATE_STATUSES.includes(statusParam as CandidateStatus)
-      ? (statusParam as CandidateStatus)
+    typeof statusParam === "string" && APPLICATION_STATUSES.includes(statusParam as ApplicationStatus)
+      ? (statusParam as ApplicationStatus)
       : undefined;
+  const statusLabel = status ? APPLICATION_STATUS_BADGE[status].label.toLowerCase() : undefined;
 
   return (
     <>
       <PageHeader
-        title={job ? `Candidates for ${job.title}${status ? ` · ${status}` : ""}` : "Candidates"}
+        title={job ? `Candidates for ${job.title}${statusLabel ? ` · ${statusLabel}` : ""}` : "Candidates"}
         description={
           job
             ? status
-              ? `Applicants with status ${status}.`
+              ? `Applicants with status ${statusLabel}.`
               : "Everyone who applied for this job. Track each application through the recruiting pipeline."
             : status
-              ? `Candidates with status ${status}.`
+              ? `Candidates with status ${statusLabel}.`
               : "People who applied for a job. Review their CV and track each application through the recruiting pipeline."
         }
         actions={

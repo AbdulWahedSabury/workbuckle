@@ -3,15 +3,17 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { initialActionState, type ActionState } from "@/lib/admin/action-state";
-import { CANDIDATE_STATUSES } from "@/schemas/AdminSchemas";
+import { MANUAL_APPLICATION_STATUSES } from "@/schemas/AdminSchemas";
+import { APPLICATION_STATUS_BADGE } from "./status-labels";
 import { FormMessage, SelectField, TextAreaField, TextField } from "./fields";
 import { useActionErrorToast } from "./useActionErrorToast";
 import { SubmitButton } from "./buttons";
 import { fieldsetClass, secondaryLinkClass } from "./styles";
 
-const STATUS_OPTIONS = CANDIDATE_STATUSES.map((s) => ({
+// Hiring is a separate, explicit step on the candidate's profile.
+const STATUS_OPTIONS = MANUAL_APPLICATION_STATUSES.filter((s) => s !== "rejected").map((s) => ({
   value: s,
-  label: s.charAt(0).toUpperCase() + s.slice(1),
+  label: APPLICATION_STATUS_BADGE[s].label,
 }));
 
 export default function CandidateForm({
@@ -37,10 +39,9 @@ export default function CandidateForm({
         <SelectField
           name="jobId"
           label="Job"
-          required
-          placeholder="Select a job"
-          options={jobs}
-          defaultValue={v?.jobId}
+          options={[{ value: "", label: "No job: add to the talent pool" }, ...jobs]}
+          defaultValue={v?.jobId ?? ""}
+          hint="Leave as no job to keep them in the talent pool as an open candidate. Assign them to a job later from their profile."
           error={errors.jobId}
         />
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">

@@ -18,7 +18,7 @@ export type JobFormValues = {
   title: string;
   salary: string;
   experience: string;
-  openings: string;
+  totalPositions: string;
   clientId: string;
   cityId: string;
   jobTypeId: string;
@@ -72,6 +72,13 @@ const RICH_TEXT_FIELDS = [
   },
 ] as const;
 
+/** "2 of 3 filled · 1 remaining" once someone is hired; closes automatically when full. */
+function capacityHint(filled: number, total: number) {
+  if (!filled) return "The job closes automatically once this many candidates are hired.";
+  const remaining = Math.max(0, total - filled);
+  return `${filled} of ${total} filled · ${remaining} remaining. Can't be lower than ${filled}.`;
+}
+
 /** Hint for an empty select, pointing at the page where its options are managed. */
 function emptyHint(options: SelectOption[], what: string, href: string) {
   return options.length ? undefined : (
@@ -89,11 +96,14 @@ export default function JobForm({
   action,
   initialJob,
   options,
+  filledPositions = 0,
   submitLabel,
 }: {
   action: (state: ActionState, formData: FormData) => Promise<ActionState>;
   initialJob?: JobFormValues;
   options: JobFormOptions;
+  /** Hires already made for this job (edit only). */
+  filledPositions?: number;
   submitLabel: string;
 }) {
   const [state, formAction] = useActionState(action, initialActionState);
@@ -161,12 +171,13 @@ export default function JobForm({
               </LocalizedField>
             </div>
             <TextField
-              name="openings"
+              name="totalPositions"
               label="Number of openings"
               type="number"
               required
-              defaultValue={value("openings") ?? "1"}
-              error={errors.openings}
+              defaultValue={value("totalPositions") ?? "1"}
+              error={errors.totalPositions}
+              hint={capacityHint(filledPositions, Number(value("totalPositions") ?? 1))}
             />
           </fieldset>
 

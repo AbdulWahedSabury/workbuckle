@@ -14,10 +14,10 @@ const credentialsSchema = z.object({
 });
 
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
-const allowLoginFromIpForEmail = createRateLimiter(5, LOGIN_WINDOW_MS);
-const allowLoginFromIp = createRateLimiter(30, LOGIN_WINDOW_MS);
+const allowLoginFromIpForEmail = createRateLimiter('login-ip-email', 5, LOGIN_WINDOW_MS);
+const allowLoginFromIp = createRateLimiter('login-ip', 30, LOGIN_WINDOW_MS);
 // Slows a guessing attack spread over many IPs at one account.
-const allowLoginForEmail = createRateLimiter(20, LOGIN_WINDOW_MS);
+const allowLoginForEmail = createRateLimiter('login-email', 20, LOGIN_WINDOW_MS);
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -38,11 +38,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Here rather than in adminSignIn, because /api/auth/callback/credentials
         // reaches this too. Checked before scrypt so a flood can't tie up the CPU.
         const ip = clientIp(request.headers);
-        const allowed = [
-          allowLoginFromIpForEmail(`${ip}:${email}`),
-          allowLoginFromIp(ip),
-          allowLoginForEmail(email),
-        ].every(Boolean);
+        const allowed = (
+          await Promise.all([
+            allowLoginFromIpForEmail(`${ip}:${email}`),
+            allowLoginFromIp(ip),
+            allowLoginForEmail(email),
+          ])
+        ).every(Boolean);
         if (!allowed) return null;
 
         const user = await prisma.user.findUnique({

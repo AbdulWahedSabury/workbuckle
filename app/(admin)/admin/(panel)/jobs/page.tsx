@@ -29,7 +29,7 @@ export default async function JobsPage({ searchParams }: PageProps<"/admin/jobs"
       <ListView
         searchLabel="Search jobs"
         searchPlaceholder="Search by title, client, city or type"
-        columnCount={8}
+        columnCount={9}
       >
         <JobsTable searchParams={searchParams} />
       </ListView>

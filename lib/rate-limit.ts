@@ -1,36 +1,49 @@
 import 'server-only';
+import { createHash } from 'node:crypto';
+import { prisma } from '@/lib/prisma';
 
-/** Oldest windows are dropped past this, so a flood of unique keys can't grow memory forever. */
-const MAX_KEYS = 10_000;
+/** True while `key` is under the limit for the current window. */
+export type RateLimiter = (key: string) => Promise<boolean>;
 
-type RateLimiter = (key: string) => boolean;
+/** About 1 call in 100 also deletes expired windows, so the table stays small without a cron job. */
+const SWEEP_CHANCE = 0.01;
 
 /**
- * Fixed-window limiter; the returned function is true while `key` is under
- * `limit` hits per `windowMs`. Counts live in this process's memory: solid on
- * one server, but each serverless instance counts on its own and a restart
- * resets them, so swap in a shared store (e.g. Redis) when scaling out.
+ * Fixed-window limiter backed by the `rate_limits` table, so every server
+ * instance shares the same counts and a restart or new deploy doesn't reset
+ * them. `name` keeps limiters apart (the same key can be in several). Keys are
+ * hashed, so no email or IP address is stored.
+ *
+ * If the database can't be reached the request is allowed and the error
+ * logged: a rate limiter must not take the login or the forms down with it.
  */
-export function createRateLimiter(limit: number, windowMs: number): RateLimiter {
-  const windows = new Map<string, { count: number; resetAt: number }>();
+export function createRateLimiter(name: string, limit: number, windowMs: number): RateLimiter {
+  const windowSeconds = windowMs / 1000;
 
-  return (key) => {
-    const now = Date.now();
-    const current = windows.get(key);
-    if (current && current.resetAt > now) {
-      current.count += 1;
-      return current.count <= limit;
+  return async (key) => {
+    const hashed = createHash('sha256').update(`${name}:${key}`).digest('hex');
+    try {
+      // One atomic statement: concurrent requests on any instance can't both slip under the limit.
+      const rows = await prisma.$queryRaw<{ count: number }[]>`
+        INSERT INTO "rate_limits" ("key", "count", "reset_at")
+        VALUES (${hashed}, 1, now() + make_interval(secs => ${windowSeconds}::float8))
+        ON CONFLICT ("key") DO UPDATE SET
+          "count" = CASE WHEN "rate_limits"."reset_at" <= now() THEN 1 ELSE "rate_limits"."count" + 1 END,
+          "reset_at" = CASE WHEN "rate_limits"."reset_at" <= now() THEN EXCLUDED."reset_at" ELSE "rate_limits"."reset_at" END
+        RETURNING "count"`;
+      if (Math.random() < SWEEP_CHANCE) sweepExpired();
+      return (rows[0]?.count ?? 0) <= limit;
+    } catch (error) {
+      console.error(`Rate limiter "${name}" unavailable; allowing the request.`, error);
+      return true;
     }
-
-    // Re-insert so the Map stays ordered oldest-first for the eviction below.
-    windows.delete(key);
-    windows.set(key, { count: 1, resetAt: now + windowMs });
-    if (windows.size > MAX_KEYS) {
-      const oldest = windows.keys().next().value;
-      if (oldest !== undefined) windows.delete(oldest);
-    }
-    return true;
   };
+}
+
+function sweepExpired(): void {
+  prisma.$executeRaw`DELETE FROM "rate_limits" WHERE "reset_at" < now()`.catch((error: unknown) => {
+    console.error('Could not sweep expired rate limits.', error);
+  });
 }
 
 /**

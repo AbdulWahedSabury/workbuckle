@@ -10,7 +10,7 @@ import { clientIp, createRateLimiter } from "@/lib/rate-limit";
 import { getCorsHeaders } from "@/utils/cors";
 import mailer from "@/utils/mailer";
 
-const allowContactMessage = createRateLimiter(5, 15 * 60 * 1000);
+const allowContactMessage = createRateLimiter("contact-message", 5, 15 * 60 * 1000);
 
 /** Visitor input goes into the email's HTML, so it must not be able to inject markup. */
 function escapeHtml(value: string): string {
@@ -135,7 +135,7 @@ export async function OPTIONS(req: Request) {
 export async function POST(req: Request) {
   const headers = getCorsHeaders(req.headers.get("origin"));
 
-  if (!allowContactMessage(clientIp(req.headers))) {
+  if (!(await allowContactMessage(clientIp(req.headers)))) {
     return NextResponse.json(
       { success: false, message: "Too many requests" },
       { status: 429, headers },
