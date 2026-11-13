@@ -13,6 +13,7 @@ import RetryProfileEmailButton from "@/components/admin/RetryProfileEmailButton"
 import ApplicationHistory from "@/components/admin/application/ApplicationHistory";
 import HiringPanel from "@/components/admin/application/HiringPanel";
 import OtherApplications from "@/components/admin/application/OtherApplications";
+import MatchBadge from "@/components/admin/jobs/MatchBadge";
 import {
   APPLICATION_STATUS_BADGE,
   CANDIDATE_STATUS_BADGE,
@@ -21,8 +22,10 @@ import {
 import { cardClass, primaryButtonClass, secondaryLinkClass } from "@/components/admin/styles";
 import { formatDate } from "@/components/admin/tables/format";
 import { getApplication, type ApplicationDetail } from "@/lib/admin/queries";
+import { viewerCanEdit } from "@/lib/admin/auth";
 import { toZonedInputValue } from "@/lib/datetime";
 import { remainingPositions } from "@/lib/jobs/capacity";
+import { getCandidateJobMatchPercent } from "@/lib/matching/queries";
 import { INTERVIEW_STATUSES, isEmployerInterviewStage, type InterviewStatus } from "@/schemas/AdminSchemas";
 
 export const metadata: Metadata = { title: "Candidate profile" };
@@ -44,6 +47,9 @@ export default async function CandidateProfilePage({ params }: PageProps<"/admin
   const application = await getApplication(id);
   if (!application) notFound();
   const name = `${application.candidate.firstName} ${application.candidate.lastName}`;
+  const matchPercent = !application.viewerIsClient && (await viewerCanEdit())
+    ? await getCandidateJobMatchPercent(application.candidate.id, application.job.id)
+    : null;
 
   return (
     <>
@@ -69,7 +75,7 @@ export default async function CandidateProfilePage({ params }: PageProps<"/admin
 
       <div className="grid max-w-5xl gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
-          <ProfileCard application={application} name={name} />
+          <ProfileCard application={application} name={name} matchPercent={matchPercent} />
           <section className={`${cardClass} flex flex-col gap-5 p-5 sm:p-6`}>
             {application.viewerIsClient ? (
               <>
@@ -97,7 +103,15 @@ export default async function CandidateProfilePage({ params }: PageProps<"/admin
   );
 }
 
-function ProfileCard({ application, name }: { application: ApplicationDetail; name: string }) {
+function ProfileCard({
+  application,
+  name,
+  matchPercent,
+}: {
+  application: ApplicationDetail;
+  name: string;
+  matchPercent: number | null;
+}) {
   const { candidate } = application;
   const availability = badgeFor(CANDIDATE_STATUS_BADGE, candidate.status);
   return (
@@ -139,6 +153,20 @@ function ProfileCard({ application, name }: { application: ApplicationDetail; na
       ) : (
         <p className="text-sm text-gray-2/60">No cover letter provided.</p>
       )}
+
+      <AdminOnly>
+        <div className={divided}>
+          <h2 className={`${sectionTitle} mb-3`}>CV match for {application.job.title}</h2>
+          {matchPercent === null ? (
+            <p className="text-sm text-gray-2">No match score is available for this CV and job yet.</p>
+          ) : (
+            <div className="flex items-center gap-3">
+              <MatchBadge match={matchPercent} size={56} />
+              <span className="text-sm text-gray-2">CV-to-job match</span>
+            </div>
+          )}
+        </div>
+      </AdminOnly>
 
       <div className={divided}>
         <AdminOnly

@@ -200,6 +200,41 @@ export async function getMatchedJobOptions(personId: string): Promise<Assignable
   return { matched: true, options };
 }
 
+/** Match an applicant to the job they applied for, indexing either side on demand. */
+export async function getCandidateJobMatchPercent(candidateId: string, jobId: string): Promise<number | null> {
+  await requireAdmin();
+  if (!isUuid(candidateId) || !isUuid(jobId)) return null;
+
+  const [candidate, job] = await Promise.all([
+    prisma.candidate.findUnique({ where: { id: candidateId }, select: { cvUrl: true, embeddedAt: true } }),
+    prisma.job.findUnique({ where: { id: jobId }, select: { embeddedAt: true } }),
+  ]);
+
+  if (candidate?.cvUrl && candidate.embeddedAt === null) {
+    try {
+      await indexCandidate(candidateId);
+    } catch (error) {
+      console.error(`Matching: could not index candidate ${candidateId}.`, error);
+    }
+  }
+  if (job?.embeddedAt === null) {
+    try {
+      await indexJob(jobId);
+    } catch (error) {
+      console.error(`Matching: could not index job ${jobId}.`, error);
+    }
+  }
+
+  const rows = await prisma.$queryRaw<{ similarity: number | null }[]>`
+    SELECT CASE WHEN c.embedding IS NULL OR j.embedding IS NULL THEN NULL
+                ELSE (1 - (c.embedding <=> j.embedding))::float8 END AS similarity
+    FROM "candidates" c
+    JOIN "jobs" j ON j.id = ${jobId}::uuid
+    WHERE c.id = ${candidateId}::uuid`;
+  const similarity = rows[0]?.similarity;
+  return similarity === null || similarity === undefined ? null : matchPercent(similarity);
+}
+
 /** How much of the open talent pool can be matched: CVs indexed, still waiting, or unreadable. */
 export async function getPoolIndexStats(): Promise<{ indexed: number; pending: number; unreadable: number }> {
   await requireView('people');
