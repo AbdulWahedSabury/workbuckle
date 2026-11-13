@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { requireAdmin, requireView } from '@/lib/admin/auth';
 import { isUuid } from '@/lib/utils';
 import { ACTIVE_APPLICATION_STATUSES } from '@/schemas/AdminSchemas';
+import { indexCandidate, indexJob } from './indexing';
 import { cvPreview, matchPercent } from './vector';
 
 /** Matched candidates shown per job. */
@@ -107,6 +108,46 @@ export type AssignableJobOption = {
   match: number | null;
 };
 
+/**
+ * Fill in indexes that background work has not completed yet before showing
+ * a candidate's match list. This is the reliable path when an admin opens a
+ * new profile immediately after the save.
+ */
+async function indexPendingMatches(personId: string): Promise<void> {
+  const person = await prisma.candidate.findUnique({
+    where: { id: personId },
+    select: { cvUrl: true, embeddedAt: true },
+  });
+
+  if (person?.cvUrl && person.embeddedAt === null) {
+    try {
+      await indexCandidate(personId);
+    } catch (error) {
+      console.error(`Matching: could not index candidate ${personId}.`, error);
+    }
+  }
+
+  const pendingJobs = await prisma.$queryRaw<{ id: string }[]>`
+    SELECT j.id
+    FROM "jobs" j
+    WHERE j.status <> 'closed'
+      AND j.filled_positions < j.total_positions
+      AND j.embedded_at IS NULL
+      AND NOT EXISTS (
+        SELECT 1 FROM "job_applications" a
+        WHERE a.job_id = j.id AND a.candidate_id = ${personId}::uuid
+      )
+    ORDER BY j.created_at DESC`;
+
+  for (const job of pendingJobs) {
+    try {
+      await indexJob(job.id);
+    } catch (error) {
+      console.error(`Matching: could not index job ${job.id}.`, error);
+    }
+  }
+}
+
 type AssignableJobRow = {
   id: string;
   title: string;
@@ -134,6 +175,8 @@ function jobOption(job: AssignableJobRow): AssignableJobOption {
 export async function getMatchedJobOptions(personId: string): Promise<AssignableJobOptions> {
   await requireAdmin();
   if (!isUuid(personId)) return { matched: false, options: [] };
+
+  await indexPendingMatches(personId);
 
   const rows = await prisma.$queryRaw<AssignableJobRow[]>`
     SELECT j.id, j.title, j.status, (j.total_positions - j.filled_positions)::int AS remaining,
