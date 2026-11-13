@@ -266,6 +266,10 @@ model Job {
   position         Position?        @relation(fields: [positionId], references: [id], onDelete: Restrict)
   applications     JobApplication[]
   translations     JobTranslation[]
+  // CV matching (lib/matching): all-MiniLM-L6-v2 vector of the job's English text,
+  // written in the background after every save. Read and written with raw SQL only.
+  embedding        Unsupported("vector(384)")?
+  embeddedAt       DateTime?        @map("embedded_at") @db.Timestamptz(3)
 
   @@index([cityId])
   @@index([jobTypeId])
@@ -355,6 +359,13 @@ model Candidate {
   // Positions this person is suited for: from the jobs they applied or were
   // assigned to, plus any an admin set on their profile. Filters the talent pool.
   positions    CandidatePosition[]
+  // CV matching (lib/matching), refreshed in the background when cvPath changes.
+  // cvText: text extracted from the CV (null if it couldn't be read, e.g. a .doc).
+  // embedding: vector of that text, read and written with raw SQL only.
+  // embeddedAt: when indexing last ran; null means never, so the backfill picks it up.
+  cvText       String?             @map("cv_text") @db.Text
+  embedding    Unsupported("vector(384)")?
+  embeddedAt   DateTime?           @map("embedded_at") @db.Timestamptz(3)
 
   @@index([status])
   @@map("candidates")

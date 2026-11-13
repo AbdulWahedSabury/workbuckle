@@ -5,7 +5,7 @@ import Reveal from "@/components/motion/Reveal";
 // Placeholder photo: point this at the final image when it's ready, and update
 // `pages.contact.hero_image_alt` in lang/en.json to describe it. A wide image works
 // best, since it's cropped to a banner. Text sits centered on top under a dark overlay.
-const HERO_IMAGE = "/images/hero/hospitality.png";
+const HERO_IMAGE = "/images/hero/hospitality.jpg";
 
 /** Full-width image hero with the page title and intro centered on top. */
 export default function ContactHero() {

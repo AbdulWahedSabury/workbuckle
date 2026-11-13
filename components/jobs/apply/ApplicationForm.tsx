@@ -2,6 +2,7 @@
 
 import { AlertCircle, Link2, Loader2 } from "lucide-react";
 
+import CaptchaWidget from "@/components/form/CaptchaWidget";
 import FormTextField from "./FormTextField";
 import FormTextAreaField from "./FormTextAreaField";
 import ResumeDropzone from "./ResumeDropzone";
@@ -28,6 +29,8 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
     submitted,
     isSubmitting,
     errorMessage,
+    captchaRef,
+    setCaptchaToken,
   } = useApplicationForm(jobId);
 
   if (submitted) {
@@ -96,6 +99,8 @@ export default function ApplicationForm({ jobId }: ApplicationFormProps) {
           value={formData.coverLetter}
           onChange={(value) => updateField("coverLetter", value)}
         />
+
+        <CaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
 
         <div className="pt-2">
           <button

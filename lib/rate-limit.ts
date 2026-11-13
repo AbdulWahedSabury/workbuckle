@@ -52,5 +52,10 @@ function sweepExpired(): void {
  * send its own value.
  */
 export function clientIp(headers: Headers): string {
+  // Set TRUSTED_IP_HEADER to the header your host always overwrites (e.g.
+  // "x-vercel-forwarded-for", "cf-connecting-ip", "x-real-ip" behind Nginx).
+  // Then nothing the client sends is believed.
+  const trusted = process.env.TRUSTED_IP_HEADER?.trim().toLowerCase();
+  if (trusted) return headers.get(trusted)?.split(',')[0]?.trim() || 'unknown';
   return headers.get('x-forwarded-for')?.split(',')[0]?.trim() || headers.get('x-real-ip') || 'unknown';
 }

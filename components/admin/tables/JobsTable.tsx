@@ -2,7 +2,9 @@ import Link from "next/link";
 import { remainingPositions } from "@/lib/jobs/capacity";
 import { Pencil, SearchX, Users } from "lucide-react";
 import { deleteJob } from "@/lib/admin/actions/jobs";
+import { requirePanelUser } from "@/lib/admin/auth";
 import { parseListParams } from "@/lib/admin/list-params";
+import { canView } from "@/lib/auth/roles";
 import { JOB_SORT_KEYS, listJobs, type JobListRow, type JobSortKey } from "@/lib/admin/queries";
 import { DataTable, type Column } from "@/components/admin/data-table";
 import AdminOnly from "@/components/admin/AdminOnly";
@@ -30,125 +32,134 @@ const PIPELINE_COUNTS = [
   "hired",
 ] as const satisfies readonly ApplicationStatus[];
 
-const columns: Column<JobListRow, JobSortKey>[] = [
-  { id: "client", header: "Client", sortKey: "client", hideBelow: "md", cell: (job) => job.client.name },
-  {
-    id: "title",
-    header: "Title",
-    sortKey: "title",
-    cell: (job) => (
-      <div className="flex flex-col">
-        <span className="font-semibold text-ink">{job.title}</span>
-        <span className="text-xs text-gray-2">{job.salary}</span>
-      </div>
-    ),
-  },
-  {
-    id: "type",
-    header: "Type",
-    sortKey: "type",
-    hideBelow: "2xl",
-    cell: (job) => job.jobType.name,
-  },
-  {
-    id: "city",
-    header: "City",
-    sortKey: "city",
-    hideBelow: "sm",
-    cell: (job) => job.city.name,
-  },
-  {
-    id: "status",
-    header: "Status",
-    sortKey: "status",
-    // Positions sit under the badge rather than in their own column, to keep the table narrow.
-    cell: (job) => {
-      const badge = STATUS_BADGE[job.status] ?? { tone: "neutral" as const, label: job.status };
-      return (
-        <div className="flex flex-col items-start gap-1.5">
-          <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
-          <PositionsSummary job={job} />
+/** `canOpenJob`: link titles to the job page (matching), for roles that can see the talent pool. */
+function jobColumns(canOpenJob: boolean): Column<JobListRow, JobSortKey>[] {
+  return [
+    { id: "client", header: "Client", sortKey: "client", hideBelow: "md", cell: (job) => job.client.name },
+    {
+      id: "title",
+      header: "Title",
+      sortKey: "title",
+      cell: (job) => (
+        <div className="flex flex-col">
+          {canOpenJob ? (
+            <Link href={`/admin/jobs/${job.id}`} className="font-semibold text-ink hover:underline">
+              {job.title}
+            </Link>
+          ) : (
+            <span className="font-semibold text-ink">{job.title}</span>
+          )}
+          <span className="text-xs text-gray-2">{job.salary}</span>
         </div>
-      );
+      ),
     },
-  },
-  {
-    id: "candidates",
-    header: "Candidates by status",
-    cell: (job) => (
-      <div
-        role="group"
-        aria-label={`Candidates by status for ${job.title}`}
-        className="grid w-64 grid-cols-2 gap-1.5"
-      >
-        {PIPELINE_COUNTS.map((status) => (
-          <CandidateCountLink
-            key={status}
-            jobId={job.id}
-            status={status}
-            label={APPLICATION_STATUS_BADGE[status].label}
-            tone={APPLICATION_STATUS_BADGE[status].tone}
-            count={job.candidateStatusCounts[status]}
-          />
-        ))}
-      </div>
-    ),
-  },
-  {
-    id: "updatedAt",
-    header: "Updated",
-    sortKey: "updatedAt",
-    hideBelow: "2xl",
-    cell: (job) => (
-      <time dateTime={job.updatedAt.toISOString()} className="whitespace-nowrap">
-        {formatDate(job.updatedAt)}
-      </time>
-    ),
-  },
-  {
-    id: "actions",
-    header: "Actions",
-    hideHeader: true,
-    align: "right",
-    className: "w-px py-2",
-    cell: (job) => (
-      <div className="flex justify-end gap-1">
-        <Link
-          href={`/admin/candidates?job=${job.id}`}
-          aria-label={`View candidates for ${job.title}`}
-          title="View candidates"
-          className={iconButtonClass}
+    {
+      id: "type",
+      header: "Type",
+      sortKey: "type",
+      hideBelow: "2xl",
+      cell: (job) => job.jobType.name,
+    },
+    {
+      id: "city",
+      header: "City",
+      sortKey: "city",
+      hideBelow: "sm",
+      cell: (job) => job.city.name,
+    },
+    {
+      id: "status",
+      header: "Status",
+      sortKey: "status",
+      // Positions sit under the badge rather than in their own column, to keep the table narrow.
+      cell: (job) => {
+        const badge = STATUS_BADGE[job.status] ?? { tone: "neutral" as const, label: job.status };
+        return (
+          <div className="flex flex-col items-start gap-1.5">
+            <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
+            <PositionsSummary job={job} />
+          </div>
+        );
+      },
+    },
+    {
+      id: "candidates",
+      header: "Candidates by status",
+      cell: (job) => (
+        <div
+          role="group"
+          aria-label={`Candidates by status for ${job.title}`}
+          className="grid w-64 grid-cols-2 gap-1.5"
         >
-          <Users aria-hidden="true" />
-        </Link>
-        <AdminOnly>
+          {PIPELINE_COUNTS.map((status) => (
+            <CandidateCountLink
+              key={status}
+              jobId={job.id}
+              status={status}
+              label={APPLICATION_STATUS_BADGE[status].label}
+              tone={APPLICATION_STATUS_BADGE[status].tone}
+              count={job.candidateStatusCounts[status]}
+            />
+          ))}
+        </div>
+      ),
+    },
+    {
+      id: "updatedAt",
+      header: "Updated",
+      sortKey: "updatedAt",
+      hideBelow: "2xl",
+      cell: (job) => (
+        <time dateTime={job.updatedAt.toISOString()} className="whitespace-nowrap">
+          {formatDate(job.updatedAt)}
+        </time>
+      ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      hideHeader: true,
+      align: "right",
+      className: "w-px py-2",
+      cell: (job) => (
+        <div className="flex justify-end gap-1">
           <Link
-            href={`/admin/jobs/${job.id}/edit`}
-            aria-label={`Edit ${job.title}`}
-            title="Edit"
+            href={`/admin/candidates?job=${job.id}`}
+            aria-label={`View candidates for ${job.title}`}
+            title="View candidates"
             className={iconButtonClass}
           >
-            <Pencil aria-hidden="true" />
+            <Users aria-hidden="true" />
           </Link>
-          <DeleteButton
-            action={deleteJob.bind(null, job.id)}
-            title="Delete this job?"
-            description={
-              <>
-                <strong>{job.title}</strong> will be permanently deleted
-                {job._count.applications > 0 &&
-                  `, along with its ${job._count.applications} ${job._count.applications === 1 ? "application" : "applications"}`}
-                .
-              </>
-            }
-            label={`Delete ${job.title}`}
-            successMessage="Job deleted."
-          />
-        </AdminOnly>
-      </div>
-    ),
-  },
-];
+          <AdminOnly>
+            <Link
+              href={`/admin/jobs/${job.id}/edit`}
+              aria-label={`Edit ${job.title}`}
+              title="Edit"
+              className={iconButtonClass}
+            >
+              <Pencil aria-hidden="true" />
+            </Link>
+            <DeleteButton
+              action={deleteJob.bind(null, job.id)}
+              title="Delete this job?"
+              description={
+                <>
+                  <strong>{job.title}</strong> will be permanently deleted
+                  {job._count.applications > 0 &&
+                    `, along with its ${job._count.applications} ${job._count.applications === 1 ? "application" : "applications"}`}
+                  .
+                </>
+              }
+              label={`Delete ${job.title}`}
+              successMessage="Job deleted."
+            />
+          </AdminOnly>
+        </div>
+      ),
+    },
+  ];
+}
 
 function PositionsSummary({ job }: { job: JobListRow }) {
   const remaining = remainingPositions(job);
@@ -207,12 +218,12 @@ export default async function JobsTable({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = parseListParams(await searchParams, JOB_SORT_KEYS);
-  const { rows, ...pageInfo } = await listJobs(params);
+  const [{ rows, ...pageInfo }, user] = await Promise.all([listJobs(params), requirePanelUser()]);
 
   return (
     <DataTable
       caption="Jobs"
-      columns={columns}
+      columns={jobColumns(canView(user.role, "people"))}
       rows={rows}
       getRowKey={(job) => job.id}
       pagination={{ ...pageInfo, itemLabel: "jobs" }}

@@ -1,6 +1,7 @@
 // Writes the single SiteSetting row (id 1) directly, bypassing the admin form.
 // Usage: pnpm settings:update --logo public/images/logo.png --name "Work Buckle" --email hi@example.com --phone "+49 30 123"
 //   Also: --meta-title, --meta-description, --facebook, --linkedin, --instagram, --about
+// Add --yes when DATABASE_URL is not a local database (e.g. production).
 // Only the flags you pass are changed; an empty value ("") clears an optional field.
 // --logo takes a local file (uploaded to Supabase Storage) or an existing https:// URL.
 import 'dotenv/config';
@@ -9,6 +10,7 @@ import { basename, extname } from 'node:path';
 import { parseArgs } from 'node:util';
 import { prisma } from '@/lib/prisma';
 import { siteSettingSchema } from '@/schemas/AdminSchemas';
+import { requireConfirmedDatabase } from './local-db';
 
 // Mirrors SITE_SETTING_ID in lib/site-settings.ts.
 const SITE_SETTING_ID = 1;
@@ -61,16 +63,19 @@ async function main() {
       linkedin: { type: 'string' },
       instagram: { type: 'string' },
       about: { type: 'string' },
+      yes: { type: 'boolean' },
     },
   });
 
-  if (Object.keys(values).length === 0) {
+  if (Object.keys(values).filter((key) => key !== 'yes').length === 0) {
     console.error(
       'Usage: pnpm settings:update [--name] [--email] [--phone] [--logo <file or URL>] ' +
         '[--meta-title] [--meta-description] [--facebook] [--linkedin] [--instagram] [--about]'
     );
     process.exit(1);
   }
+
+  requireConfirmedDatabase();
 
   let logoUrl = values.logo;
   if (logoUrl && !/^https?:\/\//.test(logoUrl)) {

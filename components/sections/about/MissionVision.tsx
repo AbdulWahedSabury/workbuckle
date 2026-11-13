@@ -12,7 +12,7 @@ interface Column {
 
 /** Text for each column lives under pages.about.partners.<key> in lang/*.json. */
 const COLUMN_IMAGES = {
-  employers: "/images/about/comapny.png",
+  employers: "/images/about/comapny.jpg",
   candidates: "/images/about/employees.jpg",
 } as const;
 

@@ -1,11 +1,13 @@
 // Creates an admin, or promotes an existing user and resets their password.
 // Usage: pnpm admin:create you@example.com   (prompts for the password)
+// Add --yes when DATABASE_URL is not a local database (e.g. production).
 import 'dotenv/config';
 import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 import { Role } from '@/lib/generated/prisma/enums';
 import { hashPassword } from '@/lib/auth/password';
 import { prisma } from '@/lib/prisma';
+import { requireConfirmedDatabase } from './local-db';
 
 async function promptHidden(question: string): Promise<string> {
   const rl = createInterface({ input: stdin, output: stdout, terminal: true });
@@ -19,7 +21,8 @@ async function promptHidden(question: string): Promise<string> {
 }
 
 async function main() {
-  const email = process.argv[2]?.trim().toLowerCase();
+  requireConfirmedDatabase();
+  const email = process.argv.slice(2).find((arg) => !arg.startsWith('--'))?.trim().toLowerCase();
   if (!email || !email.includes('@')) {
     console.error('Usage: pnpm admin:create <email>');
     process.exit(1);

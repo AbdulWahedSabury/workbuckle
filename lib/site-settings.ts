@@ -50,3 +50,13 @@ export function toSetting(raw: RawApiSettings | null): Setting {
  * so the layout, generateMetadata and any page calling it share one query.
  */
 export const getSiteSetting = cache(async (): Promise<Setting> => toSetting(await getPublicSiteSettings()));
+
+/**
+ * The admin's maintenance switch (Settings), for the public site and its forms.
+ * `message` is the admin's own text, or "" to show the default notice.
+ * Off when the settings can't be read, so a database blip doesn't close the site.
+ */
+export async function getMaintenance(): Promise<{ on: boolean; message: string }> {
+  const settings = await getPublicSiteSettings();
+  return { on: settings?.maintenanceMode ?? false, message: settings?.maintenanceMessage ?? '' };
+}

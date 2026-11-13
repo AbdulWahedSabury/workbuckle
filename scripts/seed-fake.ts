@@ -8,6 +8,7 @@
 // A city, job type or category whose slug already exists is reused as is.
 import 'dotenv/config';
 import { prisma } from '@/lib/prisma';
+import { requireLocalDatabase } from './local-db';
 
 const KIND = { city: '01', jobType: '02', category: '03', campaign: '04', job: '05', client: '06' } as const;
 
@@ -222,7 +223,12 @@ async function clean() {
   );
 }
 
-(process.argv.includes('--clean') ? clean() : seed())
+// Fake data never goes to production: the local DATABASE_URL prefix is required.
+Promise.resolve()
+  .then(() => {
+    requireLocalDatabase();
+    return process.argv.includes('--clean') ? clean() : seed();
+  })
   .catch((error: unknown) => {
     console.error(error);
     process.exitCode = 1;

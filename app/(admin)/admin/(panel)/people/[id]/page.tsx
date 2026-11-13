@@ -13,7 +13,8 @@ import { cardClass, primaryButtonClass, secondaryLinkClass } from "@/components/
 import { formatDate } from "@/components/admin/tables/format";
 import { assignToJob } from "@/lib/admin/actions/candidates";
 import { viewerCanEdit } from "@/lib/admin/auth";
-import { getAssignableJobOptions, getPerson, getPositionOptions, type PersonDetail } from "@/lib/admin/queries";
+import { getPerson, getPositionOptions, type PersonDetail } from "@/lib/admin/queries";
+import { MIN_JOB_MATCH_PERCENT, getMatchedJobOptions } from "@/lib/matching/queries";
 
 export const metadata: Metadata = { title: "Candidate" };
 
@@ -54,8 +55,8 @@ export default async function PersonPage({ params }: PageProps<"/admin/people/[i
         }
       />
 
-      <div className="grid max-w-5xl gap-6 lg:grid-cols-3">
-        <section className={`${cardClass} flex flex-col gap-5 p-5 sm:p-6 lg:col-span-2`}>
+      <div className="flex max-w-5xl flex-col gap-6">
+        <section className={`${cardClass} flex flex-col gap-5 p-5 sm:p-6`}>
           <h2 className={sectionTitle}>Contact</h2>
           <dl className="grid gap-5 sm:grid-cols-2">
             <Detail label="Email">
@@ -101,7 +102,7 @@ export default async function PersonPage({ params }: PageProps<"/admin/people/[i
         </section>
 
         <AdminOnly>
-          <section className={`${cardClass} flex h-fit flex-col gap-4 p-5 sm:p-6`}>
+          <section className={`${cardClass} flex flex-col gap-4 p-5 sm:p-6`}>
             <h2 className={sectionTitle}>Assign to a job</h2>
             <AssignPanel person={person} />
           </section>
@@ -152,12 +153,30 @@ function Applications({ applications }: { applications: PersonDetail["applicatio
   );
 }
 
-/** Only open candidates with a CV can be put forward; the form explains otherwise. */
+/**
+ * Only open candidates with a CV can be put forward, and only to jobs their CV
+ * matches (all open jobs while it isn't indexed); the form explains otherwise.
+ */
 async function AssignPanel({ person }: { person: PersonDetail }) {
   if (!(await viewerCanEdit())) return null;
   if (person.status === "hired") return <p className="text-sm text-gray-2">Hired candidates can&rsquo;t be assigned to other jobs.</p>;
   if (person.status === "inactive") return <p className="text-sm text-gray-2">Set them back to open to assign them to a job.</p>;
   if (!person.cvUrl) return <p className="text-sm text-gray-2">This candidate has no CV on file yet.</p>;
-  const jobs = await getAssignableJobOptions(person.id);
-  return <AssignToJobForm action={assignToJob.bind(null, person.id)} jobs={jobs} />;
+  const { matched, options } = await getMatchedJobOptions(person.id);
+  return (
+    <AssignToJobForm
+      action={assignToJob.bind(null, person.id)}
+      jobs={options}
+      jobsHint={
+        matched
+          ? `Jobs their CV matches at ${MIN_JOB_MATCH_PERCENT}% or more, best match first.`
+          : "Their CV isn't indexed yet (or couldn't be read), so every open job is listed."
+      }
+      emptyMessage={
+        matched
+          ? `No open job matches their CV at ${MIN_JOB_MATCH_PERCENT}% or more. Use a job's page to see how they rank there.`
+          : undefined
+      }
+    />
+  );
 }

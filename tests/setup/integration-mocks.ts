@@ -127,6 +127,20 @@ vi.mock('@/lib/admin/candidate-profile-email', () => ({
   }),
 }));
 
+/** Ids queued for CV/job matching. Next's after() needs a real request, and the model a download. */
+export const scheduledIndexing: { jobs: string[]; candidates: string[] } = { jobs: [], candidates: [] };
+
+vi.mock('@/lib/matching/indexing', () => ({
+  scheduleJobIndexing: vi.fn((id: string) => {
+    scheduledIndexing.jobs.push(id);
+  }),
+  scheduleCandidateIndexing: vi.fn((id: string) => {
+    scheduledIndexing.candidates.push(id);
+  }),
+  indexJob: vi.fn(async () => {}),
+  indexCandidate: vi.fn(async () => {}),
+}));
+
 vi.mock('@/lib/admin/actions/notifications', () => ({
   createAdminNotification: vi.fn(async (input: { title: string; message: string }) => {
     notifications.push(input);

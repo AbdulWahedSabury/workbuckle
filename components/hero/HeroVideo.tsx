@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import {motion}  from "framer-motion";
 const HERO_VIDEO_SRC = "/images/hero-video-1.mp4";
-const HERO_VIDEO_POSTER: string | undefined = undefined;
+const HERO_VIDEO_POSTER = "/images/hero-video-poster.jpg";
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 export default function HeroVideo({ reduceMotion }: { reduceMotion: boolean }) {
@@ -31,7 +31,7 @@ export default function HeroVideo({ reduceMotion }: { reduceMotion: boolean }) {
         loop
         playsInline
         webkit-playsinline="true"
-        preload="auto"
+        preload="metadata"
         initial={{ opacity: 0, scale: 1.08 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1.8, ease: EASE }}

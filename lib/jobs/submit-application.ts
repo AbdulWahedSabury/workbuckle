@@ -3,10 +3,14 @@ import 'server-only';
 import { revalidatePath } from 'next/cache';
 import { createAdminNotification } from '@/lib/admin/actions/notifications';
 import { formValues, isUniqueViolation } from '@/lib/admin/form';
+import { CAPTCHA_FIELD } from '@/lib/captcha/config';
+import { verifyCaptcha } from '@/lib/captcha/verify';
 import { InvalidCvFileError, removeCv, uploadCv } from '@/lib/cv-storage';
 import { prisma } from '@/lib/prisma';
 import { givePositionOfJob } from '@/lib/admin/positions';
+import { scheduleCandidateIndexing } from '@/lib/matching/indexing';
 import { clientIp, createRateLimiter } from '@/lib/rate-limit';
+import { getMaintenance } from '@/lib/site-settings';
 import { isUuid } from '@/lib/utils';
 import { applicationSchema, cvFileSchema } from '@/schemas/AdminSchemas';
 import type { z } from 'zod';
@@ -16,6 +20,7 @@ export type ApplicationErrorCode =
   | 'job_unavailable'
   | 'invalid'
   | 'rate_limited'
+  | 'captcha_failed'
   | 'invalid_cv'
   | 'upload_failed'
   | 'server_error';
@@ -29,6 +34,12 @@ const JOB_UNAVAILABLE = {
   ok: false,
   code: 'job_unavailable',
   message: 'This job is no longer accepting applications.',
+} as const satisfies ApplicationResult;
+
+const UNDER_MAINTENANCE = {
+  ok: false,
+  code: 'server_error',
+  message: 'The site is under maintenance. Please try again later.',
 } as const satisfies ApplicationResult;
 
 // Each attempt can store a 10 MB file and alert the panel. Forms with
@@ -51,6 +62,7 @@ export async function submitPublicApplication(
   requestHeaders: Headers,
 ): Promise<ApplicationResult> {
   if (typeof jobId !== 'string' || !isUuid(jobId)) return JOB_UNAVAILABLE;
+  if ((await getMaintenance()).on) return UNDER_MAINTENANCE;
 
   const fields = applicationSchema.safeParse(formValues(formData));
   const cv = cvFileSchema.safeParse(formData.get('cv'));
@@ -68,6 +80,15 @@ export async function submitPublicApplication(
       ok: false,
       code: 'rate_limited',
       message: 'Too many applications from your network. Please try again later.',
+    };
+  }
+
+  // After the rate limit, so a flood of made-up tokens can't turn into a flood of calls to Cloudflare.
+  if (!(await verifyCaptcha(formData.get(CAPTCHA_FIELD)))) {
+    return {
+      ok: false,
+      code: 'captcha_failed',
+      message: 'We could not verify that you are human. Please try again.',
     };
   }
 
@@ -105,12 +126,13 @@ export async function submitPublicApplication(
     ? `Applied with an email already on file, but the typed details differ from the saved profile: ${differences.join(', ')}.`
     : null;
 
-  let applicationId: string;
+  const fillMissingCv = Boolean(person) && !differences.length;
+  let saved: { applicationId: string; personId: string };
   try {
     // A matching returning applicant without a saved CV gets this one; a mismatch never does,
     // and doesn't get the job's position either (it may not be the person behind the email).
-    applicationId = await saveApplication(fields.data, jobId, upload, {
-      fillMissingCv: Boolean(person) && !differences.length,
+    saved = await saveApplication(fields.data, jobId, upload, {
+      fillMissingCv,
       givePosition: !differences.length,
       note,
     });
@@ -123,7 +145,9 @@ export async function submitPublicApplication(
     return { ok: false, code: 'server_error', message: 'Something went wrong. Please try again.' };
   }
 
-  await notifyNewApplication(applicationId, job.title, fields.data, person && differences.length ? person.name : null);
+  // A new person's CV, or one filling an empty profile, is matched against jobs.
+  if (!person || (fillMissingCv && !person.hasCv)) scheduleCandidateIndexing(saved.personId);
+  await notifyNewApplication(saved.applicationId, job.title, fields.data, person && differences.length ? person.name : null);
 
   revalidatePath('/admin/candidates');
   revalidatePath('/admin/jobs');
@@ -142,6 +166,7 @@ async function findApplicant(email: string, jobId: string) {
       firstName: true,
       lastName: true,
       phone: true,
+      cvUrl: true,
       applications: { where: { jobId }, select: { id: true } },
     },
   });
@@ -153,6 +178,7 @@ async function findApplicant(email: string, jobId: string) {
     phone: person.phone,
     name: `${person.firstName} ${person.lastName}`,
     alreadyApplied: person.applications.length > 0,
+    hasCv: person.cvUrl !== null,
   };
 }
 
@@ -208,7 +234,7 @@ async function saveApplication(
   jobId: string,
   cv: { path: string; url: string },
   { fillMissingCv, givePosition, note }: { fillMissingCv: boolean; givePosition: boolean; note: string | null },
-): Promise<string> {
+): Promise<{ applicationId: string; personId: string }> {
   const { coverLetter, ...personDetails } = fields;
   return prisma.$transaction(async (tx) => {
     const person = await tx.candidate.upsert({
@@ -229,6 +255,6 @@ async function saveApplication(
       data: { applicationId: application.id, field: 'status', toValue: 'pending', note },
     });
     if (givePosition) await givePositionOfJob(tx, person.id, jobId);
-    return application.id;
+    return { applicationId: application.id, personId: person.id };
   });
 }

@@ -6,6 +6,8 @@ import {
   MIN_SUBMIT_MS,
   getContactFormSchema,
 } from "@/schemas/ContactFormSchema";
+import { CAPTCHA_FIELD } from "@/lib/captcha/config";
+import { verifyCaptcha } from "@/lib/captcha/verify";
 import { clientIp, createRateLimiter } from "@/lib/rate-limit";
 import { getCorsHeaders } from "@/utils/cors";
 import mailer from "@/utils/mailer";
@@ -186,6 +188,13 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { success: false, message: "Validation failed", errors },
       { status: 400, headers },
+    );
+  }
+
+  if (!(await verifyCaptcha(fields[CAPTCHA_FIELD]))) {
+    return NextResponse.json(
+      { success: false, message: "Captcha verification failed" },
+      { status: 403, headers },
     );
   }
 

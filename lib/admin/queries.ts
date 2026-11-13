@@ -954,22 +954,6 @@ export async function getPersonCv(id: string) {
   return person?.cvUrl ? { cvPath: person.cvPath, cvUrl: person.cvUrl } : null;
 }
 
-/** Jobs a person can be assigned to: not closed, with a position left, not applied for yet. */
-export async function getAssignableJobOptions(personId: string): Promise<SelectOption[]> {
-  await requireAdmin();
-  const jobs = await prisma.job.findMany({
-    where: { status: { not: 'closed' }, applications: { none: { candidateId: personId } } },
-    orderBy: { createdAt: 'desc' },
-    select: { id: true, title: true, status: true, totalPositions: true, filledPositions: true, client: { select: { name: true } } },
-  });
-  return jobs
-    .filter((j) => j.filledPositions < j.totalPositions)
-    .map((j) => ({
-      value: j.id,
-      label: `${j.title} · ${j.client.name}${j.status === 'draft' ? ' (draft)' : ''} · ${j.totalPositions - j.filledPositions} open`,
-    }));
-}
-
 // ─── Users ───────────────────────────────────────────────────────────────────
 
 const userListSelect = {

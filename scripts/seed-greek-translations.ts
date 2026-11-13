@@ -1,7 +1,8 @@
 // Adds first-draft Greek translations for the existing content, so the Greek
 // site (/el) shows Greek text. Edit them afterwards in the admin panel.
 //
-// Usage:  npx tsx scripts/seed-greek-translations.ts [--dry-run]
+// Usage:  npx tsx scripts/seed-greek-translations.ts [--dry-run] [--yes]
+// --yes is required to write to a database that isn't on this machine.
 //
 // Safe to run on real data: it only INSERTS rows into the translation tables
 // (job_translations, faq_translations, job_type_translations,
@@ -11,6 +12,7 @@
 // Needs migrations 20261106120000 and 20261106130000 applied first.
 import 'dotenv/config';
 import { prisma } from '@/lib/prisma';
+import { requireConfirmedDatabase } from './local-db';
 
 const LOCALE = 'el';
 const dryRun = process.argv.includes('--dry-run');
@@ -172,6 +174,7 @@ async function seedCategories(report: Report) {
 }
 
 async function main() {
+  if (!dryRun) requireConfirmedDatabase();
   const report: Report = { added: [], skipped: [] };
   await seedJobs(report);
   await seedFaqs(report);

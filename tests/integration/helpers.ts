@@ -1,7 +1,7 @@
 import { expect } from 'vitest';
 import { prisma } from '@/lib/prisma';
 import { ACTIVE_APPLICATION_STATUSES } from '@/schemas/AdminSchemas';
-import { actAsClientUser, notifications, sentMail, sentProfileEmails, testAuth } from '../setup/integration-mocks';
+import { actAsClientUser, notifications, scheduledIndexing, sentMail, sentProfileEmails, testAuth } from '../setup/integration-mocks';
 
 const TABLES = [
   'application_events',
@@ -31,6 +31,8 @@ export async function resetDatabase() {
   sentProfileEmails.length = 0;
   sentMail.length = 0;
   notifications.length = 0;
+  scheduledIndexing.jobs.length = 0;
+  scheduledIndexing.candidates.length = 0;
   return admin;
 }
 

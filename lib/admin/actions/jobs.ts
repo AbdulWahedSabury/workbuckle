@@ -11,6 +11,7 @@ import { parseTranslations, type ParsedTranslations } from '@/lib/admin/translat
 import { cvObjectPath } from '@/lib/cv-storage';
 import { removeCvsIfUnused } from '@/lib/admin/cv-files';
 import { givePositionToApplicants } from '@/lib/admin/positions';
+import { scheduleJobIndexing } from '@/lib/matching/indexing';
 import { sanitizeRichText } from '@/lib/rich-text';
 import { isUuid } from '@/lib/utils';
 import {
@@ -126,10 +127,12 @@ export async function createJob(
   const errors = await missingRelations(result.data);
   if (errors) return { message: FIX_FIELDS_MESSAGE, errors, values };
 
-  await prisma.job.create({
+  const job = await prisma.job.create({
     data: { ...result.data, translations: { create: translations.rows } },
+    select: { id: true },
   });
 
+  scheduleJobIndexing(job.id);
   revalidateJobs();
   await setFlash(createdJobMessage(result.data));
   redirect(LIST_PATH);
@@ -185,6 +188,7 @@ export async function updateJob(
     throw error;
   }
 
+  scheduleJobIndexing(id);
   revalidateJobs();
   await setFlash(`Job "${result.data.title}" updated.`);
   redirect(LIST_PATH);

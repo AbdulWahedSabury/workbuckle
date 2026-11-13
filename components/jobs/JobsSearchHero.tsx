@@ -11,7 +11,7 @@ import { MAX_SEARCH_LENGTH } from "@/lib/jobs/jobs-params";
 import type { CampaignSummary } from "@/types/campaign";
 import { useJobsQuery } from "./JobsQueryProvider";
 
-const HERO_BG = "/images/hero/hospitality.png";
+const HERO_BG = "/images/hero/hospitality.jpg";
 
 // Typing only updates the URL (and so queries the database) after this pause.
 const DEBOUNCE_MS = 300;

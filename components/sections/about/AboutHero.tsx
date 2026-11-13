@@ -11,7 +11,7 @@ interface PhotoItem {
 }
 const leftPhotos: PhotoItem[] = [
   {
-    src: "/images/about/hero-1.png",
+    src: "/images/about/hero-1.jpg",
     altKey: "interview",
     size: "lg:h-[250px] lg:w-[240px] xl:h-[280px] xl:w-[290px] 2xl:h-[320px] 2xl:w-[340px]",
     parallax: [-5, 5],
@@ -38,7 +38,7 @@ const rightPhotos: PhotoItem[] = [
     parallax: [5, -6],
   },
   {
-    src: "/images/about/hero.png",
+    src: "/images/about/hero.jpg",
     altKey: "celebration",
     size: "lg:h-[250px] lg:w-[240px] xl:h-[280px] xl:w-[290px] 2xl:h-[320px] 2xl:w-[340px]",
     parallax: [-6, 5],

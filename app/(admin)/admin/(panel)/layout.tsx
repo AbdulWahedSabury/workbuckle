@@ -3,6 +3,10 @@ import AdminShell from "@/components/admin/shell/AdminShell";
 import { requirePanelUser } from "@/lib/admin/auth";
 import { ADMIN_THEME_COOKIE, parseAdminTheme } from "@/lib/admin/theme";
 
+// Admin saves upload CVs (up to 10 MB), email them to clients and index them
+// for matching in after(); a short platform default would cut those off.
+export const maxDuration = 60;
+
 export default async function AdminPanelLayout({ children }: LayoutProps<"/admin">) {
   // Layouts don't re-render on every client navigation, so this isn't the
   // only check: proxy.ts runs per request, pages and queries call

@@ -14,10 +14,13 @@ import { givePositionOfJob } from '@/lib/admin/positions';
 import { assignToJobSchema, candidateManualStatusSchema, candidateSchema, cvFileSchema } from '@/schemas/AdminSchemas';
 import { sendCandidateProfileEmail } from '@/lib/admin/candidate-profile-email';
 import { isUuid } from '@/lib/utils';
+import { remainingPositions } from '@/lib/jobs/capacity';
+import { scheduleCandidateIndexing } from '@/lib/matching/indexing';
 import type { z } from 'zod';
 
 const LIST_PATH = '/admin/candidates';
 const PEOPLE_PATH = '/admin/people';
+const ALREADY_APPLIED = 'This candidate has already applied for this job.';
 
 type CandidateInput = z.infer<typeof candidateSchema>;
 type Cv = { path: string; url: string };
@@ -25,7 +28,7 @@ type Cv = { path: string; url: string };
 function revalidateCandidateViews() {
   revalidatePath(LIST_PATH, 'layout');
   revalidatePath(PEOPLE_PATH, 'layout');
-  revalidatePath('/admin/jobs');
+  revalidatePath('/admin/jobs', 'layout');
   revalidatePath('/admin');
 }
 
@@ -130,6 +133,7 @@ export async function createCandidate(_prev: ActionState, formData: FormData): P
     throw error;
   }
 
+  scheduleCandidateIndexing(saved.personId);
   revalidateCandidateViews();
   const name = `${result.data.firstName} ${result.data.lastName}`;
   if (!saved.applicationId) {
@@ -151,47 +155,75 @@ export async function createCandidate(_prev: ActionState, formData: FormData): P
   redirect(LIST_PATH);
 }
 
+type AssignStatus = z.infer<typeof assignToJobSchema>['status'];
+type AssignResult = { applicationId: string } | { error: string; field?: 'jobId' };
+
+/**
+ * Puts a pool candidate forward for a job with the CV on their profile: the
+ * application, its first history row and the job's position, in one transaction.
+ * Shared by the profile's assign form and the job page's matched candidates.
+ */
+async function createAssignment(candidateId: string, jobId: string, status: AssignStatus, actorId: string): Promise<AssignResult> {
+  const [person, job] = await Promise.all([
+    prisma.candidate.findUnique({
+      where: { id: candidateId },
+      select: { status: true, cvUrl: true, cvPath: true, applications: { where: { jobId }, select: { id: true } } },
+    }),
+    prisma.job.findUnique({ where: { id: jobId }, select: { status: true, totalPositions: true, filledPositions: true } }),
+  ]);
+  if (!person) return { error: 'This candidate no longer exists.' };
+  if (!job) return { error: 'This job no longer exists.', field: 'jobId' };
+  const blocked = personBlocker(person);
+  if (blocked) return { error: blocked };
+  if (person.applications.length) return { error: ALREADY_APPLIED, field: 'jobId' };
+  if (!remainingPositions(job)) return { error: 'This job is closed or has no positions left.', field: 'jobId' };
+  if (!person.cvUrl) return { error: 'Upload a CV for this candidate before assigning them to a job.' };
+  const cvUrl = person.cvUrl;
+
+  try {
+    const applicationId = await prisma.$transaction(async (tx) => {
+      const app = await tx.jobApplication.create({
+        data: { candidateId, jobId, status, cvUrl, cvPath: person.cvPath },
+        select: { id: true },
+      });
+      await tx.applicationEvent.create({ data: { applicationId: app.id, field: 'status', toValue: status, actorId } });
+      await givePositionOfJob(tx, candidateId, jobId);
+      return app.id;
+    });
+    return { applicationId };
+  } catch (error) {
+    if (isUniqueViolation(error)) return { error: ALREADY_APPLIED, field: 'jobId' };
+    throw error;
+  }
+}
+
 /** Admin puts a pool candidate forward for a job, reusing the CV on their profile. */
 export async function assignToJob(candidateId: string, _prev: ActionState, formData: FormData): Promise<ActionState> {
   const user = await requireAdmin();
   const values = formValues(formData);
   const parsed = assignToJobSchema.safeParse(values);
   if (!parsed.success) return validationError(parsed.error, values);
-  const { jobId, status } = parsed.data;
 
-  const [person, job] = await Promise.all([
-    prisma.candidate.findUnique({
-      where: { id: candidateId },
-      select: { status: true, cvUrl: true, cvPath: true, applications: { where: { jobId }, select: { id: true } } },
-    }),
-    prisma.job.findUnique({ where: { id: jobId }, select: { id: true } }),
-  ]);
-  if (!person) return { message: 'This candidate no longer exists.', values };
-  if (!job) return { errors: { jobId: ['This job no longer exists.'] }, values };
-  const blocked = personBlocker(person);
-  if (blocked) return { message: blocked, values };
-  if (person.applications.length) return { errors: { jobId: ['This candidate has already applied for this job.'] }, values };
-  if (!person.cvUrl) return { message: 'Upload a CV for this candidate before assigning them to a job.', values };
-
-  let applicationId: string;
-  try {
-    applicationId = await prisma.$transaction(async (tx) => {
-      const app = await tx.jobApplication.create({
-        data: { candidateId, jobId, status, cvUrl: person.cvUrl!, cvPath: person.cvPath },
-        select: { id: true },
-      });
-      await tx.applicationEvent.create({ data: { applicationId: app.id, field: 'status', toValue: status, actorId: user.id } });
-      await givePositionOfJob(tx, candidateId, jobId);
-      return app.id;
-    });
-  } catch (error) {
-    if (isUniqueViolation(error)) return { errors: { jobId: ['This candidate has already applied for this job.'] }, values };
-    throw error;
+  const result = await createAssignment(candidateId, parsed.data.jobId, parsed.data.status, user.id);
+  if ('error' in result) {
+    return result.field ? { errors: { [result.field]: [result.error] }, values } : { message: result.error, values };
   }
 
   revalidateCandidateViews();
   await setFlash('Candidate assigned to the job.');
-  redirect(`${LIST_PATH}/${applicationId}`);
+  redirect(`${LIST_PATH}/${result.applicationId}`);
+}
+
+/** "Assign to job" on a job's matched candidates: same rules as assignToJob, status pending, no redirect. */
+export async function assignMatchedCandidate(jobId: string, candidateId: string): Promise<DeleteResult> {
+  const user = await requireAdmin();
+  if (!isUuid(jobId) || !isUuid(candidateId)) return { error: 'Invalid candidate or job.' };
+
+  const result = await createAssignment(candidateId, jobId, 'pending', user.id);
+  if ('error' in result) return { error: result.error };
+
+  revalidateCandidateViews();
+  return {};
 }
 
 /** Admin sets a person open or inactive. Hired is set only by hiring, and stays. */

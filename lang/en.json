@@ -651,6 +651,7 @@
     "too_many_requests": "Too many requests, please try again later",
     "submit_faild": "Submit failed, please try again later",
     "submit_too_fast": "That was quick! Please wait a moment and submit again",
+    "captcha_failed": "Please complete the verification check and try again",
     "submit_success": "Submit success",
     "error_occured": "Error occured, please try again later",
     "btn": "Submit",
@@ -798,6 +799,7 @@
       "job_unavailable": "This job is no longer accepting applications.",
       "invalid": "Please check your details: enter a valid email address and phone number, and upload your CV.",
       "rate_limited": "Too many applications from your network. Please try again later.",
+      "captcha_failed": "We could not verify that you are human. Please try again.",
       "invalid_cv": "Your CV could not be read. Please upload a PDF, DOC or DOCX file.",
       "upload_failed": "We could not upload your CV. Please try again.",
       "server_error": "Something went wrong. Please try again."
@@ -807,5 +809,17 @@
       "body": "Thank you, <name>{firstName}</name>. Your application has been received. We'll be in touch soon.",
       "again": "Submit Another Application"
     }
+  },
+  "error": {
+    "badge": "Something went wrong",
+    "title": "We couldn’t load this page",
+    "description": "This is usually temporary. Please try again in a moment.",
+    "retry": "Try again",
+    "back_home": "Back to home"
+  },
+  "maintenance": {
+    "badge": "Maintenance",
+    "title": "We’ll be back soon",
+    "description": "The site is down for scheduled maintenance. Please check back shortly."
   }
 }

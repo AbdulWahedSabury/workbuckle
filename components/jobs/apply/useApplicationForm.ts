@@ -1,6 +1,8 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
+import type { CaptchaHandle } from "@/components/form/CaptchaWidget";
+import { CAPTCHA_ENABLED, CAPTCHA_FIELD } from "@/lib/captcha/config";
 import { submitApplication } from "@/lib/jobs/actions";
 import { EMPTY_APPLICATION_FORM, RESUME_EXTENSIONS, RESUME_MAX_BYTES, RESUME_MAX_MB } from "./applyConfig";
 import type { ApplicationFormData } from "./types";
@@ -8,7 +10,7 @@ import type { ApplicationFormData } from "./types";
 const resumeExtension = (file: File) => file.name.split(".").pop()?.toLowerCase() ?? "";
 
 /** Fields named as the server action expects them (lib/jobs/actions.ts). */
-const buildApplicationPayload = (formData: ApplicationFormData) => {
+const buildApplicationPayload = (formData: ApplicationFormData, captchaToken: string | null) => {
   const payload = new FormData();
   payload.append("firstName", formData.firstName);
   payload.append("lastName", formData.lastName);
@@ -17,6 +19,7 @@ const buildApplicationPayload = (formData: ApplicationFormData) => {
   payload.append("linkedin", formData.linkedin);
   payload.append("coverLetter", formData.coverLetter);
   if (formData.resume) payload.append("cv", formData.resume, formData.resume.name);
+  if (captchaToken) payload.append(CAPTCHA_FIELD, captchaToken);
   return payload;
 };
 
@@ -29,6 +32,8 @@ export function useApplicationForm(jobId: string) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   // Pass as `key` to the <input type="file"> so it clears on reset / rejected file.
   const [resumeInputKey, setResumeInputKey] = useState(0);
+  const captchaRef = useRef<CaptchaHandle>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const updateField = useCallback(
     <K extends keyof ApplicationFormData>(name: K, value: ApplicationFormData[K]) => {
@@ -62,6 +67,7 @@ export function useApplicationForm(jobId: string) {
     setSubmitted(false);
     setErrorMessage(null);
     setResumeInputKey((k) => k + 1);
+    setCaptchaToken(null);
   }, []);
 
   const isFormValid = useMemo(
@@ -71,9 +77,10 @@ export function useApplicationForm(jobId: string) {
           formData.lastName.trim() &&
           formData.email.trim() &&
           formData.phone.trim() &&
-          formData.resume
+          formData.resume &&
+          (!CAPTCHA_ENABLED || captchaToken)
       ),
-    [formData]
+    [formData, captchaToken]
   );
 
   const handleSubmit = useCallback(
@@ -85,7 +92,7 @@ export function useApplicationForm(jobId: string) {
       setIsSubmitting(true);
 
       try {
-        const result = await submitApplication(jobId, buildApplicationPayload(formData));
+        const result = await submitApplication(jobId, buildApplicationPayload(formData, captchaToken));
         if (result.ok) setSubmitted(true);
         else setErrorMessage(result.message);
       } catch {
@@ -93,9 +100,11 @@ export function useApplicationForm(jobId: string) {
         setErrorMessage(t("network"));
       } finally {
         setIsSubmitting(false);
+        // The token is spent whatever the answer was (a no-op once the success card replaced the form).
+        captchaRef.current?.reset();
       }
     },
-    [formData, jobId, isFormValid, isSubmitting, t]
+    [formData, captchaToken, jobId, isFormValid, isSubmitting, t]
   );
 
   return {
@@ -109,5 +118,7 @@ export function useApplicationForm(jobId: string) {
     isSubmitting,
     errorMessage,
     resumeInputKey,
+    captchaRef,
+    setCaptchaToken,
   };
 }

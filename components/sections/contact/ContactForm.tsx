@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner"; // or "react-hot-toast"
 import { useForm } from "react-hook-form";
@@ -11,9 +11,11 @@ import {
   HONEYPOT_FIELD,
   getContactFormSchema,
 } from "@/schemas/ContactFormSchema";
+import CaptchaWidget, { type CaptchaHandle } from "@/components/form/CaptchaWidget";
 import { InputField } from "@/components/form/InputField";
 import { TextAreaField } from "@/components/form/TextAreaField";
 import { Button } from "@/components/ui/button";
+import { CAPTCHA_ENABLED, CAPTCHA_FIELD } from "@/lib/captcha/config";
 
 export default function ContactForm() {
   const f = useTranslations("form");
@@ -44,7 +46,14 @@ export default function ContactForm() {
     startedAtRef.current = performance.now();
   }, []);
 
+  const captchaRef = useRef<CaptchaHandle>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+
   const onSubmit = async (data: ContactFormType) => {
+    if (CAPTCHA_ENABLED && !captchaToken) {
+      toast.error(f("captcha_failed"));
+      return;
+    }
     try {
       const res = await fetch("/api", {
         method: "POST",
@@ -53,14 +62,19 @@ export default function ContactForm() {
           ...data,
           [HONEYPOT_FIELD]: honeypotRef.current?.value ?? "",
           [ELAPSED_FIELD]: Math.round(performance.now() - startedAtRef.current),
+          [CAPTCHA_FIELD]: captchaToken ?? "",
         }),
       });
+      // The token is spent whatever the answer was.
+      captchaRef.current?.reset();
 
       if (!res.ok) {
         if (res.status === 429) {
           toast.error(f("too_many_requests"));
         } else if (res.status === 422) {
           toast.error(f("submit_too_fast"));
+        } else if (res.status === 403) {
+          toast.error(f("captcha_failed"));
         } else {
           toast.error(f("submit_faild"));
         }
@@ -160,6 +174,8 @@ export default function ContactForm() {
         errors={errors}
         control={control}
       />
+
+      <CaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
 
       <div className="flex items-center justify-end gap-3">
         <Button type="submit" disabled={isSubmitting}>
