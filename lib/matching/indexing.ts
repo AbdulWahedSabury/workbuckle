@@ -2,9 +2,15 @@ import 'server-only';
 import { after } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { cvObjectPath } from '@/lib/cv-storage';
-import { extractCvText } from './cv-text';
-import { embedText } from './embed';
 import { htmlToText, toVectorLiteral } from './vector';
+
+// The model (onnxruntime) and the PDF reader (pdf.js with a native canvas) are
+// loaded only when something is actually indexed. Admin pages import this module
+// through their Server Actions; a static import would load those native
+// libraries on every page view, and a host that can't load them would then fail
+// the whole page instead of just the indexing.
+const loadEmbedText = async () => (await import('./embed')).embedText;
+const loadExtractCvText = async () => (await import('./cv-text')).extractCvText;
 
 const DEFAULT_LOCALE = 'en';
 
@@ -42,6 +48,7 @@ async function jobText(jobId: string): Promise<{ text: string; updatedAt: Date }
 export async function indexJob(jobId: string): Promise<void> {
   const job = await jobText(jobId);
   if (!job) return;
+  const embedText = await loadEmbedText();
   const vector = await embedText(job.text);
   const literal = vector ? toVectorLiteral(vector) : null;
   await prisma.$executeRaw`
@@ -62,8 +69,8 @@ export async function indexCandidate(candidateId: string): Promise<void> {
   if (!person) return;
 
   const objectPath = person.cvUrl ? cvObjectPath({ cvPath: person.cvPath, cvUrl: person.cvUrl }) : null;
-  const text = objectPath ? await extractCvText(objectPath) : null;
-  const vector = text ? await embedText(text) : null;
+  const text = objectPath ? await (await loadExtractCvText())(objectPath) : null;
+  const vector = text ? await (await loadEmbedText())(text) : null;
   const literal = vector ? toVectorLiteral(vector) : null;
 
   await prisma.$executeRaw`
