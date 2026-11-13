@@ -21,11 +21,18 @@ const contentSecurityPolicy = [
   "frame-ancestors 'none'",
 ].join("; ");
 
-/** onnxruntime-node's JS and its Linux binaries, where pnpm or npm installs them. */
+/**
+ * onnxruntime-node's JS and its Linux binaries, where pnpm or npm installs them,
+ * plus the CommonJS build of onnxruntime-common: onnxruntime-node require()s it,
+ * while tracing only follows transformers' ESM import of it, so without these
+ * every index fails on the server with "Cannot find module .../dist/cjs/index.js".
+ */
 const ONNXRUNTIME_FILES = [
   "./node_modules/.pnpm/onnxruntime-node@*/node_modules/onnxruntime-node/{package.json,dist/**,bin/napi-v*/linux/**}",
   "./node_modules/onnxruntime-node/{package.json,dist/**,bin/napi-v*/linux/**}",
   "./node_modules/.pnpm/@huggingface+transformers@*/node_modules/onnxruntime-node/package.json",
+  "./node_modules/.pnpm/onnxruntime-common@*/node_modules/onnxruntime-common/{package.json,dist/cjs/**}",
+  "./node_modules/onnxruntime-common/{package.json,dist/cjs/**}",
 ];
 
 const nextConfig: NextConfig = {
