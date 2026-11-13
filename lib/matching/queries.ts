@@ -91,12 +91,6 @@ export async function getMatchedCandidates(jobId: string, limit = MATCH_LIMIT): 
   }));
 }
 
-/**
- * Lowest match a job needs to be offered on a person's "Assign to a job" list.
- * On this model a fitting job scores about 45–75% and an unrelated one under 40%.
- */
-export const MIN_JOB_MATCH_PERCENT = 40;
-
 export type AssignableJobOptions = {
   /** False when the person's CV isn't indexed (not yet, or unreadable): `options` then lists every assignable job. */
   matched: boolean;
@@ -133,9 +127,9 @@ function jobOption(job: AssignableJobRow): AssignableJobOption {
 
 /**
  * Jobs a person can be assigned to (not closed, a position left, not applied
- * for yet), limited to those their CV matches at MIN_JOB_MATCH_PERCENT or more,
- * best first. If their CV isn't indexed there is nothing to rank, so every
- * assignable job is listed (newest first) rather than none.
+ * for yet), ranked by their CV match. A score of 0 is still shown so admins
+ * can compare every available job. If their CV isn't indexed there is nothing
+ * to rank, so every assignable job is listed (newest first) without a score.
  */
 export async function getMatchedJobOptions(personId: string): Promise<AssignableJobOptions> {
   await requireAdmin();
@@ -157,9 +151,8 @@ export async function getMatchedJobOptions(personId: string): Promise<Assignable
   const indexed = rows.some((row) => row.similarity !== null);
   if (!indexed) return { matched: false, options: rows.map(jobOption) };
 
-  const minSimilarity = MIN_JOB_MATCH_PERCENT / 100;
   const options = rows
-    .filter((row) => row.similarity !== null && row.similarity >= minSimilarity)
+    .filter((row) => row.similarity !== null)
     .map(jobOption);
   return { matched: true, options };
 }

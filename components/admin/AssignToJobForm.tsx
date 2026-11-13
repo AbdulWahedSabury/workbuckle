@@ -128,14 +128,14 @@ function JobPicker({
               </span>
               {isSelected && (
                 <span
-                  aria-hidden="true"
                   style={{
                     backgroundColor: "var(--color-primary)",
                     color: "var(--color-on-primary)",
                   }}
-                  className="ml-auto flex size-6 shrink-0 items-center justify-center rounded-full"
+                  className="ml-auto inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold"
                 >
-                  <Check className="size-4" strokeWidth={3} />
+                  <Check className="size-3.5" strokeWidth={3} aria-hidden="true" />
+                  Selected
                 </span>
               )}
             </label>

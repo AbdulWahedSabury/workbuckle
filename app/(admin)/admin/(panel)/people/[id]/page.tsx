@@ -14,7 +14,7 @@ import { formatDate } from "@/components/admin/tables/format";
 import { assignToJob } from "@/lib/admin/actions/candidates";
 import { viewerCanEdit } from "@/lib/admin/auth";
 import { getPerson, getPositionOptions, type PersonDetail } from "@/lib/admin/queries";
-import { MIN_JOB_MATCH_PERCENT, getMatchedJobOptions } from "@/lib/matching/queries";
+import { getMatchedJobOptions } from "@/lib/matching/queries";
 
 export const metadata: Metadata = { title: "Candidate" };
 
@@ -169,12 +169,12 @@ async function AssignPanel({ person }: { person: PersonDetail }) {
       jobs={options}
       jobsHint={
         matched
-          ? `Jobs their CV matches at ${MIN_JOB_MATCH_PERCENT}% or more, best match first.`
+          ? "Jobs are ranked by how closely their CV matches, highest first."
           : "Their CV isn't indexed yet (or couldn't be read), so every open job is listed."
       }
       emptyMessage={
         matched
-          ? `No open job matches their CV at ${MIN_JOB_MATCH_PERCENT}% or more. Use a job's page to see how they rank there.`
+          ? "No open job with a free position that they haven’t applied for."
           : undefined
       }
     />
